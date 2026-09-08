@@ -1,0 +1,40 @@
+schema_version = 1
+id = "{{PRODUCT}}/{{CVE}}"
+cve = "{{CVE}}"
+product = "{{PRODUCT}}"
+title = "TODO: verified vulnerability title"
+lifecycle = "draft"
+agent_specificity = "unclassified"
+advisories = []
+description = "TODO: root cause and trust boundary"
+prerequisites = []
+
+[vulnerable]
+version = ""
+source_url = ""
+commit = ""
+image = ""
+
+[patched]
+version = ""
+source_url = ""
+commit = ""
+image = ""
+
+[runtime]
+isolation = "container"
+platforms = []
+requires_model = false
+network_requirements = "TODO: required destinations or no network"
+
+[verification.mechanism]
+status = "not_run"
+verified_at = ""
+evidence = []
+notes = ""
+
+[verification.end_to_end]
+status = "not_run"
+verified_at = ""
+evidence = []
+notes = ""
