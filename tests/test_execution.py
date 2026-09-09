@@ -49,7 +49,7 @@ class ExecutionTests(unittest.TestCase):
         for variant in ("vulnerable", "patched"):
             self.metadata[variant]["commit"] = "a" * 40
         self.context = {"schema_version": 1, "run_id": "test-run", "case_id": "01-vulnerable-attack",
-                        "variant": "vulnerable", "scenario": "attack"}
+                        "environment_id": self.metadata["id"], "variant": "vulnerable", "scenario": "attack"}
 
     def report(self):
         output = self.root / "results" / "test-run"
@@ -156,6 +156,12 @@ class ExecutionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "independent"):
             validate_report(report, report["fingerprint"])
 
+    def test_cases_from_another_run_prevent_promotion(self):
+        _, report = self.report()
+        report["cases"][0]["run_id"] = "another-run"
+        with self.assertRaisesRegex(ValueError, "run_id"):
+            validate_report(report, report["fingerprint"])
+
     def test_promotion_preserves_evidence_and_invalidates_changed_code(self):
         output, report = self.report()
         promote(self.root, self.directory, self.metadata, output / "report.json", ["maintainer"])
@@ -208,15 +214,25 @@ class ComposePolicyTests(unittest.TestCase):
         images = {v: "image@sha256:" + "a" * 64 for v in ("vulnerable", "patched")}
         services = {v: {"image": image, "profiles": [v], "mem_limit": 1024,
                        "cpus": 1, "pids_limit": 32, "cap_drop": ["ALL"],
-                       "security_opt": ["no-new-privileges:true"], "networks": {"lab": {}}}
+                       "security_opt": ["no-new-privileges:true"], "networks": {"lab": {}},
+                       "volumes": [{"type": "volume", "source": "results",
+                                    "target": "/lab/results"}]}
                     for v, image in images.items()}
-        return {"name": "avh-test", "services": services, "networks": {"lab": {"internal": True}}}, images
+        return {"name": "avh-test", "services": services, "networks": {"lab": {"internal": True}},
+                "volumes": {"results": {}}}, images
 
     def test_bind_mount_and_shared_name_rejected(self):
         config, images = self.config()
         validate_compose(config, images)
-        config["services"]["vulnerable"]["volumes"] = [{"type": "bind", "source": "/tmp", "target": "/host"}]
+        config["services"]["vulnerable"]["volumes"].append(
+            {"type": "bind", "source": "/tmp", "target": "/host"})
         with self.assertRaisesRegex(ValueError, "bind_mounts"):
+            validate_compose(config, images)
+
+    def test_target_results_volume_is_required(self):
+        config, images = self.config()
+        config["services"]["vulnerable"]["volumes"] = []
+        with self.assertRaisesRegex(ValueError, "managed /lab/results"):
             validate_compose(config, images)
 
     def test_local_immutable_image_ids_are_valid_targets(self):

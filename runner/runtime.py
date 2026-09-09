@@ -11,7 +11,7 @@ import uuid
 
 from .compose import validate_compose
 from .protocol import (CASES, IMAGE, IMAGE_ID, SCHEMA, check_fixtures, fingerprint,
-                       read_json, validate_verdict, write_json)
+                       read_json, runner_fingerprint, validate_verdict, write_json)
 
 
 class RunError(Exception):
@@ -82,7 +82,12 @@ def preflight(commands):
 
 
 def image_check(commands, image, directory, metadata, variant, binding):
-    _, content = commands.run(["docker", "image", "inspect", image], "image_inspect")
+    try:
+        _, content = commands.run(["docker", "image", "inspect", image], "image_inspect")
+    except RunError as error:
+        # An immutable metadata image that is not cached is a missing prerequisite.
+        raise RunError("image_inspect", f"{variant}: immutable image is unavailable locally", 2, "not_run",
+                       "immutable image is present and inspectable") from error
     data = json.loads(content)[0]
     labels = data.get("Config", {}).get("Labels") or {}
     if labels.get("org.opencontainers.image.revision") != metadata[variant]["commit"]:
@@ -180,6 +185,9 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
         status, _ = child.run(["docker", "exec", container, "python3", "/lab/verify.py",
                                "--context", "/lab/results/context.json", "--output", "/lab/results"],
                               "verify", accepted=(0, 1, 2))
+        if status == 2:
+            raise RunError("verify", "Verifier could not establish a verdict; see verify logs", 2, "not_run",
+                           "verifier determines the outcome from collected evidence")
         child.run(["docker", "cp", container + ":/lab/results/.", str(output / "evidence")], "collect")
         verdict = validate_verdict(output / "evidence", context)
         if status != (0 if verdict["outcome"] == "passed" else 1):
@@ -213,6 +221,8 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
                                              "expected": "collect complete logs and evidence", "actual": str(error)})
                 result["exit_code"] = 3
                 result["outcome"] = "infrastructure_error"
+            if result["outcome"] != "passed":
+                result["failure_evidence"] = "failure-evidence"
             if args.keep_on_failure and result["outcome"] != "passed":
                 result["retained_project"] = project
             else:
@@ -244,7 +254,7 @@ def reproduce(root, directory, metadata, args):
         check_fixtures(directory)
         report["fingerprint"] = fingerprint(root, directory, metadata)
         binding = input_binding(root, directory, metadata)
-        report["runner_fingerprint"] = binding
+        report["runner_fingerprint"] = runner_fingerprint(root)
         report.update(preflight(commands))
         if report["platform"] != "linux/amd64" or platform.machine() not in {"x86_64", "AMD64"}:
             raise RunError("preflight", "First release supports native linux/amd64", 2, "not_run")
@@ -290,8 +300,9 @@ def reproduce(root, directory, metadata, args):
         report.update(exit_code=error.code, outcome=error.status, failure={
             "phase": error.phase, "status": error.status, "expected": error.expected, "actual": error.actual})
     except (ValueError, KeyError, TypeError, OSError) as error:
-        report.update(exit_code=2, outcome="not_run", failure={
-            "phase": "preflight", "expected": "complete valid environment", "actual": str(error)})
+        report.update(exit_code=3, outcome="infrastructure_error", failure={
+            "phase": "protocol", "status": "invalid_evidence", "expected": "complete valid environment",
+            "actual": str(error)})
     finally:
         report["finished_at"] = utc()
         write_json(output / "report.json", report)

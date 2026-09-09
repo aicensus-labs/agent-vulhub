@@ -99,6 +99,17 @@ def fingerprint(root, directory, metadata):
     return hashlib.sha256(payload).hexdigest()
 
 
+def runner_fingerprint(root):
+    """Return a digest for the runner implementation and its execution contract."""
+    files = {}
+    for path in sorted((root / "runner").glob("*.py")):
+        files[path.name] = digest(path)
+    contract = root / "docs/environment-contract.md"
+    if contract.exists():
+        files["@contract"] = digest(contract)
+    return hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
+
+
 def check_fixtures(directory):
     manifest = tomllib.loads((directory / "fixtures/manifest.toml").read_text())
     entries = manifest.get("files", {})
@@ -189,6 +200,10 @@ def validate_report(report, expected_fingerprint):
         if len(batch) != 4 or {(c.get("variant"), c.get("scenario")) for c in batch} != set(CASES):
             raise ValueError("Incomplete or duplicate round")
         for case in batch:
+            if case.get("run_id") != report.get("run_id"):
+                raise ValueError("Case run_id does not match report")
+            if case.get("environment_id") != report.get("environment_id"):
+                raise ValueError("Case environment_id does not match report")
             if case.get("outcome") != "passed" or case.get("exit_code") != 0 or not case.get("cleaned"):
                 raise ValueError("A case failed or left resources behind")
             if not re.fullmatch(r"[0-9a-f]{40}", case.get("source_commit", "")):

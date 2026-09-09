@@ -60,7 +60,7 @@ results/                本地实验结果（Git 忽略）
 
 ## 文档与 CI
 
-详见[执行协议](docs/environment-contract.md)、[收录流程](CONTRIBUTING.md)、[设计记录](docs/design-session.md)和[术语](CONTEXT.md)。
+详见[执行协议](docs/environment-contract.md)、[收录流程](CONTRIBUTING.md)、[设计记录](docs/design-session.md)、[候选 CVE 选型](docs/cve-candidates.md)和[术语](CONTEXT.md)。
 
 PR CI 只运行静态检查和工具测试。真实复现使用独立工作流，需要管理员配置受保护的 vulhub-lab environment 和一次性 VM runner；GHCR 登录和发布权限也需维护者配置。
 

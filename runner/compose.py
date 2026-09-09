@@ -57,6 +57,16 @@ def validate_compose(config, images, exceptions=(), allow_exceptions=False):
                 mount.get("target") == "/lab/results" and mount.get("read_only")
                 for mount in service.get("volumes", [])):
             raise ValueError("Result volume must be writable")
+        if name in images:
+            results_mounts = [mount for mount in service.get("volumes", [])
+                              if mount.get("target") == "/lab/results"]
+            if len(results_mounts) != 1:
+                raise ValueError("Target service requires one managed /lab/results volume")
+            results_mount = results_mounts[0]
+            if (results_mount.get("type") != "volume"
+                    or results_mount.get("source") not in config.get("volumes", {})
+                    or results_mount.get("read_only")):
+                raise ValueError("Target service requires a writable project volume at /lab/results")
         require(not service.get("ports"), f"service.{name}.ports")
         require(not service.get("privileged"), f"service.{name}.privileged")
         require(not service.get("devices"), f"service.{name}.devices")
