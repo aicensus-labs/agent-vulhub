@@ -59,22 +59,30 @@ def fetch_inputs(root, directory, metadata, offline=False):
         if path.is_symlink():
             raise ValueError("Symlink cache entry")
         if not path.exists():
-            if offline:
-                raise RunError("fetch", f"Offline cache miss: {item['name']}", 2, "not_run")
-            request = urllib.request.Request(item["url"], headers={"User-Agent": "agent-vulhub/1"})
-            with urllib.request.urlopen(request, timeout=60) as response, tempfile.NamedTemporaryFile(dir=cache) as stream:
-                if urllib.parse.urlparse(response.url).scheme != "https":
-                    raise ValueError("Source redirect downgraded HTTPS")
-                size = 0
-                while chunk := response.read(1024 * 1024):
-                    size += len(chunk)
-                    if size > 2 * 1024**3:
-                        raise ValueError("Build input exceeds 2 GiB")
-                    stream.write(chunk)
-                stream.flush()
-                if digest(stream.name) != item["sha256"]:
-                    raise ValueError(f"Download hash mismatch: {item['name']}")
-                shutil.copyfile(stream.name, path)
+            local = directory / "inputs" / item["name"]
+            if local.is_symlink():
+                raise ValueError(f"Symlink local input: {item['name']}")
+            if local.is_file():
+                if digest(local) != item["sha256"]:
+                    raise ValueError(f"Local input hash mismatch: {item['name']}")
+                shutil.copyfile(local, path)
+            else:
+                if offline:
+                    raise RunError("fetch", f"Offline cache miss: {item['name']}", 2, "not_run")
+                request = urllib.request.Request(item["url"], headers={"User-Agent": "agent-vulhub/1"})
+                with urllib.request.urlopen(request, timeout=60) as response, tempfile.NamedTemporaryFile(dir=cache) as stream:
+                    if urllib.parse.urlparse(response.url).scheme != "https":
+                        raise ValueError("Source redirect downgraded HTTPS")
+                    size = 0
+                    while chunk := response.read(1024 * 1024):
+                        size += len(chunk)
+                        if size > 2 * 1024**3:
+                            raise ValueError("Build input exceeds 2 GiB")
+                        stream.write(chunk)
+                    stream.flush()
+                    if digest(stream.name) != item["sha256"]:
+                        raise ValueError(f"Download hash mismatch: {item['name']}")
+                    shutil.copyfile(stream.name, path)
         if digest(path) != item["sha256"]:
             raise ValueError(f"Cache hash mismatch: {item['name']}")
         result[item["name"]] = path

@@ -99,6 +99,13 @@ def image_check(commands, image, directory, metadata, variant, binding):
     return data["Id"]
 
 
+def harness(metadata):
+    value = metadata.get("runtime", {}).get("harness", "python3")
+    if value not in {"python3", "node"}:
+        raise ValueError("runtime.harness must be python3 or node")
+    return value
+
+
 def input_binding(root, directory, metadata):
     # Published image references are outputs, so cannot participate in their own build label.
     material = json.loads(json.dumps(metadata))
@@ -160,8 +167,9 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
             child.run(base + ["up", "-d", "--wait", "--wait-timeout", str(args.timeout),
                               "--pull", "never", "--no-build", variant], "healthcheck", env=env)
         else:
+            # Keep the target alive independently of the selected script harness.
             child.run(base + ["run", "-d", "--no-deps", "--pull", "never", "--name", project + "-target",
-                              "--entrypoint", "python3", variant, "-c", "import time; time.sleep(86400)"], "compose_up", env=env)
+                              "--entrypoint", "tail", variant, "-f", "/dev/null"], "compose_up", env=env)
         container = project + "-target"
         if mode == "service":
             _, container = child.run(base + ["ps", "-q", variant], "compose_up", env=env)
@@ -172,17 +180,16 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
         state = json.loads(state)[0]
         if state.get("Config", {}).get("Labels", {}).get("com.docker.compose.project") != project:
             raise RunError("compose_up", "Container project identity mismatch")
-        child.run(["docker", "exec", container, "python3", "-c",
-                   "from pathlib import Path; Path('/lab/results').mkdir(parents=True, exist_ok=True)"], "setup")
         child.run(["docker", "cp", str(output / "context.json"), container + ":/lab/results/context.json"], "setup")
-        status, _ = child.run(["docker", "exec", container, "python3", "/lab/reproduce.py",
+        interpreter = harness(metadata)
+        status, _ = child.run(["docker", "exec", container, interpreter, "/lab/reproduce.py",
                                "--context", "/lab/results/context.json", "--output", "/lab/results"],
                               "reproduce", accepted=(0, 1, 2))
         if status:
             raise RunError("reproduce", f"PoC exited {status}; no verification claim", 1 if status == 1 else 2,
                            "execution_failed" if status == 1 else "not_run")
         # Separate invocation: verify only reads evidence and writes its verdict.
-        status, _ = child.run(["docker", "exec", container, "python3", "/lab/verify.py",
+        status, _ = child.run(["docker", "exec", container, interpreter, "/lab/verify.py",
                                "--context", "/lab/results/context.json", "--output", "/lab/results"],
                               "verify", accepted=(0, 1, 2))
         if status == 2:

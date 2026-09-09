@@ -68,6 +68,9 @@ def validate_metadata(data: dict, environment_id: str) -> None:
         raise RegistryError(f"{environment_id}: lifecycle must be draft or ready")
     if data.get("agent_specificity") not in {"unclassified", "agent_related", "agent_unique"}:
         raise RegistryError(f"{environment_id}: invalid agent_specificity")
+    runtime = data.get("runtime", {})
+    if not isinstance(runtime, dict) or runtime.get("harness", "python3") not in {"python3", "node"}:
+        raise RegistryError(f"{environment_id}: runtime.harness must be python3 or node")
     verification = data.get("verification", {})
     if not isinstance(verification, dict):
         raise RegistryError(f"{environment_id}: verification must be a table")

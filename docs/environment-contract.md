@@ -38,7 +38,7 @@ publish 仅在显式调用时上传 GHCR，要求维护者事先 docker login；
 
 目标服务固定命名 vulnerable、patched，各自同名 profile 和对应镜像变量。Compose 本身不保证 profile 互斥，由运行器选择；禁止依赖启动另一个变体。每轮四个独立测试：漏洞版 attack、修复版 attack、漏洞版 benign、修复版 benign。每个测试都创建唯一 project、网络、volume。
 
-`runtime.mode = "oneshot"` 时，镜像须提供 Python 3，运行器创建保活进程后分别执行 PoC、验证器。`mode = "service"` 时先启动真实服务并等待 healthy，再通过独立 docker exec 进程执行两脚本。辅助数据库/队列/接收器必须固定镜像并声明 healthcheck。
+`runtime.mode = "oneshot"` 时，运行器创建保活进程后分别执行 PoC、验证器。`runtime.harness` 只能是 `python3` 或 `node`，并决定两脚本的解释器；镜像必须提供对应程序。`mode = "service"` 时先启动真实服务并等待 healthy，再通过独立 docker exec 进程执行两脚本。辅助数据库/队列/接收器必须固定镜像并声明 healthcheck。
 
 入口为 /lab/reproduce.py、/lab/verify.py，fixtures 放在 /lab/fixtures，/lab/results 使用本项目命名 volume。默认内部网络、无端口/宿主目录/特权/额外 capability，必须 ALL cap_drop、no-new-privileges、正数 CPU/内存/PID 限制。拒绝外部 volume、固定资源名、自动 restart、env_file、secrets/configs 和未支持字段，避免静默绕过检查。
 

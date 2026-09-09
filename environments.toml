@@ -1,2 +1,13 @@
 schema_version = 1
-environments = []
+
+[[environments]]
+id = "ios-simulator-mcp/CVE-2025-52573"
+path = "environments/ios-simulator-mcp/CVE-2025-52573"
+
+[[environments]]
+id = "mcp-server-git/CVE-2025-68143"
+path = "environments/mcp-server-git/CVE-2025-68143"
+
+[[environments]]
+id = "node-code-sandbox-mcp/CVE-2025-53372"
+path = "environments/node-code-sandbox-mcp/CVE-2025-53372"
