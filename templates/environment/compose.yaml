@@ -3,6 +3,12 @@ services:
     profiles: [vulnerable]
     image: "${VULNERABLE_IMAGE:?Set a verified vulnerable image digest}"
     init: true
+    platform: linux/amd64
+    working_dir: /lab
+    environment:
+      PYTHONHASHSEED: "0"
+      TZ: UTC
+    volumes: ["results:/lab/results"]
     mem_limit: 1g
     cpus: 1.0
     pids_limit: 256
@@ -13,6 +19,12 @@ services:
     profiles: [patched]
     image: "${PATCHED_IMAGE:?Set a verified patched image digest}"
     init: true
+    platform: linux/amd64
+    working_dir: /lab
+    environment:
+      PYTHONHASHSEED: "0"
+      TZ: UTC
+    volumes: ["results:/lab/results"]
     mem_limit: 1g
     cpus: 1.0
     pids_limit: 256
@@ -22,3 +34,5 @@ services:
 networks:
   lab:
     internal: true
+volumes:
+  results: {}

@@ -1,4 +1,4 @@
-"""List, validate and scaffold environments without executing their code."""
+"""Register, build, reproduce, and review isolated CVE environments."""
 
 import argparse
 import json
@@ -15,6 +15,7 @@ IMAGE = re.compile(r"[^\s]+@sha256:[0-9a-f]{64}")
 REQUIRED_FILES = (
     "metadata.toml", "README.zh-cn.md", "compose.yaml", "Dockerfile",
     "reproduce.py", "end_to_end.py", "verify.py", "fixtures/README.md",
+    "fixtures/manifest.toml",
 )
 STATUSES = {"not_run", "passed", "failed", "not_applicable"}
 
@@ -101,6 +102,11 @@ def check(root: Path) -> list[dict]:
             if not path.is_file() or not path.resolve().is_relative_to(directory.resolve()):
                 raise RegistryError(f"{entry['id']}: missing or external file {name}")
         validate_metadata(read_toml(directory / "metadata.toml"), entry["id"])
+        from .protocol import check_fixtures
+        from .lifecycle import ready_check
+        data = read_toml(directory / "metadata.toml")
+        check_fixtures(directory)
+        ready_check(root, directory, data)
     for path in (root / "environments").glob("*/*/metadata.toml"):
         if path.parent.relative_to(root).as_posix() not in indexed:
             raise RegistryError(f"Unregistered environment: {path.parent.relative_to(root)}")
@@ -147,8 +153,109 @@ def main(argv: list[str] | None = None) -> int:
     new = commands.add_parser("new", help="Create and register a draft from the template")
     new.add_argument("product")
     new.add_argument("cve")
+    commands.add_parser("refresh", help="Downgrade stale ready environments; preserve historical evidence")
+    lint = commands.add_parser("lint", help="Parse Compose via Docker CLI without starting containers")
+    lint.add_argument("environment", nargs="?")
+    for name in ("fetch", "build", "reproduce", "promote", "publish"):
+        command = commands.add_parser(name)
+        command.add_argument("environment")
+        if name in {"fetch", "build", "reproduce"}:
+            command.add_argument("--offline", action="store_true")
+        if name in {"build", "reproduce", "publish"}:
+            command.add_argument("--timeout", type=positive_int, default=300)
+        if name == "reproduce":
+            source = command.add_mutually_exclusive_group()
+            source.add_argument("--build", action="store_true", help="Build pinned source locally before execution")
+            source.add_argument("--images", help="Use a local build.json manifest")
+            command.add_argument("--rounds", type=positive_int, default=1)
+            command.add_argument("--scenario", choices=("all", "vulnerable", "patched", "benign"), default="all")
+            command.add_argument("--keep-on-failure", action="store_true")
+            command.add_argument("--allow-exceptions", action="store_true", help="Apply only explicitly documented isolation exceptions")
+        if name == "promote":
+            command.add_argument("--report", required=True)
+            command.add_argument("--reviewer", action="append", required=True)
+            command.add_argument("--reviewed", action="store_true", required=True,
+                                 help="Attest that evidence, source, safety and redaction were reviewed")
+        if name == "publish":
+            command.add_argument("--images", required=True)
+            command.add_argument("--repository", required=True, help="ghcr.io/owner/package")
     args = parser.parse_args(argv)
     try:
+        if args.command == "refresh":
+            from .lifecycle import refresh
+            for entry in load_registry(ROOT):
+                directory = ROOT / entry["path"]
+                if refresh(ROOT, directory, read_toml(directory / "metadata.toml")):
+                    print(f"Downgraded: {entry['id']}")
+            return 0
+        if args.command == "lint":
+            from .runtime import Commands, inspect_config
+            from .build import validate_sources
+            import tempfile
+            entries = check(ROOT)
+            if args.environment and args.environment not in {e['id'] for e in entries}:
+                raise RegistryError("Unknown environment")
+            with tempfile.TemporaryDirectory(prefix="avh-lint-") as temp:
+                if not args.environment:
+                    template = ROOT / "templates/environment"
+                    placeholders = {v: "placeholder@sha256:" + "0" * 64 for v in ("vulnerable", "patched")}
+                    inspect_config(Commands(Path(temp)), template, placeholders, "avh-template-lint",
+                                   read_toml(template / "metadata.toml"), False)
+                    print("Static Compose check: template")
+                for entry in entries:
+                    if args.environment and entry["id"] != args.environment:
+                        continue
+                    directory = ROOT / entry["path"]
+                    data = read_toml(directory / "metadata.toml")
+                    images = {v: data[v].get("image") or "placeholder@sha256:" + "0" * 64 for v in ("vulnerable", "patched")}
+                    inspect_config(Commands(Path(temp)), directory, images, "avh-lint", data, True)
+                    if data["lifecycle"] == "ready":
+                        validate_sources(directory, data)
+                    print(f"Static Compose check: {entry['id']}")
+            return 0
+        if args.command in {"fetch", "build", "reproduce", "promote", "publish"}:
+            from .runtime import Commands, preflight, reproduce, utc
+            from .build import build_images, fetch_inputs
+            from .lifecycle import promote, refresh
+            from .protocol import write_json
+            import uuid
+            split_id(args.environment)
+            entries = load_registry(ROOT)
+            if args.environment not in {e["id"] for e in entries}:
+                raise RegistryError(f"Unknown environment: {args.environment}")
+            directory = ROOT / "environments" / args.environment
+            data = read_toml(directory / "metadata.toml")
+            refresh(ROOT, directory, data)
+            validate_metadata(data, args.environment)
+            if args.command == "reproduce":
+                return reproduce(ROOT, directory, data, args)
+            if args.command == "fetch":
+                files = fetch_inputs(ROOT, directory, data, args.offline)
+                print(f"Verified {len(files)} cached build input(s)")
+            elif args.command == "build":
+                output = ROOT / "results" / args.environment / ("build-" + uuid.uuid4().hex[:12])
+                output.mkdir(parents=True)
+                commands_io = Commands(output, args.timeout)
+                try:
+                    preflight(commands_io)
+                    build_images(ROOT, directory, data, commands_io, args.offline)
+                except Exception as error:
+                    write_json(output / "failure.json", {"phase": "build", "actual": str(error), "time": utc()})
+                    raise
+                print(output / "build.json")
+            elif args.command == "publish":
+                from .publish import publish
+                output = ROOT / "results" / args.environment / ("publish-" + uuid.uuid4().hex[:12])
+                output.mkdir(parents=True)
+                publish(ROOT, directory, data, args.images, args.repository, Commands(output, args.timeout))
+                print(output / "publication.json")
+            else:
+                from .build import validate_sources
+                validate_sources(directory, data)
+                candidate = dict(data, lifecycle="ready")
+                validate_metadata(candidate, args.environment)
+                print(f"Reviewed evidence retained: {promote(ROOT, directory, data, args.report, args.reviewer)}")
+            return 0
         if args.command == "new":
             print(f"Created draft: {scaffold(ROOT, args.product, args.cve)}")
         else:
@@ -162,6 +269,19 @@ def main(argv: list[str] | None = None) -> int:
                     metadata = read_toml(ROOT / entry["path"] / "metadata.toml")
                     print(f"{entry['id']}\t{metadata['lifecycle']}\t{metadata['agent_specificity']}")
         return 0
-    except (OSError, ValueError) as error:
+    except (OSError, ValueError, KeyError, TypeError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
-        return 1
+        return 2 if args.command in {"fetch", "build", "reproduce", "promote", "publish"} else 1
+    except Exception as error:
+        from .runtime import RunError
+        if not isinstance(error, RunError):
+            raise
+        print(f"ERROR ({error.phase}): {error}", file=sys.stderr)
+        return error.code
+
+
+def positive_int(value):
+    number = int(value)
+    if number <= 0:
+        raise argparse.ArgumentTypeError("must be positive")
+    return number

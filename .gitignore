@@ -8,3 +8,5 @@ results/
 artifacts/
 *.log
 .DS_Store
+.cache/
+*.before-update

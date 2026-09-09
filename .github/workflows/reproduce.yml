@@ -1,0 +1,47 @@
+name: Isolated Reproduction
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment_id:
+        description: Registered product/CVE-ID (empty selects ready environments)
+        type: string
+        required: false
+      from_source:
+        description: Build locked source before running
+        type: boolean
+        default: true
+  schedule:
+    - cron: '17 3 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: isolated-reproduction
+  cancel-in-progress: false
+
+jobs:
+  reproduce:
+    # Administrators must provision a fresh disposable VM for each job.
+    runs-on: [self-hosted, linux, x64, vulhub-ephemeral]
+    environment: vulhub-lab
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Run three rounds
+        env:
+          AVH_ENVIRONMENT: ${{ inputs.environment_id }}
+          AVH_FROM_SOURCE: ${{ github.event_name == 'schedule' || inputs.from_source }}
+        run: python3 -m runner.ci
+      - name: Retain reports and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reproduction-${{ github.run_id }}
+          path: results/
+          retention-days: 90
+          if-no-files-found: warn

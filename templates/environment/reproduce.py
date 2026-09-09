@@ -1,9 +1,16 @@
 """Implement a mechanism reproduction inside the isolated lab."""
 
 import sys
+import argparse
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--context", required=True)
+    parser.add_argument("--output", required=True)
+    parser.parse_args()
+    # Read context.json; invoke upstream code; write facts.json and effect evidence.
+    # Handle expected patched rejection as completed execution, not a process error.
     print("NOT IMPLEMENTED: mechanism reproduction for {{CVE}}", file=sys.stderr)
     return 2
 

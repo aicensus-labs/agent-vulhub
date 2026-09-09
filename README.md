@@ -1,63 +1,73 @@
 # Agent Vulhub
 
-Agent 安全漏洞复现环境库。每个 CVE 保存独立环境、攻击输入、复现步骤、修复对照和验证证据。
+Agent 安全漏洞的 Docker 机制复现仓库。每个环境固定完整上游源码、依赖和镜像，提供 PoC、独立验证器、修复对照与可复核证据。
 
-当前是仓库骨架，环境索引为空；尚未提供或验证任何真实 CVE。仓库名称为暂定名，不代表与 Vulhub 官方存在隶属关系。
+当前已实现共享工具与模板，真实 CVE 索引仍为空。合成 Docker 冒烟测试仅验证运行器，不构成任何漏洞复现证明。仓库名称为暂定名，与 Vulhub 官方无隶属关系。
 
-## 快速开始
+## 使用
 
-索引管理只需 Python 3.11+，无第三方依赖，不需要 Docker：
+索引工具仅需 Python 3.11+ 标准库；构建和实验需要 Linux amd64 原生 Docker，以及支持 JSON config、--no-env-resolution、up --wait 的 Compose 插件。
 
 ```sh
 python3 -m runner list
 python3 -m runner check
+python3 -m runner lint
 python3 -m unittest discover -s tests -v
 ```
 
-新增草稿时，用已核实的产品目录名和真实 CVE 编号替换参数：
+新增环境并完成配方与实验脚本后：
 
 ```sh
-python3 -m runner new <product> <CVE-YYYY-NNNN>
+python3 -m runner new <product> <CVE-ID>
+python3 -m runner reproduce <product>/<CVE-ID> --build --rounds 3
 ```
 
-命令创建 `environments/<product>/<CVE-ID>/` 并注册到 `environments.toml`。它不会联网、安装依赖、启动容器或执行复现脚本。新建条目均为 `draft`，不代表确认漏洞。
+--build 从固定源码构建两版镜像，然后运行四个独立测试：漏洞版攻击、修复版攻击，以及两版各自的正常任务。默认 1 轮，晋升 ready 至少 3 轮，每个测试使用全新容器和数据。
+
+也可先 build，再通过 --images 指定输出的 build.json 复用本地不可变镜像；已有 GHCR 镜像的环境省略 --build 即按元数据 digest 拉取。--offline 要求所有输入和镜像已缓存。
+
+```sh
+python3 -m runner build <product>/<CVE-ID>
+python3 -m runner reproduce <product>/<CVE-ID> --images <build.json> --offline
+python3 -m runner reproduce <product>/<CVE-ID> --scenario vulnerable --keep-on-failure
+```
+
+## 结果与状态
+
+结果保存在 results/<product>/<CVE-ID>/<run-id>/，有 report.json、各测试 result.json、独立 verdict、效果证据及日志。退出码 0/1/2/3 分别表示所选测试通过、实验失败、未运行/前提不足、基础设施或证据错误。缺少证据、服务启动失败不能当作修复成功。
+
+ready 表示已由维护者审阅并通过三轮完整验收；缺修复对照的环境保持 draft。执行材料变化会使旧证据失效，check 拒绝旧 ready，refresh 或下一次执行命令降级并保留历史。
+
+```sh
+python3 -m runner promote <product>/<CVE-ID> --report <report.json> --reviewer <login> --reviewed
+python3 -m runner refresh
+```
 
 ## 目录
 
 ```text
-environments.toml             环境索引，身份由 product/CVE 构成
-environments/                 真实 CVE 环境，目前为空
-templates/environment/        环境模板，不参与索引和验证计数
-runner/                       索引、静态检查和草稿生成 CLI
-docs/                         收录、验证及 AgentSec 关联约定
-tests/                        仓库工具测试，不是漏洞复现测试
-.github/workflows/check.yml    静态检查与工具测试
+environments.toml       环境索引
+environments/           真实 CVE 环境（目前为空）
+templates/environment/  环境配方、PoC、验证器和 fixture 模板
+runner/                 索引、源码构建、Compose 编排、证据校验和晋升
+tests/                  静态工具测试和显式 Docker smoke
+docs/                   执行协议、设计记录和 ADR
+results/                本地实验结果（Git 忽略）
+.cache/sha256/          按哈希缓存构建输入（Git 忽略）
 ```
 
-每个环境采用相同结构：
+模板仍明确返回未实现，不能因存在模板文件而标记为成功。机制复现允许固定模型输出，但必须走真实漏洞代码路径；真实模型端到端复现另行记录。
 
-```text
-metadata.toml                 公告、版本、来源、运行需求和验证状态
-README.zh-cn.md               原理、前提、复现及修复对照说明
-compose.yaml                  漏洞版和修复版的独立 Compose profiles
-Dockerfile                    需要自行构建时补全的配方
-fixtures/                     模拟仓库、网页、工具输出及假数据
-reproduce.py                  机制复现入口
-end_to_end.py                 真实模型端到端入口
-verify.py                     独立效果验证入口
-.env.example                  运行变量示例，不含真实凭据
+## 文档与 CI
+
+详见[执行协议](docs/environment-contract.md)、[收录流程](CONTRIBUTING.md)、[设计记录](docs/design-session.md)和[术语](CONTEXT.md)。
+
+PR CI 只运行静态检查和工具测试。真实复现使用独立工作流，需要管理员配置受保护的 vulhub-lab environment 和一次性 VM runner；GHCR 登录和发布权限也需维护者配置。
+
+工具链 Docker smoke 显式执行，需要缓存的固定 Python 镜像；该命令不会收录任何真实 CVE：
+
+```sh
+python3 -m tests.docker_smoke --base-image python@sha256:<digest> --exercise-failures
 ```
 
-模板脚本会明确返回“未实现”和退出码 2。模板 Dockerfile 也拒绝构建；维护者须完成配方、实验边界和验收后才能运行。Compose 提供可解析的占位服务，但只有明确选择 profile 并设置镜像才可启动。
-
-## 复现标准
-
-机制复现与真实模型端到端复现分别记账。前者可以固定模型输出，但必须走真实漏洞代码路径；后者需要记录模型标识、参数、重复次数和攻击成功分母。
-
-“通过”至少要有漏洞版效果、修复版阻断、正常任务成功三类证据。固定源码 commit 与镜像 digest，保留攻击前提和具体场景。详见 [环境规范](docs/environment-contract.md) 和 [收录流程](CONTRIBUTING.md)。
-
-## 与 AgentSec 关联
-
-以 CVE 和官方别名关联现有漏洞，独立保存环境加入时间与验证时间。只附加仓库路径、固定 commit 和验证状态，不将新环境当作当天新披露漏洞。详见 [关联约定](docs/agentsec-integration.md)。
-
-本骨架没有设置开源许可证。正式公开分发前需由维护者选择许可证；引入第三方代码时须保留其许可和来源。
+关联 AgentSec 时使用 CVE/官方别名，不把环境加入时间当作漏洞披露时间，见[关联约定](docs/agentsec-integration.md)。仓库尚未选择开源许可证；引入上游材料时保留来源与许可。

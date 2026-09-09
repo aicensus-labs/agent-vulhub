@@ -14,16 +14,27 @@ version = ""
 source_url = ""
 commit = ""
 image = ""
+archive = "vulnerable-source.tar.gz"
 
 [patched]
 version = ""
 source_url = ""
 commit = ""
 image = ""
+archive = "patched-source.tar.gz"
+
+[build]
+base_image = ""
+dockerfile = "Dockerfile"
+# Each entry: { name = "...", url = "https://...", sha256 = "..." }
+# Include source archives AND every dependency needed by network-disabled builds.
+inputs = []
 
 [runtime]
 isolation = "container"
-platforms = []
+platforms = ["linux/amd64"]
+mode = "oneshot"
+exceptions = []
 requires_model = false
 network_requirements = "TODO: required destinations or no network"
 
@@ -34,7 +45,7 @@ evidence = []
 notes = ""
 
 [verification.end_to_end]
-status = "not_run"
+status = "not_applicable"
 verified_at = ""
 evidence = []
-notes = ""
+notes = "Mechanism reproduction is required; real-model testing is optional."

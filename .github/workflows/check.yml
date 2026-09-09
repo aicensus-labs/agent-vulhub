@@ -25,3 +25,5 @@ jobs:
         run: python -m runner check
       - name: Test registry tools
         run: python -m unittest discover -s tests -v
+      - name: Parse Compose without starting services
+        run: python -m runner lint
