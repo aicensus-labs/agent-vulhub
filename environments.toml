@@ -1,8 +1,20 @@
 schema_version = 1
 
 [[environments]]
+id = "hackmd-mcp/CVE-2025-59155"
+path = "environments/hackmd-mcp/CVE-2025-59155"
+
+[[environments]]
 id = "ios-simulator-mcp/CVE-2025-52573"
 path = "environments/ios-simulator-mcp/CVE-2025-52573"
+
+[[environments]]
+id = "mcp-filesystem/CVE-2025-53109"
+path = "environments/mcp-filesystem/CVE-2025-53109"
+
+[[environments]]
+id = "mcp-filesystem/CVE-2025-53110"
+path = "environments/mcp-filesystem/CVE-2025-53110"
 
 [[environments]]
 id = "mcp-server-git/CVE-2025-68143"

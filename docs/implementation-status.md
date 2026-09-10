@@ -1,6 +1,6 @@
 # 首版实现与验证记录
 
-日期：2026-09-09。用户已确认设计并授权实现。本记录描述共享工具，不宣称任何真实 CVE 已复现。
+日期：2026-09-10。用户已确认设计并授权实现。本记录描述共享工具和 6 个机制环境；环境仍需维护者审阅后才能晋升 `ready`。
 
 ## 已实现
 
@@ -10,12 +10,14 @@
 - 每轮四个独立测试及状态清理，超时、阶段日志、失败原因、缺失证据拒绝和独立 verdict 核对。
 - 三轮晋升、维护者声明、例外双审阅、永久小型证据包、manifest、输入指纹失效和历史降级记录。
 - 更新模板、执行协议、收录说明；PR 静态 CI 与独立 VM 手动/定时复现工作流。
+- 收录 6 个 Agent/MCP CVE 环境：iOS Simulator MCP、Node Code Sandbox MCP、MCP Git、Filesystem 两个路径边界案例，以及 HackMD MCP HTTP connector。
+- 新增的三个环境使用完整上游源码和固定依赖：CVE-2025-53109、CVE-2025-53110、CVE-2025-59155；PoC 直接调用真实 MCP handler，验证器独立读取证据。
 
 ## 验证
 
-- `python3 -m unittest discover -s tests -v`：28 项通过，不运行漏洞代码。
-- `python3 -m runner check`：通过，真实环境数量 0。
-- `python3 -m runner lint`：模板 Compose 静态解析通过。
+- `python3 -m unittest discover -s tests -v`：30 项通过，不运行漏洞代码。
+- `python3 -m runner check`：通过，索引包含 6 个环境。
+- `python3 -m runner lint`：6 个环境和模板的 Compose 静态解析通过。
 - `git diff --check`：通过。
 - 显式 Docker smoke：Python 固定基础镜像、Linux amd64、Docker 29.6.1、Compose 5.3.0；3 轮共 12 测试通过。
 - 服务模式和健康辅助服务通过；缺失 verdict、PoC 超时、辅助服务不健康均按预期失败并清理。
@@ -27,6 +29,8 @@ Docker 实测报告目录：`results/tooling-smoke/f71882b32cd5/`。这些是合
 
 GHCR 发布命令已实现，尚未真实上传；需要维护者账号、目标 package 和登录权限。隔离 CI 配置已写入，但本次未创建 GitHub environment、分支保护或一次性 VM runner，这些需仓库管理员配置。
 
-真实 CVE 尚未添加实验环境；首批候选与实施顺序见[候选 CVE 选型](cve-candidates.md)。首版仅编排机制复现；真实模型入口保留为可选。Dockerfile 静态检查不是完整行为审计，来源标签、证据哈希和审阅者字符串不是密码学真实性证明。来源、无害效果、脱敏、维护者身份及容器工具链变更的语义影响仍需平台审阅与人工复核。
+当前 6 个环境都保持 `draft`：尚未上传 GHCR，也尚未运行 `promote`。首版仅编排机制复现；真实模型入口保留为可选。Dockerfile 静态检查不是完整行为审计，来源标签、证据哈希和审阅者字符串不是密码学真实性证明。来源、无害效果、脱敏、维护者身份及容器工具链变更的语义影响仍需平台审阅与人工复核。
+
+新增环境最近一次三轮报告：`results/mcp-filesystem/CVE-2025-53109/20260910T072747Z-45bb18b44b7d/report.json`、`results/mcp-filesystem/CVE-2025-53110/20260910T072848Z-3c954a207a39/report.json`、`results/hackmd-mcp/CVE-2025-59155/20260910T072946Z-f23140138608/report.json`。三个报告均为 12/12 case 通过并完成清理。
 
 详细参数、证据字段和实现细化见 [环境协议](environment-contract.md)。
