@@ -1,10 +1,10 @@
 # 环境与执行协议 v1
 
-已确认设计的执行规范。当前索引包含 6 个真实上游源码环境，均为 `draft`；模板和合成工具测试不代表漏洞已复现。
+已确认设计的执行规范。当前索引包含 9 个真实上游源码环境，均为 `draft`；模板和合成工具测试不代表漏洞已复现。
 
 ## 固定源码与构建
 
-环境 ID 为 `<product>/<CVE-ID>`，目录和索引沿用原布局。两个变体分别记录完整上游 commit、版本、源码 URL、`archive`（build.inputs 的名称）和已发布镜像 digest。完整安装上游版本，允许直接调用内部函数，不能抽取或重写漏洞函数代替产品。
+环境 ID 为 `<product>/<CVE-ID>` 或 `<product>/<GHSA-ID>`，目录和索引沿用原布局。两个变体分别记录完整上游 commit、版本、源码 URL、`archive`（build.inputs 的名称）和已发布镜像 digest。完整安装上游版本，允许直接调用内部函数，不能抽取或重写漏洞函数代替产品。
 
 `build.base_image` 固定 digest；`build.inputs` 每项包含简单文件名 `name`、HTTPS `url`、`sha256`。源码归档、语言依赖和系统软件包通过清单校验，缓存到 `.cache/sha256/`。构建器把它们放进临时上下文 `inputs/`，Docker build 使用 `--network none`，配方必须离线安装。`--offline` 还禁止下载和拉取，缺缓存明确失败；基础镜像也必须已缓存。
 
@@ -15,7 +15,7 @@ GHCR 正式镜像用 `image@sha256:...`；本地源码构建用 Docker 返回的
 ## 标准入口
 
 ```sh
-python3 -m runner new <product> <CVE-ID>
+python3 -m runner new <product> <identifier>
 python3 -m runner check
 python3 -m runner lint
 python3 -m runner fetch <product>/<CVE-ID>

@@ -2,9 +2,9 @@
 
 Agent 安全漏洞的 Docker 机制复现仓库。每个环境固定完整上游源码、依赖和镜像，提供 PoC、独立验证器、修复对照与可复核证据。
 
-当前索引包含 6 个真实上游源码的 CVE 机制环境，均保持 `draft`，尚未宣称为 `ready` 或发布 GHCR 镜像。每个环境使用容器内 synthetic 效果验证漏洞路径和修复对照；合成 Docker 冒烟测试仅验证运行器，不构成漏洞复现证明。仓库名称为暂定名，与 Vulhub 官方无隶属关系。
+当前索引包含 9 个真实上游源码的 CVE/GHSA 机制环境，均保持 `draft`，尚未宣称为 `ready` 或发布 GHCR 镜像。每个环境使用容器内 synthetic 效果验证漏洞路径和修复对照；合成 Docker 冒烟测试仅验证运行器，不构成漏洞复现证明。仓库名称为暂定名，与 Vulhub 官方无隶属关系。
 
-已收录环境：`ios-simulator-mcp/CVE-2025-52573`、`node-code-sandbox-mcp/CVE-2025-53372`、`mcp-server-git/CVE-2025-68143`、`mcp-filesystem/CVE-2025-53109`、`mcp-filesystem/CVE-2025-53110` 和 `hackmd-mcp/CVE-2025-59155`。
+已收录环境：`ios-simulator-mcp/CVE-2025-52573`、`node-code-sandbox-mcp/CVE-2025-53372`、`mcp-server-git/CVE-2025-68143`、`mcp-filesystem/CVE-2025-53109`、`mcp-filesystem/CVE-2025-53110`、`hackmd-mcp/CVE-2025-59155`、`agent-device/GHSA-M7Q5-6423-2MWQ`、`vtcode/GHSA-WQGW-CRR5-CR2P` 和 `factoryfloor/CVE-2026-88063`。三个新增环境仍为草稿，其中 VT Code 和 Factory Floor 明确缺少可执行前提。
 
 ## 使用
 
@@ -20,7 +20,7 @@ python3 -m unittest discover -s tests -v
 新增环境并完成配方与实验脚本后：
 
 ```sh
-python3 -m runner new <product> <CVE-ID>
+python3 -m runner new <product> <CVE-or-GHSA-ID>
 python3 -m runner reproduce <product>/<CVE-ID> --build --rounds 3
 ```
 
@@ -49,7 +49,7 @@ python3 -m runner refresh
 
 ```text
 environments.toml       环境索引
-environments/           真实 CVE 环境（当前 6 个，均为 draft）
+environments/           真实 CVE/GHSA 环境（当前 9 个，均为 draft）
 templates/environment/  环境配方、PoC、验证器和 fixture 模板
 runner/                 索引、源码构建、Compose 编排、证据校验和晋升
 tests/                  静态工具测试和显式 Docker smoke

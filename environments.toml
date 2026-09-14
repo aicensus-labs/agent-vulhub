@@ -1,6 +1,14 @@
 schema_version = 1
 
 [[environments]]
+id = "agent-device/GHSA-M7Q5-6423-2MWQ"
+path = "environments/agent-device/GHSA-M7Q5-6423-2MWQ"
+
+[[environments]]
+id = "factoryfloor/CVE-2026-88063"
+path = "environments/factoryfloor/CVE-2026-88063"
+
+[[environments]]
 id = "hackmd-mcp/CVE-2025-59155"
 path = "environments/hackmd-mcp/CVE-2025-59155"
 
@@ -23,3 +31,7 @@ path = "environments/mcp-server-git/CVE-2025-68143"
 [[environments]]
 id = "node-code-sandbox-mcp/CVE-2025-53372"
 path = "environments/node-code-sandbox-mcp/CVE-2025-53372"
+
+[[environments]]
+id = "vtcode/GHSA-WQGW-CRR5-CR2P"
+path = "environments/vtcode/GHSA-WQGW-CRR5-CR2P"
