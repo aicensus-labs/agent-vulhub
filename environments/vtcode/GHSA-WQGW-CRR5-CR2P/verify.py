@@ -1,0 +1,34 @@
+"""Independent verifier for VT Code lifecycle hook evidence."""
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--context", required=True)
+    parser.add_argument("--output", required=True)
+    args = parser.parse_args()
+    context = json.loads(Path(args.context).read_text())
+    output = Path(args.output)
+    facts = json.loads((output / "facts.json").read_text())
+    observation = json.loads((output / "observation.json").read_text())
+    for key in ("schema_version", "run_id", "case_id", "variant", "scenario"):
+        if facts[key] != context[key] or observation["context"][key] != context[key]:
+            raise ValueError(f"context mismatch: {key}")
+    evidence_entry = next((item for item in facts["evidence"] if item["path"] == "observation.json"), None)
+    if evidence_entry is None or evidence_entry["sha256"] != digest(output / "observation.json"):
+        raise ValueError("observation evidence hash mismatch")
+    print("Cannot verify: the mechanism trigger was not executed because a terminal-based session prerequisite is missing", file=sys.stderr)
+    return 2
+
+
+def digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

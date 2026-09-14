@@ -1,0 +1,10 @@
+[agent]
+provider = "ollama"
+
+[hooks.lifecycle]
+quiet_success_output = true
+
+[[hooks.lifecycle.session_start]]
+
+[[hooks.lifecycle.session_start.hooks]]
+command = "printf 'vtcode-session-start-marker\\n' > .vtcode-session-start-marker"

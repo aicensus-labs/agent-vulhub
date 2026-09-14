@@ -1,0 +1,6 @@
+schema_version = 1
+
+# Keys are paths relative to fixtures/. Include attack AND benign inputs.
+[files]
+"attack.toml" = "eb151a308359d5a09ec2f2c134c9ea3309baa3b5bc901c33590931422e8e55d2"
+"benign.toml" = "9f4a330a13916e6fef003abd115c095afe0b85689ef50e9e74095d60a6f85158"
