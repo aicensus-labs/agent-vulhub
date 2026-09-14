@@ -1,6 +1,6 @@
 schema_version = 1
 id = "{{PRODUCT}}/{{CVE}}"
-cve = "{{CVE}}"
+{{CVE_KEY}} = "{{CVE}}"
 product = "{{PRODUCT}}"
 title = "TODO: verified vulnerability title"
 lifecycle = "draft"

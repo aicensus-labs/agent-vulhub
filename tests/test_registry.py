@@ -36,10 +36,17 @@ class RegistryTests(unittest.TestCase):
         self.assertEqual((target / "reproduce.py").read_text(), "preserve this work\n")
 
     def test_path_traversal_and_invalid_cve_are_rejected(self):
-        for product, cve in [("../outside", "CVE-2099-99999"), ("agent", "not-a-cve")]:
-            with self.subTest(product=product, cve=cve), self.assertRaises(RegistryError):
-                scaffold(self.root, product, cve)
+        for product, identifier in [("../outside", "CVE-2099-99999"), ("agent", "not-a-cve")]:
+            with self.subTest(product=product, identifier=identifier), self.assertRaises(RegistryError):
+                scaffold(self.root, product, identifier)
         self.assertEqual(check(self.root), [])
+
+    def test_ghsa_environment_is_supported(self):
+        target = scaffold(self.root, "synthetic-agent", "GHSA-2099-aaaa-bbbb")
+        self.assertEqual(len(check(self.root)), 1)
+        data = read_toml(target / "metadata.toml")
+        self.assertEqual(data["id"], "synthetic-agent/GHSA-2099-aaaa-bbbb")
+        self.assertEqual(data["ghsa"], "GHSA-2099-aaaa-bbbb")
 
     def test_missing_required_file_is_rejected(self):
         target = scaffold(self.root, "synthetic-agent", "CVE-2099-99999")

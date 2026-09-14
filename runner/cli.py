@@ -9,7 +9,7 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 PRODUCT = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
-CVE = re.compile(r"CVE-[0-9]{4}-[0-9]{4,}")
+IDENTIFIER = re.compile(r"(?:CVE-[0-9]{4}-[0-9]{4,}|GHSA-[0-9A-Za-z]{4}-[0-9A-Za-z]{4}-[0-9A-Za-z]{4,})", re.I)
 COMMIT = re.compile(r"[0-9a-f]{40}")
 IMAGE = re.compile(r"[^\s]+@sha256:[0-9a-f]{64}")
 REQUIRED_FILES = (
@@ -31,7 +31,7 @@ def read_toml(path: Path) -> dict:
 
 def split_id(value: str) -> tuple[str, str]:
     parts = value.split("/")
-    if len(parts) != 2 or not PRODUCT.fullmatch(parts[0]) or not CVE.fullmatch(parts[1]):
+    if len(parts) != 2 or not PRODUCT.fullmatch(parts[0]) or not IDENTIFIER.fullmatch(parts[1]):
         raise RegistryError(f"Invalid environment id: {value!r}")
     return parts[0], parts[1]
 
@@ -60,8 +60,9 @@ def load_registry(root: Path) -> list[dict]:
 
 
 def validate_metadata(data: dict, environment_id: str) -> None:
-    product, cve = split_id(environment_id)
-    for key, expected in {"schema_version": 1, "id": environment_id, "product": product, "cve": cve}.items():
+    product, identifier = split_id(environment_id)
+    metadata_key = "cve" if identifier.startswith("CVE-") else "ghsa"
+    for key, expected in {"schema_version": 1, "id": environment_id, "product": product, metadata_key: identifier}.items():
         if data.get(key) != expected:
             raise RegistryError(f"{environment_id}: metadata {key} must equal {expected!r}")
     if data.get("lifecycle") not in {"draft", "ready"}:
@@ -116,11 +117,12 @@ def check(root: Path) -> list[dict]:
     return entries
 
 
-def scaffold(root: Path, product: str, cve: str) -> Path:
-    environment_id = f"{product}/{cve}"
-    split_id(environment_id)
+def scaffold(root: Path, product: str, identifier: str) -> Path:
+    environment_id = f"{product}/{identifier}"
+    _, normalized = split_id(environment_id)
+    metadata_key = "cve" if normalized.startswith("CVE-") else "ghsa"
     entries = check(root)
-    target = root / "environments" / product / cve
+    target = root / "environments" / product / identifier
     if target.exists() or any(entry["id"] == environment_id for entry in entries):
         raise RegistryError(f"Environment already exists: {environment_id}")
     if not target.resolve().is_relative_to((root / "environments").resolve()):
@@ -132,7 +134,8 @@ def scaffold(root: Path, product: str, cve: str) -> Path:
     rendered = {}
     for path in files:
         if path.is_file():
-            rendered[path.relative_to(template)] = path.read_text(encoding="utf-8").replace("{{PRODUCT}}", product).replace("{{CVE}}", cve)
+            rendered[path.relative_to(template)] = path.read_text(encoding="utf-8").replace(
+                "{{PRODUCT}}", product).replace("{{CVE_KEY}}", metadata_key).replace("{{CVE}}", normalized)
     for name, content in rendered.items():
         destination = target / name
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -155,7 +158,7 @@ def main(argv: list[str] | None = None) -> int:
     commands.add_parser("check", help="Validate metadata and required files without executing code")
     new = commands.add_parser("new", help="Create and register a draft from the template")
     new.add_argument("product")
-    new.add_argument("cve")
+    new.add_argument("identifier", help="CVE or GHSA identifier")
     commands.add_parser("refresh", help="Downgrade stale ready environments; preserve historical evidence")
     lint = commands.add_parser("lint", help="Parse Compose via Docker CLI without starting containers")
     lint.add_argument("environment", nargs="?")
@@ -260,7 +263,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"Reviewed evidence retained: {promote(ROOT, directory, data, args.report, args.reviewer)}")
             return 0
         if args.command == "new":
-            print(f"Created draft: {scaffold(ROOT, args.product, args.cve)}")
+            print(f"Created draft: {scaffold(ROOT, args.product, args.identifier)}")
         else:
             entries = check(ROOT)
             if args.command == "check":
