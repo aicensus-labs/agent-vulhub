@@ -1,0 +1,57 @@
+schema_version = 1
+id = "agent-device/GHSA-M7Q5-6423-2MWQ"
+ghsa = "GHSA-M7Q5-6423-2MWQ"
+product = "agent-device"
+title = "Agent Device project configuration redirects remote daemon credentials"
+lifecycle = "draft"
+agent_specificity = "agent_unique"
+advisories = ["https://github.com/callstack/agent-device/security/advisories/GHSA-M7Q5-6423-2MWQ"]
+description = "Agent Device automatically loads agent-device.json from the current project. In the vulnerable version, a project may set daemonBaseUrl while the user environment supplies AGENT_DEVICE_DAEMON_AUTH_TOKEN. A client-backed CLI command sends that token to the project-selected endpoint in Authorization and x-agent-device-token headers. The patched release rejects daemonBaseUrl in project configuration before a network request."
+prerequisites = ["A project-controlled agent-device.json with daemonBaseUrl", "A synthetic user token in AGENT_DEVICE_DAEMON_AUTH_TOKEN", "A locally controlled HTTP receiver", "A client-backed command such as devices"]
+
+[vulnerable]
+version = "0.20.3"
+source_url = "https://github.com/callstack/agent-device"
+commit = "b4487f57a7e5c7aff2f50b573fa6bf95e32e0a17"
+image = ""
+archive = "vulnerable-source.tar.gz"
+
+[patched]
+version = "0.20.4"
+source_url = "https://github.com/callstack/agent-device"
+commit = "95b4623461dbdd4b482bdb773a2e61718df8a006"
+image = ""
+archive = "patched-source.tar.gz"
+
+[build]
+base_image = "node@sha256:6c74791e557ce11fc957704f6d4fe134a7bc8d6f5ca4403205b2966bd488f6b3"
+dockerfile = "Dockerfile"
+# Each entry: { name = "...", url = "https://...", sha256 = "..." }
+# Include source archives AND every dependency needed by network-disabled builds.
+inputs = [
+  { name = "agent-device-vulnerable-source.tar.gz", url = "https://github.com/callstack/agent-device/archive/b4487f57a7e5c7aff2f50b573fa6bf95e32e0a17.tar.gz", sha256 = "00b1400dfd567c759a220c83c7392a26b98910425c17d26eb8f251237025f8b1" },
+  { name = "agent-device-patched-source.tar.gz", url = "https://github.com/callstack/agent-device/archive/95b4623461dbdd4b482bdb773a2e61718df8a006.tar.gz", sha256 = "ec5297b98c90c631b007346a69153f95793b7f817af3498be3ef74a49edda1f4" },
+  { name = "agent-device-vulnerable-node-deps.tar.gz", url = "https://raw.githubusercontent.com/glmgbj233/agent-vulhub/main/environments/agent-device/GHSA-M7Q5-6423-2MWQ/inputs/agent-device-vulnerable-node-deps.tar.gz", sha256 = "784fe5381fb899caa356a08cb78afe396da30c191b48a1f9c23ffd972d170cfa" },
+  { name = "agent-device-patched-node-deps.tar.gz", url = "https://raw.githubusercontent.com/glmgbj233/agent-vulhub/main/environments/agent-device/GHSA-M7Q5-6423-2MWQ/inputs/agent-device-patched-node-deps.tar.gz", sha256 = "ac1fd0462fbe3b43121c1fcf47af98f8b2d0c74813de277816654f803190bb45" },
+]
+
+[runtime]
+isolation = "container"
+platforms = ["linux/amd64"]
+mode = "oneshot"
+harness = "python3"
+exceptions = []
+requires_model = false
+network_requirements = "No network; the synthetic receiver is bound to loopback inside the container"
+
+[verification.mechanism]
+status = "not_run"
+verified_at = ""
+evidence = []
+notes = ""
+
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."

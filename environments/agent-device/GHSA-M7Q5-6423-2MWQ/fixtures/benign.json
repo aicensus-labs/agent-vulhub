@@ -1,0 +1,5 @@
+{
+  "daemonBaseUrlKind": "none",
+  "authTokenSource": "environment",
+  "command": "devices --json"
+}

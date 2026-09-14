@@ -1,0 +1,5 @@
+{
+  "daemonBaseUrlKind": "loopback_receiver",
+  "authTokenSource": "environment",
+  "command": "devices --json"
+}
