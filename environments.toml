@@ -33,5 +33,85 @@ id = "node-code-sandbox-mcp/CVE-2025-53372"
 path = "environments/node-code-sandbox-mcp/CVE-2025-53372"
 
 [[environments]]
+id = "praisonai/CVE-2026-34955"
+path = "environments/praisonai/CVE-2026-34955"
+
+[[environments]]
+id = "praisonai/CVE-2026-40149"
+path = "environments/praisonai/CVE-2026-40149"
+
+[[environments]]
+id = "praisonai/CVE-2026-40156"
+path = "environments/praisonai/CVE-2026-40156"
+
+[[environments]]
+id = "praisonai/CVE-2026-40158"
+path = "environments/praisonai/CVE-2026-40158"
+
+[[environments]]
+id = "praisonai/CVE-2026-44334"
+path = "environments/praisonai/CVE-2026-44334"
+
+[[environments]]
+id = "praisonai/CVE-2026-44339"
+path = "environments/praisonai/CVE-2026-44339"
+
+[[environments]]
+id = "praisonai/CVE-2026-47391"
+path = "environments/praisonai/CVE-2026-47391"
+
+[[environments]]
+id = "praisonai/CVE-2026-47395"
+path = "environments/praisonai/CVE-2026-47395"
+
+[[environments]]
+id = "praisonai/CVE-2026-55527"
+path = "environments/praisonai/CVE-2026-55527"
+
+[[environments]]
+id = "praisonai/CVE-2026-55530"
+path = "environments/praisonai/CVE-2026-55530"
+
+[[environments]]
+id = "praisonai/CVE-2026-55532"
+path = "environments/praisonai/CVE-2026-55532"
+
+[[environments]]
+id = "praisonai/CVE-2026-55540"
+path = "environments/praisonai/CVE-2026-55540"
+
+[[environments]]
+id = "praisonai/CVE-2026-56833"
+path = "environments/praisonai/CVE-2026-56833"
+
+[[environments]]
+id = "praisonai/CVE-2026-57117"
+path = "environments/praisonai/CVE-2026-57117"
+
+[[environments]]
+id = "praisonai/CVE-2026-57120"
+path = "environments/praisonai/CVE-2026-57120"
+
+[[environments]]
+id = "praisonai/CVE-2026-57125"
+path = "environments/praisonai/CVE-2026-57125"
+
+[[environments]]
+id = "praisonai/CVE-2026-57129"
+path = "environments/praisonai/CVE-2026-57129"
+
+[[environments]]
+id = "praisonai/CVE-2026-61428"
+path = "environments/praisonai/CVE-2026-61428"
+
+[[environments]]
+id = "praisonai/CVE-2026-61439"
+path = "environments/praisonai/CVE-2026-61439"
+
+[[environments]]
+id = "praisonai/CVE-2026-61445"
+path = "environments/praisonai/CVE-2026-61445"
+
+[[environments]]
 id = "vtcode/GHSA-WQGW-CRR5-CR2P"
 path = "environments/vtcode/GHSA-WQGW-CRR5-CR2P"
