@@ -1,0 +1,55 @@
+schema_version = 1
+id = "mcp-atlassian/GHSA-wm45-qh3g-v83f"
+ghsa = "GHSA-wm45-qh3g-v83f"
+product = "mcp-atlassian"
+title = "MCP Atlassian attachment upload arbitrary server-side file read"
+lifecycle = "draft"
+agent_specificity = "agent_unique"
+advisories = ["https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-wm45-qh3g-v83f", "https://github.com/advisories/GHSA-wm45-qh3g-v83f"]
+description = "The attachment-upload tools accept a client-supplied file_path and open it on the server host. On a remote HTTP or SSE deployment, a client can read arbitrary server-readable files and exfiltrate them as Atlassian attachments, including secrets from /proc/self/environ."
+prerequisites = ["Pinned mcp-atlassian 0.21.0 source", "Pinned mcp-atlassian 0.22.0 source", "A remote MCP transport with attachment upload enabled"]
+
+[vulnerable]
+version = "0.21.0"
+source_url = "https://github.com/sooperset/mcp-atlassian/tree/c450a161ec630dd57f44a2b15d977debae19eba5"
+commit = "c450a161ec630dd57f44a2b15d977debae19eba5"
+image = ""
+archive = "mcp-atlassian-0.21.0.tar.gz"
+
+[patched]
+version = "0.22.0"
+source_url = "https://github.com/sooperset/mcp-atlassian/tree/b041733473f95119dd539542a43c280737a8e460"
+commit = "b041733473f95119dd539542a43c280737a8e460"
+image = ""
+archive = "mcp-atlassian-0.22.0.tar.gz"
+
+[build]
+base_image = "codex-universal@sha256:9ba2aa8b4fa406a22c8c9284e1ee6bcb641c5f93a0c4933e58268a53a212d359"
+dockerfile = "Dockerfile"
+# Each entry: { name = "...", url = "https://...", sha256 = "..." }
+# Include source archives AND every dependency needed by network-disabled builds.
+inputs = [
+  { name = "mcp-atlassian-0.21.0.tar.gz", url = "https://github.com/sooperset/mcp-atlassian/archive/c450a161ec630dd57f44a2b15d977debae19eba5.tar.gz", sha256 = "fbe59d73f23e688bfa83d2a83917d65fc7cb7c813dadef1fdbeed64f855234f2" },
+  { name = "mcp-atlassian-0.22.0.tar.gz", url = "https://github.com/sooperset/mcp-atlassian/archive/b041733473f95119dd539542a43c280737a8e460.tar.gz", sha256 = "4740af64608f975a38fd422f85f35d0507212bfe012935b4a9dd2f735061c887" },
+]
+
+[runtime]
+isolation = "container"
+platforms = ["linux/amd64"]
+mode = "oneshot"
+harness = "python3"
+exceptions = []
+requires_model = false
+network_requirements = "No network is used by this draft; source archives are fetched by the runner before container execution"
+
+[verification.mechanism]
+status = "not_run"
+verified_at = ""
+evidence = []
+notes = ""
+
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."

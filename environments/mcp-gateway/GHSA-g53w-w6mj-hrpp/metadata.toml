@@ -1,0 +1,55 @@
+schema_version = 1
+id = "mcp-gateway/GHSA-g53w-w6mj-hrpp"
+ghsa = "GHSA-g53w-w6mj-hrpp"
+product = "mcp-gateway"
+title = "MCP Gateway router hair-pin path bypasses JWT session authorization"
+lifecycle = "draft"
+agent_specificity = "agent_unique"
+advisories = ["https://github.com/Kuadrant/mcp-gateway/security/advisories/GHSA-g53w-w6mj-hrpp", "https://github.com/advisories/GHSA-g53w-w6mj-hrpp"]
+description = "An unauthenticated router initialize path trusts the mcp-init-host header after only a shared router-key check. It can bypass the gateway JWT session validator and rewrite the upstream :authority header, forwarding requests to registered backends without the broker's signed capability filter."
+prerequisites = ["Pinned MCP Gateway 0.6.0 source", "Pinned MCP Gateway 0.7.0 source", "Access to the unauthenticated router hair-pin path"]
+
+[vulnerable]
+version = "0.6.0"
+source_url = "https://github.com/Kuadrant/mcp-gateway/tree/9799d0a704862455f3ba22721bd097242fd8fdf3"
+commit = "9799d0a704862455f3ba22721bd097242fd8fdf3"
+image = ""
+archive = "mcp-gateway-0.6.0.tar.gz"
+
+[patched]
+version = "0.7.0"
+source_url = "https://github.com/Kuadrant/mcp-gateway/tree/5d96c6fb51e46e35a54682bdf814a66d480ab8a9"
+commit = "5d96c6fb51e46e35a54682bdf814a66d480ab8a9"
+image = ""
+archive = "mcp-gateway-0.7.0.tar.gz"
+
+[build]
+base_image = "codex-universal@sha256:9ba2aa8b4fa406a22c8c9284e1ee6bcb641c5f93a0c4933e58268a53a212d359"
+dockerfile = "Dockerfile"
+# Each entry: { name = "...", url = "https://...", sha256 = "..." }
+# Include source archives AND every dependency needed by network-disabled builds.
+inputs = [
+  { name = "mcp-gateway-0.6.0.tar.gz", url = "https://github.com/Kuadrant/mcp-gateway/archive/9799d0a704862455f3ba22721bd097242fd8fdf3.tar.gz", sha256 = "a78c47f6706783bc1d39ed7cfe1d764ce1e928da772ae07e568cad9b5d8974fb" },
+  { name = "mcp-gateway-0.7.0.tar.gz", url = "https://github.com/Kuadrant/mcp-gateway/archive/5d96c6fb51e46e35a54682bdf814a66d480ab8a9.tar.gz", sha256 = "5d384f66dd0b748e70ad1f2e1ad14276addbde1017a0c03997e0a712c43ac2ef" },
+]
+
+[runtime]
+isolation = "container"
+platforms = ["linux/amd64"]
+mode = "oneshot"
+harness = "python3"
+exceptions = []
+requires_model = false
+network_requirements = "No network is used by this draft; source archives are fetched by the runner before container execution"
+
+[verification.mechanism]
+status = "not_run"
+verified_at = ""
+evidence = []
+notes = ""
+
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."

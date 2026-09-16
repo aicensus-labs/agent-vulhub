@@ -5,8 +5,20 @@ id = "agent-device/GHSA-M7Q5-6423-2MWQ"
 path = "environments/agent-device/GHSA-M7Q5-6423-2MWQ"
 
 [[environments]]
+id = "chainlit/CVE-2026-45018"
+path = "environments/chainlit/CVE-2026-45018"
+
+[[environments]]
+id = "claude-code-action/CVE-2026-47751"
+path = "environments/claude-code-action/CVE-2026-47751"
+
+[[environments]]
 id = "factoryfloor/CVE-2026-88063"
 path = "environments/factoryfloor/CVE-2026-88063"
+
+[[environments]]
+id = "flowise/CVE-2026-70477"
+path = "environments/flowise/CVE-2026-70477"
 
 [[environments]]
 id = "hackmd-mcp/CVE-2025-59155"
@@ -17,6 +29,10 @@ id = "ios-simulator-mcp/CVE-2025-52573"
 path = "environments/ios-simulator-mcp/CVE-2025-52573"
 
 [[environments]]
+id = "mcp-atlassian/GHSA-wm45-qh3g-v83f"
+path = "environments/mcp-atlassian/GHSA-wm45-qh3g-v83f"
+
+[[environments]]
 id = "mcp-filesystem/CVE-2025-53109"
 path = "environments/mcp-filesystem/CVE-2025-53109"
 
@@ -25,12 +41,36 @@ id = "mcp-filesystem/CVE-2025-53110"
 path = "environments/mcp-filesystem/CVE-2025-53110"
 
 [[environments]]
+id = "mcp-gateway/GHSA-g53w-w6mj-hrpp"
+path = "environments/mcp-gateway/GHSA-g53w-w6mj-hrpp"
+
+[[environments]]
 id = "mcp-server-git/CVE-2025-68143"
 path = "environments/mcp-server-git/CVE-2025-68143"
 
 [[environments]]
+id = "mcp-server-kubernetes/CVE-2026-61459"
+path = "environments/mcp-server-kubernetes/CVE-2026-61459"
+
+[[environments]]
+id = "n8n/CVE-2026-86996"
+path = "environments/n8n/CVE-2026-86996"
+
+[[environments]]
 id = "node-code-sandbox-mcp/CVE-2025-53372"
 path = "environments/node-code-sandbox-mcp/CVE-2025-53372"
+
+[[environments]]
+id = "omnigent/CVE-2026-62674"
+path = "environments/omnigent/CVE-2026-62674"
+
+[[environments]]
+id = "open-webui/CVE-2026-87017"
+path = "environments/open-webui/CVE-2026-87017"
+
+[[environments]]
+id = "openharness/CVE-2026-56696"
+path = "environments/openharness/CVE-2026-56696"
 
 [[environments]]
 id = "praisonai/CVE-2026-34955"
