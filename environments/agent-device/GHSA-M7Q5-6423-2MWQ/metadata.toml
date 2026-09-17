@@ -14,17 +14,17 @@ version = "0.20.3"
 source_url = "https://github.com/callstack/agent-device"
 commit = "b4487f57a7e5c7aff2f50b573fa6bf95e32e0a17"
 image = ""
-archive = "vulnerable-source.tar.gz"
+archive = "agent-device-vulnerable-source.tar.gz"
 
 [patched]
 version = "0.20.4"
 source_url = "https://github.com/callstack/agent-device"
 commit = "95b4623461dbdd4b482bdb773a2e61718df8a006"
 image = ""
-archive = "patched-source.tar.gz"
+archive = "agent-device-patched-source.tar.gz"
 
 [build]
-base_image = "node@sha256:6c74791e557ce11fc957704f6d4fe134a7bc8d6f5ca4403205b2966bd488f6b3"
+base_image = "codex-universal@sha256:55e6ae2ade43eb3ca29741f475d833a0f52bffe4208ca199ee717c1f8ef8188b"
 dockerfile = "Dockerfile"
 # Each entry: { name = "...", url = "https://...", sha256 = "..." }
 # Include source archives AND every dependency needed by network-disabled builds.
@@ -33,6 +33,7 @@ inputs = [
   { name = "agent-device-patched-source.tar.gz", url = "https://github.com/callstack/agent-device/archive/95b4623461dbdd4b482bdb773a2e61718df8a006.tar.gz", sha256 = "ec5297b98c90c631b007346a69153f95793b7f817af3498be3ef74a49edda1f4" },
   { name = "agent-device-vulnerable-node-deps.tar.gz", url = "https://raw.githubusercontent.com/glmgbj233/agent-vulhub/main/environments/agent-device/GHSA-M7Q5-6423-2MWQ/inputs/agent-device-vulnerable-node-deps.tar.gz", sha256 = "784fe5381fb899caa356a08cb78afe396da30c191b48a1f9c23ffd972d170cfa" },
   { name = "agent-device-patched-node-deps.tar.gz", url = "https://raw.githubusercontent.com/glmgbj233/agent-vulhub/main/environments/agent-device/GHSA-M7Q5-6423-2MWQ/inputs/agent-device-patched-node-deps.tar.gz", sha256 = "ac1fd0462fbe3b43121c1fcf47af98f8b2d0c74813de277816654f803190bb45" },
+  { name = "node-v22.14.0-linux-x64.tar.xz", url = "https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-x64.tar.xz", sha256 = "69b09dba5c8dcb05c4e4273a4340db1005abeafe3927efda2bc5b249e80437ec" },
 ]
 
 [runtime]
@@ -45,9 +46,9 @@ requires_model = false
 network_requirements = "No network; the synthetic receiver is bound to loopback inside the container"
 
 [verification.mechanism]
-status = "not_run"
-verified_at = ""
-evidence = []
+status = "passed"
+verified_at = "2026-09-17T15:28:30.334975+00:00"
+evidence = ["results/agent-device/GHSA-M7Q5-6423-2MWQ/20260917T152525Z-b13dab693f55/report.json"]
 notes = ""
 
 [verification.end_to_end]

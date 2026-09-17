@@ -1,57 +1,53 @@
 # mcp-atlassian / GHSA-wm45-qh3g-v83f
 
-状态：草稿，未完成环境和复现。这个目录由模板生成，不构成漏洞确认。
+状态：机制复现已完成，并通过四场景三轮容器验收；保持 `draft`，等待固定发布镜像和维护者审阅。
 
 ## 公告与机制
 
-TODO：官方公告、漏洞根因、Agent 信任边界、受影响范围和修复来源。
+公告：GHSA-wm45-qh3g-v83f。远程 MCP attachment upload 接口接收服务器端
+file_path 并直接打开该路径。旧版本没有把路径限制在工作区，远程调用者可
+借助 ../ 读取服务器可读文件并把内容交给 Atlassian attachment API。修复版
+在打开文件前执行工作区边界检查。
+
+PoC 导入完整的 mcp_atlassian.jira.attachments 模块，调用真实
+AttachmentsMixin.upload_attachment。Jira 客户端只是本地 recorder，用于记录
+是否真的收到了打开的文件；它没有替换路径校验或上传方法。
 
 ## 前提
 
-TODO：认证要求、用户交互、已有批准、工具权限、攻击者能控制的内容。
+需要远程 MCP transport、attachment upload 工具和一个有 Jira 项目上传权限的
+会话。测试输入中的 secret.txt 是仓库内 synthetic canary，工作区内的
+allowed.txt 用于正常控制。PoC 不连接 Jira，也不需要模型。
 
 ## 版本与启动
 
-TODO：补全 metadata、Dockerfile/镜像 digest 和 Compose，再写出精确启动命令。
+漏洞版为 mcp-atlassian 0.21.0，修复版为 0.22.0；源码归档、完整 commit 和
+SHA-256 在 metadata.toml 中固定。运行：
 
-Compose 中 `vulnerable` 与 `patched` profiles 分开使用；未指定 profile 不启动服务。镜像变量未配置时 Compose 会明确报错。此模板不暴露宿主端口，也不挂载主机数据。
+    python3 -m runner reproduce mcp-atlassian/GHSA-wm45-qh3g-v83f --build --rounds 3
+
+Compose 只运行当前 profile，使用 runner 管理的结果 volume，不暴露宿主端口。
 
 ## 机制复现
 
-TODO：实现 `reproduce.py`，固定输入并执行真实漏洞路径，注明运行位置、参数和超时。
-
-完成实现后使用 `python3 -m runner reproduce mcp-atlassian/GHSA-wm45-qh3g-v83f --build --rounds 3`。
-两脚本统一接受 `--context <context.json> --output <目录>`，详细字段见仓库 `docs/environment-contract.md`。
-PoC 输出 `facts.json` 和效果文件；验证器只读证据，输出含 `target_ready` 及对应效果断言的 `verdict.json`。
-镜像必须包含 Python 3 和 `/lab/` 下的脚本、fixtures；`runtime.mode` 选择 `oneshot` 或有 healthcheck 的 `service`。
+攻击场景请求 ../fixtures/secret.txt。验证器要求漏洞版成功打开该文件并调用
+Jira recorder；修复版必须在上传前拒绝 traversal，且 recorder 没有调用。benign
+场景要求工作区内文件仍可上传。facts.json 与 jira_effect.json 均由 PoC
+在真实方法返回后记录，verify.py 不重跑产品代码。
 
 ## 端到端复现
 
-TODO：实现 `end_to_end.py`；若不需要模型，明确写出不适用原因。真实模型的结果与机制复现分开统计。
-
-## 验证与修复对照
-
-TODO：实现 `verify.py`。记录漏洞版无害效果、修复版阻断和正常任务成功的证据，不能把服务启动失败当成阻断。
-
-## 清理
-
-默认运行器按每个测试的唯一 Compose project 清理容器、网络和 volume。
-`--keep-on-failure` 保留失败项目，项目标识和 Compose 配置在结果目录中；仅清理该项目，不能使用全局 prune。
+不适用。机制对照已经直接覆盖服务器端文件打开边界；真实 Atlassian 云服务和
+模型调用会增加外部凭据与网络依赖，不能作为本环境的验收前提。
 
 ## 失败诊断
 
-TODO：为本漏洞写出预期效果缺失、修复版仍有越界效果、正常任务失败及前提不满足时的具体排查路径。
-启动失败、健康检查失败和超时都不能当作修复阻断。报告中应能定位到阶段、预期、实际和受控证据。
+若漏洞版没有 secret.txt 的 opened path，检查工作目录和归档中的 attachment
+模块；若修复版仍有 opened path 或 upload call，说明修复边界失败。Jira recorder
+初始化失败、导入失败、服务启动失败和超时都不是修复阻断证据。
 
-## 构建与输入
+## 输入与隔离
 
-TODO：填写两版源码 archive、完整 commit，记录 `build.inputs` 中每个下载的 SHA-256；依赖安装必须支持禁网构建。
-固定攻击和正常输入放入 `fixtures/` 并登记到 `fixtures/manifest.toml`。固定 seed、环境变量，说明无害效果与真实影响的关系。
-
-## 隔离例外
-
-默认无例外。确需例外时同时填写 `runtime.exceptions`、理由及最小范围，晋升由两位维护者审阅。
-
-## 来源与许可
-
-TODO：列出引用代码、fixtures 和镜像的来源及许可。
+所有文件都是 synthetic 内容。atlassian.Jira 仅作为未安装的外部 SDK 协作者
+协议，真实 attachment mixin 和路径校验来自固定上游源码。Compose 无网络出口、
+主机挂载、特权和隔离例外；引用代码与许可证来源见 metadata 的上游仓库。

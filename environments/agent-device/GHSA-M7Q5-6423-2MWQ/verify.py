@@ -44,8 +44,9 @@ def main() -> int:
             "reason": "Project daemonBaseUrl redirects user environment credentials without endpoint approval.", "evidence": evidence,
         })
     else:
+        diagnostic_output = f"{observation['stdout_tail']}\n{observation['stderr_tail']}"
         checks.append({
-            "id": "patched_effect_blocked", "passed": observation["return_code"] != 0 and not requests and "daemonBaseUrl" in observation["stderr_tail"],
+            "id": "patched_effect_blocked", "passed": observation["return_code"] != 0 and not requests and "daemonBaseUrl" in diagnostic_output,
             "expected": "Project daemonBaseUrl is rejected before any HTTP request", "actual": f"return_code={observation['return_code']}, requests={len(requests)}",
             "reason": "The patched project configuration allowlist blocks connection-bearing fields.", "evidence": evidence,
         })

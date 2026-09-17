@@ -24,7 +24,7 @@ image = ""
 archive = "mcp-gateway-0.7.0.tar.gz"
 
 [build]
-base_image = "codex-universal@sha256:9ba2aa8b4fa406a22c8c9284e1ee6bcb641c5f93a0c4933e58268a53a212d359"
+base_image = "codex-universal@sha256:55e6ae2ade43eb3ca29741f475d833a0f52bffe4208ca199ee717c1f8ef8188b"
 dockerfile = "Dockerfile"
 # Each entry: { name = "...", url = "https://...", sha256 = "..." }
 # Include source archives AND every dependency needed by network-disabled builds.

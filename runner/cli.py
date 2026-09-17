@@ -205,8 +205,14 @@ def main(argv: list[str] | None = None) -> int:
                 if not args.environment:
                     template = ROOT / "templates/environment"
                     placeholders = {v: "placeholder@sha256:" + "0" * 64 for v in ("vulnerable", "patched")}
+                    template_metadata = tomllib.loads(
+                        (template / "metadata.toml").read_text(encoding="utf-8")
+                        .replace("{{PRODUCT}}", "template")
+                        .replace("{{CVE_KEY}}", "cve")
+                        .replace("{{CVE}}", "CVE-0000-0000")
+                    )
                     inspect_config(Commands(Path(temp)), template, placeholders, "avh-template-lint",
-                                   read_toml(template / "metadata.toml"), False)
+                                   template_metadata, False)
                     print("Static Compose check: template")
                 for entry in entries:
                     if args.environment and entry["id"] != args.environment:

@@ -2,3 +2,6 @@ schema_version = 1
 
 # Keys are paths relative to fixtures/. Include attack AND benign inputs.
 [files]
+"attack.json" = "48de387008a941bb38c94be6f25129c2c0346aa13c7527d7f8baed886828ac77"
+"benign.json" = "f7d7ccc2210a9d26fd3944d564f895ed897afa95c662e6455561d57e92919f7a"
+"secret.txt" = "3aa988a45634f4d1687b8cd7871f0175192a591d4830ecfd13701a7223fa6f95"

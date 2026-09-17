@@ -119,6 +119,8 @@ def check_fixtures(directory):
     for path in (directory / "fixtures").rglob("*"):
         if path.is_symlink():
             raise ValueError("Fixture symlinks are forbidden")
+        if "__pycache__" in path.parts or path.suffix == ".pyc":
+            continue
         if path.is_file() and path.name not in {"manifest.toml", "README.md"}:
             actual.add(path.relative_to(directory / "fixtures").as_posix())
     if set(entries) != actual:

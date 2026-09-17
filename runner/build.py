@@ -102,7 +102,8 @@ def build_images(root, directory, metadata, commands, offline=False):
         context = Path(temporary)
         for source in directory.rglob("*"):
             relative = source.relative_to(directory)
-            if relative.parts[0] in {"evidence", "results", "__pycache__", ".cache", ".git"}:
+            if (relative.parts[0] in {"evidence", "results", "__pycache__", ".cache", ".git"}
+                    or "__pycache__" in relative.parts or source.suffix == ".pyc"):
                 continue
             if relative.parts[0] == ".env" or (relative.parts[0].startswith(".env.") and relative.parts[0] != ".env.example"):
                 continue
@@ -113,6 +114,7 @@ def build_images(root, directory, metadata, commands, offline=False):
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, target)
         (context / "inputs").mkdir(exist_ok=True)
+        shutil.copyfile(root / "runner" / "lab_support.py", context / "lab_support.py")
         for name, source in inputs.items():
             shutil.copyfile(source, context / "inputs" / name)
         for variant in ("vulnerable", "patched"):

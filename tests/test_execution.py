@@ -123,6 +123,8 @@ class ExecutionTests(unittest.TestCase):
             check_fixtures(self.directory)
         sha = digest(self.directory / "fixtures/attack.txt")
         (self.directory / "fixtures/manifest.toml").write_text(f'[files]\n"attack.txt" = "{sha}"\n')
+        (self.directory / "fixtures/__pycache__").mkdir()
+        (self.directory / "fixtures/__pycache__/attack.cpython-312.pyc").write_bytes(b"generated")
         check_fixtures(self.directory)
 
     def test_offline_source_cache_requires_matching_hash(self):

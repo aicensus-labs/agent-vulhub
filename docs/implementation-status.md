@@ -1,5 +1,14 @@
 # 首版实现与验证记录
 
+## 当前状态（2026-09-17）
+
+- 索引包含 39 个环境，全部保持 `draft`；31 个已在 Linux amd64 上完成四场景三轮机制验收并通过，8 个因前置条件不足或真实入口缺失保持 `not_run`。
+- `python3 -m runner check`、`python3 -m runner lint` 和 `git diff --check` 通过；`python3 -m unittest discover -s tests -v` 共 32 项通过。
+- 31 个通过环境的 metadata evidence 均指向对应的三轮 `report.json`；没有环境被标为 `ready`，也没有上传 GHCR 镜像。
+- 真实模型端到端测试仍按环境逐项标记为 `not_applicable`；机制验收不证明模型会选择工具或完成完整工作流。
+
+以下内容是 2026-09-10 的首版历史记录，保留当时的 6 个环境和 30 项测试统计。
+
 日期：2026-09-10。用户已确认设计并授权实现。本记录描述共享工具和 6 个机制环境；环境仍需维护者审阅后才能晋升 `ready`。
 
 ## 已实现

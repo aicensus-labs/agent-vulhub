@@ -10,4 +10,5 @@ WORKDIR /lab
 COPY inputs/ /inputs/
 COPY reproduce.py verify.py end_to_end.py /lab/
 COPY fixtures/ /lab/fixtures/
+COPY lab_support.py /lab/
 RUN echo 'Environment recipe is not implemented' >&2; exit 2

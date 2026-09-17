@@ -24,13 +24,14 @@ image = ""
 archive = "mcp-atlassian-0.22.0.tar.gz"
 
 [build]
-base_image = "codex-universal@sha256:9ba2aa8b4fa406a22c8c9284e1ee6bcb641c5f93a0c4933e58268a53a212d359"
+base_image = "codex-universal@sha256:55e6ae2ade43eb3ca29741f475d833a0f52bffe4208ca199ee717c1f8ef8188b"
 dockerfile = "Dockerfile"
 # Each entry: { name = "...", url = "https://...", sha256 = "..." }
 # Include source archives AND every dependency needed by network-disabled builds.
 inputs = [
   { name = "mcp-atlassian-0.21.0.tar.gz", url = "https://github.com/sooperset/mcp-atlassian/archive/c450a161ec630dd57f44a2b15d977debae19eba5.tar.gz", sha256 = "fbe59d73f23e688bfa83d2a83917d65fc7cb7c813dadef1fdbeed64f855234f2" },
   { name = "mcp-atlassian-0.22.0.tar.gz", url = "https://github.com/sooperset/mcp-atlassian/archive/b041733473f95119dd539542a43c280737a8e460.tar.gz", sha256 = "4740af64608f975a38fd422f85f35d0507212bfe012935b4a9dd2f735061c887" },
+  { name = "python-runtime-deps.tar.gz", url = "https://raw.githubusercontent.com/hejunjie/agent-vulhub/main/environments/mcp-atlassian/GHSA-wm45-qh3g-v83f/inputs/python-runtime-deps.tar.gz", sha256 = "354c218bc0268db421987c19b21edd05908482a1a7d7126ea2367cb11ba7e0b5" },
 ]
 
 [runtime]
@@ -43,9 +44,9 @@ requires_model = false
 network_requirements = "No network is used by this draft; source archives are fetched by the runner before container execution"
 
 [verification.mechanism]
-status = "not_run"
-verified_at = ""
-evidence = []
+status = "passed"
+verified_at = "2026-09-17T15:32:18.405870+00:00"
+evidence = ["results/mcp-atlassian/GHSA-wm45-qh3g-v83f/20260917T153135Z-270c2be15fa4/report.json"]
 notes = ""
 
 [verification.end_to_end]

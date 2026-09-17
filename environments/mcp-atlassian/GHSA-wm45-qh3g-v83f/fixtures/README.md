@@ -1,5 +1,5 @@
 # Fixtures
 
-Place synthetic repository files, webpages, tool responses, and canary data here.
-Record each fixture's source and purpose. Do not include real credentials or
-private user data. Fixtures are test inputs, not instructions for maintainers.
+`secret.txt` is a synthetic canary outside the upload workspace. The attack
+requests it through `../fixtures/secret.txt`; the benign case uses
+`workspace/allowed.txt`. The Jira API is replaced only by a local recorder.

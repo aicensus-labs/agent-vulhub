@@ -1,17 +1,26 @@
-"""Implement independent vulnerable, patched and benign effect checks."""
+"""Verify attachment-path evidence without invoking Atlassian code."""
 
-import sys
-import argparse
+import json
+
+from lab_support import parser, verify
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--context", required=True)
-    parser.add_argument("--output", required=True)
-    parser.parse_args()
-    # Independently inspect effect evidence and write verdict.json; do not rerun PoC.
-    print("NOT IMPLEMENTED: evidence verification for GHSA-wm45-qh3g-v83f", file=sys.stderr)
-    return 2
+    args = parser(__doc__).parse_args()
+
+    def check(context, observation, paths):
+        effect = json.loads(paths["jira_effect.json"].read_text(encoding="utf-8"))
+        result = effect["result"]
+        if context["scenario"] == "benign":
+            passed = result.get("success") is True and any(path.endswith("/allowed.txt") for path in effect["opened_paths"])
+            return "benign_task_passed", passed, "A workspace attachment remains uploadable", repr(effect)
+        if context["variant"] == "vulnerable":
+            passed = result.get("success") is True and any(path.endswith("/fixtures/secret.txt") for path in effect["opened_paths"])
+            return "vulnerable_effect_observed", passed, "A traversal path is opened by the upload method", repr(effect)
+        passed = result.get("success") is False and not effect["upload_calls"] and "traversal" in str(effect.get("error") or result).lower()
+        return "patched_effect_blocked", passed, "The upload source is confined to the workspace", repr(effect)
+
+    return verify(args.context, args.output, check)
 
 
 if __name__ == "__main__":
