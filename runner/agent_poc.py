@@ -4,8 +4,10 @@ from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import Path, PurePosixPath
+import shutil
 import stat
 import tarfile
+import tempfile
 import tomllib
 
 from .build import fetch_inputs
@@ -34,6 +36,18 @@ class CandidateSpec:
     max_output_bytes: int
     artifact_sha256: str
     manifest_sha256: str
+    snapshot_root: Path | None = None
+
+    def cleanup(self):
+        if self.snapshot_root is None or not self.snapshot_root.exists():
+            return
+        for path in sorted(self.snapshot_root.rglob("*"), reverse=True):
+            if path.is_dir() and not path.is_symlink():
+                path.chmod(0o755)
+            elif path.exists() and not path.is_symlink():
+                path.chmod(0o644)
+        self.snapshot_root.chmod(0o755)
+        shutil.rmtree(self.snapshot_root)
 
 
 def _relative_path(value: str, label: str) -> Path:
@@ -108,6 +122,21 @@ def _extract_source(archive: Path, destination: Path) -> None:
             target.chmod(stat.S_IMODE(member.mode) or 0o644)
 
 
+def _trusted_source_digest(root: Path, directory: Path, metadata: dict) -> str:
+    try:
+        inputs = fetch_inputs(root, directory, metadata, offline=True)
+    except Exception as error:
+        raise AgentPocError(f"Trusted vulnerable archive is unavailable: {error}") from error
+    archive_name = metadata["vulnerable"].get("archive", "")
+    archive = inputs.get(archive_name)
+    if archive is None:
+        raise AgentPocError(f"Trusted vulnerable archive is missing: {archive_name}")
+    with tempfile.TemporaryDirectory(prefix="avh-source-verify-") as temporary:
+        source = Path(temporary) / "source"
+        _extract_source(archive, source)
+        return _tree_digest(source)
+
+
 def _write_candidate_example(path: Path) -> None:
     path.write_text(
         """schema_version = 1
@@ -170,7 +199,7 @@ The patched source, verifier, reference PoC and expected effects are hidden from
     return output
 
 
-def validate_task(task_directory: Path, environment_id: str, metadata: dict) -> dict:
+def validate_task(root: Path, directory: Path, task_directory: Path, environment_id: str, metadata: dict) -> dict:
     task_directory = Path(task_directory)
     if task_directory.is_symlink():
         raise AgentPocError("Task directory cannot be a symlink")
@@ -187,6 +216,8 @@ def validate_task(task_directory: Path, environment_id: str, metadata: dict) -> 
         raise AgentPocError("Task source revision differs from metadata")
     if task.get("source_sha256") != _tree_digest(source):
         raise AgentPocError("Task source hash mismatch")
+    if task.get("source_sha256") != _trusted_source_digest(root, directory, metadata):
+        raise AgentPocError("Task source does not match the trusted vulnerable archive")
     if task.get("visible_files") != _task_visible_inventory(task_directory):
         raise AgentPocError("Task visible file inventory mismatch")
     if task.get("task_sha256") != _task_binding(task):
@@ -194,13 +225,7 @@ def validate_task(task_directory: Path, environment_id: str, metadata: dict) -> 
     return task
 
 
-def validate_candidate(directory: Path) -> CandidateSpec:
-    directory = Path(directory)
-    if directory.is_symlink():
-        raise AgentPocError("Candidate must be a directory")
-    directory = directory.resolve()
-    if not directory.is_dir():
-        raise AgentPocError("Candidate must be a directory")
+def _candidate_details(directory: Path) -> tuple[tuple[str, ...], int, int]:
     total = 0
     for path in directory.rglob("*"):
         relative = path.relative_to(directory)
@@ -239,8 +264,39 @@ def validate_candidate(directory: Path) -> CandidateSpec:
         raise AgentPocError("Candidate timeout must be between 1 and 300 seconds")
     if not isinstance(output_limit, int) or not 0 < output_limit <= MAX_CANDIDATE_BYTES:
         raise AgentPocError("Candidate output limit must be between 1 and 8 MiB")
-    return CandidateSpec(directory, tuple(command), timeout, output_limit,
-                         _tree_digest(directory), digest(manifest_path))
+    return tuple(command), timeout, output_limit
+
+
+def validate_candidate(directory: Path) -> CandidateSpec:
+    directory = Path(directory)
+    if directory.is_symlink():
+        raise AgentPocError("Candidate must be a directory")
+    directory = directory.resolve()
+    if not directory.is_dir():
+        raise AgentPocError("Candidate must be a directory")
+    command, timeout, output_limit = _candidate_details(directory)
+    artifact_sha256 = _tree_digest(directory)
+    snapshot_root = Path(tempfile.mkdtemp(prefix="avh-agent-candidate-"))
+    snapshot = snapshot_root / "candidate"
+    try:
+        shutil.copytree(directory, snapshot, symlinks=True)
+        snapshot_command, snapshot_timeout, snapshot_output_limit = _candidate_details(snapshot)
+        snapshot_sha256 = _tree_digest(snapshot)
+        if snapshot_sha256 != artifact_sha256:
+            raise AgentPocError("Candidate changed while creating its snapshot")
+        if (snapshot_command, snapshot_timeout, snapshot_output_limit) != (command, timeout, output_limit):
+            raise AgentPocError("Candidate manifest changed while creating its snapshot")
+        for path in snapshot.rglob("*"):
+            if path.is_dir():
+                path.chmod(0o555)
+            else:
+                path.chmod(0o444)
+        snapshot.chmod(0o555)
+        return CandidateSpec(snapshot, snapshot_command, snapshot_timeout, snapshot_output_limit,
+                             snapshot_sha256, digest(snapshot / "manifest.toml"), snapshot_root)
+    except Exception:
+        shutil.rmtree(snapshot_root, ignore_errors=True)
+        raise
 
 
 def load_agent_metadata(path: Path | None) -> dict:

@@ -49,13 +49,13 @@ check 纯文件静态校验，不调用 Docker；lint 使用 Compose CLI 的 JSO
 
 patched 源码、patched 镜像、patch diff、reference PoC、`verify.py`、预期 verdict、隐藏 fixture 和内部 canary 逻辑必须留在评测器一侧。Level 0/2/3 的可见材料遵循 ADR-0019 的难度定义；任务包必须记录可见文件清单和哈希，防止生成过程中的隐式泄漏。
 
-源码归档可以按 commit 和 SHA-256 在多个环境之间复用，但漏洞描述、修复对照、fixture 和任务身份不可混淆。patched 源码或不可变 patched 镜像是候选评测的必需隐藏输入；Level 1 不得发给 Agent。
+源码归档可以按 commit 和 SHA-256 在多个环境之间复用，但漏洞描述、修复对照、fixture 和任务身份不可混淆。任务校验必须把任务中的 vulnerable 源码树与评测器一侧按 metadata 哈希校验过的 vulnerable 归档对照，不能只相信任务目录自行重算的 manifest。patched 源码或不可变 patched 镜像是候选评测的必需隐藏输入；Level 1 不得发给 Agent。
 
 ### 候选接口与四场景
 
-候选目录必须包含版本化 manifest 和声明的入口。runner 拒绝绝对路径、`..`、符号链接、越界文件和超出大小/时间限制的候选；候选目录被复制到目标容器的 `/candidate`，任务包和宿主文件不会挂载给候选。产品源码、fixtures 和评测器路径对候选用户不可写；候选的约定输出接口是本轮受控结果目录，临时目录中的内容不属于证据。Level 1 的隐藏边界针对任务包和提交前 Agent；候选进程运行在选定的产品镜像内，可能读取该镜像的产品运行时内容，因此候选执行不是对抗性代码的保密沙箱。候选通过 `/lab/results/agent-context.json` 或 `AVH_AGENT_CONTEXT` 获取公开上下文，其中不含 `variant`；私有 `context.json` 只在候选完成后由 runner 注入验证阶段。runner 不向候选公开评测器路径。
+候选目录必须包含版本化 manifest 和声明的入口。runner 拒绝绝对路径、`..`、符号链接、越界文件和超出大小/时间限制的候选，并在四场景开始前冻结一份只读快照；每个场景把同一快照复制到一次性的 sibling candidate container 的 `/candidate`。候选容器只共享目标容器的网络命名空间和受控 `/lab/results` volume，任务包和宿主文件不会挂载给候选。产品源码、fixtures 和评测器路径对候选用户不可写；候选的约定输出接口是本轮受控结果目录，临时目录中的内容不属于证据。Level 1 的隐藏边界针对任务包和提交前 Agent；候选进程运行在选定的产品镜像内，可能读取该镜像的产品运行时内容，因此候选执行不是对抗性代码的保密沙箱。候选通过 `/lab/results/agent-context.json` 或 `AVH_AGENT_CONTEXT` 获取公开上下文，其中不含 `variant`；私有 `context.json` 只在候选完成后由 runner 注入验证阶段。runner 不向候选公开评测器路径。
 
-候选执行前 runner 会移除镜像中的 `/inputs` 和 `/lab` 顶层评测脚本，并把产品树设为候选用户不可写；候选结束后从宿主环境重新注入 `verify.py` 及其 `lab_support.py` 依赖。该处理避免常规镜像布局意外泄漏修复归档或验证脚本，但候选执行仍是同一受限容器内的不可信代码执行，不是对恶意候选的密码学隔离边界；不能把 Agent-PoC runner 当作安全沙箱。
+候选执行前 runner 会移除候选镜像中的 `/inputs` 和 `/lab` 顶层评测脚本，并把评测目录设为候选用户不可写；候选结束后强制删除候选容器及其派生进程，再收集结果。验证器使用同一不可变产品镜像启动独立的 `--network none --rm` 容器，只通过受控结果 volume 读写证据，不从候选容器或宿主可写路径加载脚本。该处理避免常规镜像布局意外泄漏修复归档或验证脚本，但候选执行仍不是对恶意候选的密码学保密沙箱；不能把 Agent-PoC runner 当作安全沙箱。
 
 同一个候选 artifact 和同一组公开输入分别执行：漏洞版攻击、修复版攻击、漏洞版正常任务、修复版正常任务。每个测试创建唯一 Compose project、容器、网络和 volume。候选退出码只表示执行完成，不构成漏洞判定。
 

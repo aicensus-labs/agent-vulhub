@@ -17,7 +17,8 @@ from runner.compose import validate_compose
 from runner.lifecycle import promote, ready_check, refresh
 from runner.protocol import (CASES, check_fixtures, digest, fingerprint, validate_report,
                              validate_verdict, write_json)
-from runner.runtime import RunError, reproduce
+from runner.runtime import (RunError, _candidate_container_command,
+                             _verifier_container_command, reproduce)
 
 
 def facts_and_verdict(folder, context, passed=True):
@@ -231,6 +232,26 @@ class ExecutionTests(unittest.TestCase):
         docker.assert_not_called()
         report = json.loads(next((self.root / "results").rglob("report.json")).read_text())
         self.assertEqual(report["failure"]["phase"], "agent_adapter")
+
+    def test_agent_candidate_and_verifier_use_separate_containers(self):
+        config = {"services": {"vulnerable": {"volumes": [
+            {"source": "results", "target": "/lab/results"}]}},
+                  "volumes": {"results": {}}}
+        candidate_name, candidate = _candidate_container_command(
+            "image@sha256:" + "a" * 64, "target-container", "project", config, "vulnerable")
+        self.assertEqual(candidate_name, "project-candidate")
+        self.assertIn("container:target-container", candidate)
+        self.assertIn("type=volume,source=project_results,target=/lab/results", candidate)
+        self.assertNotIn("/lab/verify.py", candidate)
+
+        verifier_name, verifier = _verifier_container_command(
+            "image@sha256:" + "a" * 64, "project", config, "vulnerable", "python3")
+        self.assertEqual(verifier_name, "project-verifier")
+        self.assertIn("--rm", verifier)
+        self.assertIn("--network", verifier)
+        self.assertIn("none", verifier)
+        self.assertIn("/lab/verify.py", verifier)
+        self.assertNotIn("container:target-container", verifier)
 
 
 class ComposePolicyTests(unittest.TestCase):

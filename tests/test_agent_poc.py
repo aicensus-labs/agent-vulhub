@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 import shutil
+import stat
 import tarfile
 import tempfile
 import unittest
@@ -54,7 +55,7 @@ class AgentPocTests(unittest.TestCase):
 
     def test_level_one_task_contains_source_and_description_but_no_hidden_material(self):
         task_dir = create_task(self.root, self.directory, self.metadata, 1, self.root / "task", offline=True)
-        task = validate_task(task_dir, self.metadata["id"], self.metadata)
+        task = validate_task(self.root, self.directory, task_dir, self.metadata["id"], self.metadata)
         self.assertEqual(task["difficulty"], 1)
         self.assertIn("vulnerable source", (task_dir / "source/README.md").read_text())
         self.assertIn("synthetic description", (task_dir / "description.md").read_text())
@@ -68,13 +69,37 @@ class AgentPocTests(unittest.TestCase):
         task_dir = create_task(self.root, self.directory, self.metadata, 1, self.root / "task", offline=True)
         (task_dir / "source/src/target.py").write_text("tampered\n")
         with self.assertRaisesRegex(AgentPocError, "source hash"):
-            validate_task(task_dir, self.metadata["id"], self.metadata)
+            validate_task(self.root, self.directory, task_dir, self.metadata["id"], self.metadata)
 
     def test_task_visible_material_tampering_is_rejected(self):
         task_dir = create_task(self.root, self.directory, self.metadata, 1, self.root / "task", offline=True)
         (task_dir / "description.md").write_text("tampered\n")
         with self.assertRaisesRegex(AgentPocError, "visible file inventory"):
-            validate_task(task_dir, self.metadata["id"], self.metadata)
+            validate_task(self.root, self.directory, task_dir, self.metadata["id"], self.metadata)
+
+    def test_task_source_must_match_the_trusted_vulnerable_archive(self):
+        task_dir = create_task(self.root, self.directory, self.metadata, 1, self.root / "task", offline=True)
+        source = task_dir / "source/src/target.py"
+        source.write_text("replacement source\n")
+        task = json.loads((task_dir / "task.json").read_text())
+        entries = []
+        for path in sorted(task_dir.rglob("*")):
+            if path.is_file() and path.relative_to(task_dir).as_posix() != "task.json":
+                entries.append({"path": path.relative_to(task_dir).as_posix(),
+                                "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+        source_entries = [{**entry, "path": entry["path"][len("source/"):]} for entry in entries
+                          if entry["path"].startswith("source/")]
+        task["source_sha256"] = hashlib.sha256(
+            b"".join(entry["path"].encode() + b"\0" + entry["sha256"].encode() + b"\n"
+                      for entry in source_entries)).hexdigest()
+        task["visible_files"] = entries
+        binding = {key: task[key] for key in (
+            "environment_id", "difficulty", "source_commit", "source_sha256", "visible_files")}
+        task["task_sha256"] = hashlib.sha256(json.dumps(binding, sort_keys=True).encode()).hexdigest()
+        (task_dir / "task.json").write_text(json.dumps(task) + "\n")
+
+        with self.assertRaisesRegex(AgentPocError, "trusted vulnerable archive"):
+            validate_task(self.root, self.directory, task_dir, self.metadata["id"], self.metadata)
 
     def test_task_binding_changes_when_visible_description_changes(self):
         first = create_task(self.root, self.directory, self.metadata, 1, self.root / "task-one", offline=True)
@@ -105,6 +130,24 @@ class AgentPocTests(unittest.TestCase):
 
         facts = json.loads((output / "candidate-evidence/facts.json").read_text())
         self.assertEqual([entry["path"] for entry in facts["evidence"]], ["subdir/effect.txt"])
+
+    def test_candidate_is_copied_to_a_read_only_snapshot(self):
+        candidate = self.root / "candidate"
+        candidate.mkdir()
+        (candidate / "poc.py").write_text("print('original')\n")
+        (candidate / "manifest.toml").write_text(
+            "schema_version = 1\nformat = \"command\"\nentrypoint = \"poc.py\"\n"
+            "command = [\"python3\", \"/candidate/poc.py\"]\n"
+            "timeout_seconds = 10\nmax_output_bytes = 1024\n"
+        )
+
+        spec = validate_candidate(candidate)
+        self.addCleanup(spec.cleanup)
+        (candidate / "poc.py").write_text("print('changed after validation')\n")
+
+        self.assertNotEqual(spec.directory, candidate.resolve())
+        self.assertEqual((spec.directory / "poc.py").read_text(), "print('original')\n")
+        self.assertFalse((spec.directory / "poc.py").stat().st_mode & stat.S_IWUSR)
 
     def test_candidate_manifest_and_entrypoint_are_validated(self):
         candidate = self.root / "candidate"

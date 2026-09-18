@@ -139,6 +139,47 @@ def inspect_config(commands, directory, images, project, metadata, allow_excepti
     return config
 
 
+def _results_volume_name(config, project, variant):
+    mounts = [mount for mount in config["services"][variant].get("volumes", [])
+              if mount.get("target") == "/lab/results"]
+    if len(mounts) != 1:
+        raise ValueError(f"{variant} service must have exactly one results volume")
+    source = mounts[0]["source"]
+    definition = config.get("volumes", {}).get(source) or {}
+    return definition.get("name", f"{project}_{source}")
+
+
+def _candidate_container_command(image, target, project, config, variant):
+    name = project + "-candidate"
+    volume = _results_volume_name(config, project, variant)
+    return name, ["docker", "run", "-d", "--name", name,
+                  "--network", "container:" + target,
+                  "--mount", f"type=volume,source={volume},target=/lab/results",
+                  "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true",
+                  "--pids-limit", "64", "--user", "0:0", "--entrypoint", "tail", image,
+                  "-f", "/dev/null"]
+
+
+def _verifier_container_command(image, project, config, variant, interpreter):
+    name = project + "-verifier"
+    volume = _results_volume_name(config, project, variant)
+    return name, ["docker", "run", "--rm", "--name", name, "--network", "none",
+                  "--mount", f"type=volume,source={volume},target=/lab/results",
+                  "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true",
+                  "--user", "0:0", "--entrypoint", interpreter, image, "/lab/verify.py",
+                  "--context", "/lab/results/context.json", "--output", "/lab/results"]
+
+
+def _remove_container(child, name, phase):
+    status, _ = child.run(["docker", "rm", "-f", name], phase, accepted=(0, 1), timeout=30)
+    if status:
+        inspect_status, _ = child.run(["docker", "inspect", name], phase + "_inspect",
+                                      accepted=(0, 1), timeout=30)
+        if inspect_status == 0:
+            raise RunError(phase, f"Container still exists after forced removal: {name}", 3,
+                           "cleanup_failed", "candidate and verifier containers are removed")
+
+
 def _collect_candidate_facts(child, container, output, context):
     """Replace candidate-authored facts with a runner-owned evidence inventory."""
     collected = output / "candidate-evidence"
@@ -194,6 +235,8 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
     env = compose_env(images)
     created = False
     base = None
+    candidate_container = None
+    verifier_container = None
     try:
         config = inspect_config(child, directory, images, project, metadata, args.allow_exceptions)
         target = config["services"][variant]
@@ -241,11 +284,14 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
             timeout = None
             output_limit = 8 * 1024 * 1024
         else:
-            _prepare_candidate_container(child, container)
-            child.run(["docker", "cp", str(candidate.directory) + "/.", container + ":/candidate"],
+            candidate_container, candidate_command = _candidate_container_command(
+                images[variant], container, project, config, variant)
+            child.run(candidate_command, "candidate_setup", env=env)
+            _prepare_candidate_container(child, candidate_container)
+            child.run(["docker", "cp", str(candidate.directory) + "/.", candidate_container + ":/candidate"],
                       "candidate_setup")
             child.run(["docker", "cp", str(output / "agent-context.json"),
-                       container + ":/lab/results/agent-context.json"], "candidate_setup")
+                       candidate_container + ":/lab/results/agent-context.json"], "candidate_setup")
             command = list(candidate.command)
             phase = "candidate"
             timeout = candidate.timeout_seconds
@@ -254,28 +300,27 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
         if candidate is not None:
             exec_args.extend(["-e", "AVH_AGENT_CONTEXT=/lab/results/agent-context.json",
                               "--user", "65532:65532"])
-        exec_args.extend([container, *command])
+        exec_args.extend([candidate_container if candidate is not None else container, *command])
         status, _ = child.run(exec_args, phase,
                               accepted=(0, 1, 2), timeout=timeout, output_limit=output_limit)
         if status:
             raise RunError(phase, f"PoC exited {status}; no verification claim", 1 if status == 1 else 2,
                            "execution_failed" if status == 1 else "not_run")
         if candidate is not None:
+            _remove_container(child, candidate_container, "candidate_cleanup")
+            candidate_container = None
             _collect_candidate_facts(child, container, output, context)
-            child.run(["docker", "exec", container, "sh", "-c",
-                       "chmod a+wx /lab; chmod -R a+rwX /lab/results"], "verifier_setup")
             child.run(["docker", "cp", str(output / "context.json"), container + ":/lab/results/context.json"],
                       "verifier_setup")
-            child.run(["docker", "cp", str(directory / "verify.py"), container + ":/lab/verify.py"],
-                      "verifier_setup")
-            helper = directory / "lab_support.py"
-            if helper.exists():
-                child.run(["docker", "cp", str(helper), container + ":/lab/lab_support.py"],
-                          "verifier_setup")
-        # Separate invocation: verify only reads evidence and writes its verdict.
-        status, _ = child.run(["docker", "exec", container, interpreter, "/lab/verify.py",
-                               "--context", "/lab/results/context.json", "--output", "/lab/results"],
-                              "verify", accepted=(0, 1, 2))
+            verifier_container, verifier_command = _verifier_container_command(
+                images[variant], project, config, variant, interpreter)
+            status, _ = child.run(verifier_command, "verify", accepted=(0, 1, 2))
+            verifier_container = None
+        else:
+            # Separate invocation: verify only reads evidence and writes its verdict.
+            status, _ = child.run(["docker", "exec", container, interpreter, "/lab/verify.py",
+                                   "--context", "/lab/results/context.json", "--output", "/lab/results"],
+                                  "verify", accepted=(0, 1, 2))
         if status == 2:
             raise RunError("verify", "Verifier could not establish a verdict; see verify logs", 2, "not_run",
                            "verifier determines the outcome from collected evidence")
@@ -300,6 +345,17 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
             "actual": str(error)})
     finally:
         child.deadline = None
+        for orphan in (candidate_container, verifier_container):
+            if orphan:
+                try:
+                    _remove_container(child, orphan, "candidate_cleanup")
+                except RunError as error:
+                    result.setdefault("collection_errors", []).append(str(error))
+                    result.setdefault("failure", {"phase": "candidate_cleanup", "status": "cleanup_failed",
+                                                   "expected": "remove candidate and verifier containers",
+                                                   "actual": str(error)})
+                    result["exit_code"] = 3
+                    result["outcome"] = "infrastructure_error"
         if created and base:
             try:
                 child.run(base + ["logs", "--no-color"], "collect", env=env, timeout=30)
@@ -428,7 +484,10 @@ def agent_evaluate(root, directory, metadata, args):
 
     task_directory = Path(args.task_dir)
     candidate = validate_candidate(Path(args.candidate))
-    task = validate_task(task_directory, metadata["id"], metadata)
-    agent_metadata = load_agent_metadata(Path(args.agent_meta) if args.agent_meta else None)
-    return reproduce(root, directory, metadata, args, candidate=candidate, layer="agent_poc", task=task,
-                     agent_metadata=agent_metadata)
+    try:
+        task = validate_task(root, directory, task_directory, metadata["id"], metadata)
+        agent_metadata = load_agent_metadata(Path(args.agent_meta) if args.agent_meta else None)
+        return reproduce(root, directory, metadata, args, candidate=candidate, layer="agent_poc", task=task,
+                         agent_metadata=agent_metadata)
+    finally:
+        candidate.cleanup()
