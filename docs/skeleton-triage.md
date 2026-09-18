@@ -28,23 +28,29 @@
 | praisonai/CVE-2026-56833 | Dynamic Context history/terminal 工具 | 高 | 低 | 不需要 | 可直接实施 | 修复版调整为 4.6.59 |
 | praisonai/CVE-2026-57117 | `LocalManagedAgent`/`SandboxedAgent` + compute provider | 待确认 | 待确认 | 待确认 | 待复核 | 须先确认 compute provider 能否容器内本地运行 |
 | praisonai/CVE-2026-57120 | `execute_code` 工具 | 高 | 低 | 不需要 | 可直接实施 | 目前是读取原语、非完整 RCE，结论须如实写 |
-| praisonai/CVE-2026-57125 | `POST /api/v1/runs` + `approve` 绕过 | 高（本地机制） | 中 | 可选（完整 RCE 链需固定模型输出） | 可直接实施（机制层） | 已补齐；真实 YAML parser 与 approval decorator，审批绕过是确定性的 |
+| praisonai/CVE-2026-57125 | `POST /api/v1/runs` + `approve` 绕过 | 高（本地机制） | 中 | 需要（导入协作者桩；完整 RCE 链另需固定模型输出） | 可直接实施（机制层） | 已补齐；真实 YAML parser 与 approval decorator，`workflows`/`agent`/`task` 仅提供导入协议桩，审批绕过是确定性的 |
 | praisonai/CVE-2026-57129 | `MentionsParser` 的 `@file:` | 高 | 低 | 不需要 | 可直接实施 | |
 | praisonai/CVE-2026-61428 | AgentMail webhook `POST` | 高（本地服务） | 低-中 | 不需要 | 可直接实施 | 用固定伪造事件，不连真实 AgentMail |
 | praisonai/CVE-2026-61439 | 注入防御阈值判定 | 高 | 低 | 可选（证明传入模型需固定模型输出） | 可直接实施（阈值机制） | 只证明 HIGH 未被阻断 |
 | praisonai/CVE-2026-61445 | AICoder 工具调用 | 当前修复归档不可导入 | 低-中 | 不需要 | 阻塞 | v4.6.78 及后续可访问 tag 的 aicoder.py 有语法错误；漏洞版已通过，见 source blocker |
-| chainlit/CVE-2026-45018 | 未认证 `POST /mcp` stdio `fullCommand` | 高（单容器 Python 服务） | 中（30–40 个 pip 依赖，无编译） | 不需要 | 可直接实施 | 先建 Socket.IO session；2.12.0 配置为破坏性变更，两版各需 config fixture；镜像需 node+npx |
+| chainlit/CVE-2026-45018 | 未认证 `POST /mcp` stdio `fullCommand` | 高（单容器 Python 服务） | 中（30–40 个 pip 依赖，无编译） | 需要（导入 `chainlit`/`chainlit.config` 协作者桩） | 可直接实施 | 真实 `chainlit.mcp`/validator；不启动完整应用、npx、MCP server 或 shell；2.12.0 配置为破坏性变更，两版各需 config fixture |
 | claude-code-action/CVE-2026-47751 | Actions 运行器读 `.mcp.json` 起 MCP 进程 | 低（只能覆盖机制级一段） | 高（`claude-agent-sdk` 会拉 CLI） | 需要（假 GitHub 事件上下文 + 假 Anthropic 端点） | 需要替身 | 容器内无法复现 PR 工作流前提，README 须写明降级范围 |
 | flowise/CVE-2026-70477 | chatflow CSV Agent → pyodide | 不可离线（构建极重） | 很高（pnpm monorepo + pyodide/pandas/numpy wasm，archive 49–51 MB） | 需要（固定模型输出） | 阻塞 | 3.1.3 直接删除 CSVAgent 与 pyodide |
-| mcp-atlassian/GHSA-wm45-qh3g-v83f | 远程 MCP attachment upload 的 `file_path` | 高（streamable-http 单容器） | 低-中（Python，无编译无 DB） | 需要（假 Atlassian API） | 需要替身 | canary 可用 cwd 内文件；假后端须满足 atlassian-python-api 的 REST 契约 |
+| mcp-atlassian/GHSA-wm45-qh3g-v83f | 远程 MCP attachment upload 的 `file_path` | 高（streamable-http 单容器） | 低-中（Python，无编译无 DB） | 需要（假 Atlassian API；导入协议桩） | 需要替身 | canary 可用 cwd 内文件；Jira recorder 和 `mcp_atlassian` 非目标模块为最小协议替身，真实 mixin/路径校验仍执行 |
 | mcp-gateway/GHSA-g53w-w6mj-hrpp | 未认证 router hair-pin 路径 | 低（需自建 Envoy ext_proc） | 很高（Go 1.25 + 手写 ext_proc 配置） | 需要（假上游后端） | 阻塞 | 脆弱点在 Envoy ext_proc；上游只有 Istio EnvoyFilter 生成物，自建等于另造部署面 |
 | mcp-server-kubernetes/CVE-2026-61459 | stdio 工具 `kubectl_get/describe/delete` 的 `--server` 注入 | 高（stdio JSON-RPC） | 中（npm 依赖 + kubectl 二进制） | 需要（假 k8s API + 假 kubeconfig） | 需要替身 | 用假 API 接收 `Authorization: Bearer` canary；GHSA 生态标为 PyPI 有误，真实产品是 npm 包 |
-| n8n/CVE-2026-86996 | Agent workflow tool → `SubworkflowPolicyChecker` | 可（Linux amd64） | 高（pnpm monorepo 数千包 + 前端构建 + DB） | 机制层不需要（真实 agent 链可选假 LLM） | 可直接实施 | 已补齐机制脚本；真实执行函数体，NVD 条目尚未发布；离线依赖固化仍是主要工作量 |
+| n8n/CVE-2026-86996 | Agent workflow tool → `SubworkflowPolicyChecker` | 可（Linux amd64） | 高（pnpm monorepo 数千包 + 前端构建 + DB） | 需要（loader 导入桩 + runner/policy 协议对象） | 可直接实施 | 已补齐机制脚本；真实执行函数体，非完整 n8n/runner/DI/DB/模型链；NVD 条目尚未发布；离线依赖固化仍是主要工作量 |
 | omnigent/CVE-2026-62674 | `PUT /sessions/{id}/agent` → stdio MCP 子进程 | 不可（上游要求 Python >=3.12，固定基础镜像只有 3.10） | 当前不可用 | 不适用 | 阻塞 | 需先提供可核查的 Python 3.12+ amd64 基础镜像；见 blocker 记录 |
-| open-webui/CVE-2026-87017 | knowledge 工具 → 向量后端 `search` | 可（需真实 Qdrant 等非默认后端） | 高（164 行固定依赖 + 前端构建 + 辅助服务） | 不需要（用真实 Qdrant，不是替身） | 可直接实施 | 已补齐机制脚本；默认 Chroma 不受影响，必须显式换后端；受控后端协议只返回 synthetic ID |
-| openharness/CVE-2026-56696 | 远端 channel → `/issue`、`/pr_comments` | 可（纯 Python） | 低-中（约 18 个依赖，可离线固化 wheels） | 需要（假远端 channel） | 需要替身 | 无 fixed 版本号，用修复 commit 对照 |
+| open-webui/CVE-2026-87017 | knowledge 工具 → 向量后端 `search` | 可（需真实 Qdrant 等非默认后端） | 高（164 行固定依赖 + 前端构建 + 辅助服务） | 需要（Open WebUI 框架协作者桩；Qdrant 真实本地实现） | 可直接实施 | 真实 Qdrant adapter 和 `qdrant-client`；替换 config、基类/结果模型及 `iter_filter_conditions`，不启动完整 Open WebUI 应用 |
+| openharness/CVE-2026-56696 | 远端 channel → `/issue`、`/pr_comments` | 可（纯 Python） | 低-中（约 18 个依赖，可离线固化 wheels） | 需要（导入协议桩；不启动真实远端 channel） | 需要替身 | 真实 registry/命令定义；auth、config、bridge、memory、plugins、provider 等非目标协作者为 `_Imported` 桩；无 fixed 版本号，用修复 commit 对照 |
 | factoryfloor/CVE-2026-88063 | macOS GUI 创建 workstream | 不可（macOS 14 / Xcode / AppKit） | 不可在 Linux 离线构建 | 不适用 | 阻塞 | 除非维护者接受独立 macOS VM，否则超出 Linux amd64 ready 前提 |
 | vtcode/GHSA-WQGW-CRR5-CR2P | 交互式 TUI 的 `session_start` hook | 不可稳定触发（TUI-only） | 当前不可用 | 不需要 | 阻塞 | 两处阻塞见下 |
+
+表格中的“需要替身”列按本文约定记录任何替身，包括导入协议桩、fake CLI、
+本地 receiver 和假外部 API；“分档小结”按“结论”列统计，表示当前能否仅靠
+容器内固定输入形成可验收的机制链。因此 Chainlit、57125、n8n 和 Open WebUI
+虽然明确使用导入协作者桩，仍可归入“可直接实施（机制层）”；这两个维度不应
+相加或互相替代。
 
 ## 分档小结
 

@@ -48,6 +48,12 @@ Jira recorder；修复版必须在上传前拒绝 traversal，且 recorder 没�
 
 ## 输入与隔离
 
-所有文件都是 synthetic 内容。atlassian.Jira 仅作为未安装的外部 SDK 协作者
-协议，真实 attachment mixin 和路径校验来自固定上游源码。Compose 无网络出口、
-主机挂载、特权和隔离例外；引用代码与许可证来源见 metadata 的上游仓库。
+所有文件都是 synthetic 内容。
+
+`reproduce.py` 为导入 `attachments.py` 注入 `mcp_atlassian` 包命名空间、Jira
+client/protocol/model、环境变量和媒体限制等最小协议模块，并用本地 Jira
+recorder 代替真实 Atlassian SDK/API。真实 `AttachmentsMixin.upload_attachment`、
+文件打开路径和上游路径校验仍被执行；这些协作者不代表真实 Jira REST、MCP
+transport 或认证链。因此本环境不覆盖 Atlassian 云端上传、远程认证和真实
+MCP 部署。Compose 无网络出口、主机挂载、特权和隔离例外；引用代码与许可证
+来源见 metadata 的上游仓库。
