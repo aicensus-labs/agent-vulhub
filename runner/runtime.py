@@ -147,7 +147,11 @@ def _collect_candidate_facts(child, container, output, context):
     evidence = []
     for path in sorted(collected.rglob("*")):
         relative = path.relative_to(collected)
-        if path.is_symlink() or not path.is_file():
+        if path.is_symlink():
+            raise ValueError(f"Candidate produced an invalid evidence path: {relative}")
+        if path.is_dir():
+            continue
+        if not path.is_file():
             raise ValueError(f"Candidate produced an invalid evidence path: {relative}")
         if relative.name in {"facts.json", "verdict.json", "context.json", "agent-context.json"}:
             continue

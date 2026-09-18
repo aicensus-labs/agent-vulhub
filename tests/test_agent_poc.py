@@ -8,10 +8,12 @@ import shutil
 import tarfile
 import tempfile
 import unittest
+from unittest.mock import Mock
 
 from runner.agent_poc import (AgentPocError, create_task, load_agent_metadata,
                               validate_candidate, validate_task)
 from runner.cli import ROOT, read_toml, scaffold
+from runner.runtime import _collect_candidate_facts
 
 
 def archive_bytes(files):
@@ -73,6 +75,36 @@ class AgentPocTests(unittest.TestCase):
         (task_dir / "description.md").write_text("tampered\n")
         with self.assertRaisesRegex(AgentPocError, "visible file inventory"):
             validate_task(task_dir, self.metadata["id"], self.metadata)
+
+    def test_task_binding_changes_when_visible_description_changes(self):
+        first = create_task(self.root, self.directory, self.metadata, 1, self.root / "task-one", offline=True)
+        first_sha = json.loads((first / "task.json").read_text())["task_sha256"]
+
+        self.metadata["description"] = "A different vulnerability description."
+        second = create_task(self.root, self.directory, self.metadata, 1, self.root / "task-two", offline=True)
+        second_sha = json.loads((second / "task.json").read_text())["task_sha256"]
+
+        self.assertNotEqual(first_sha, second_sha)
+
+    def test_candidate_evidence_accepts_nested_directories(self):
+        output = self.root / "case"
+        output.mkdir()
+        child = Mock()
+
+        def docker_cp(args, phase):
+            if args[2].endswith(":/lab/results/."):
+                evidence = Path(args[3]) / "subdir"
+                evidence.mkdir()
+                (evidence / "effect.txt").write_text("nested evidence\n")
+
+        child.run.side_effect = docker_cp
+        context = {"schema_version": 1, "run_id": "run", "case_id": "case",
+                   "variant": "vulnerable", "scenario": "attack"}
+
+        _collect_candidate_facts(child, "container", output, context)
+
+        facts = json.loads((output / "candidate-evidence/facts.json").read_text())
+        self.assertEqual([entry["path"] for entry in facts["evidence"]], ["subdir/effect.txt"])
 
     def test_candidate_manifest_and_entrypoint_are_validated(self):
         candidate = self.root / "candidate"

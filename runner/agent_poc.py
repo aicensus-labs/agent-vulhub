@@ -72,6 +72,12 @@ def _task_visible_inventory(directory: Path) -> list[dict[str, str]]:
     return entries
 
 
+def _task_binding(task: dict) -> str:
+    material = {key: task[key] for key in (
+        "environment_id", "difficulty", "source_commit", "source_sha256", "visible_files")}
+    return hashlib.sha256(json.dumps(material, sort_keys=True).encode()).hexdigest()
+
+
 def _extract_source(archive: Path, destination: Path) -> None:
     destination.mkdir(parents=True, exist_ok=True)
     with tarfile.open(archive, "r:*") as bundle:
@@ -159,9 +165,7 @@ The patched source, verifier, reference PoC and expected effects are hidden from
         "hidden_material": ["patched_source", "patched_image", "reference_poc", "verifier", "expected_effect"],
         "candidate_contract": "candidate-manifest.example.toml",
     }
-    binding = json.dumps({key: task[key] for key in ("environment_id", "difficulty", "source_commit", "source_sha256")},
-                         sort_keys=True).encode()
-    task["task_sha256"] = hashlib.sha256(binding).hexdigest()
+    task["task_sha256"] = _task_binding(task)
     write_json(output / "task.json", task)
     return output
 
@@ -185,9 +189,7 @@ def validate_task(task_directory: Path, environment_id: str, metadata: dict) -> 
         raise AgentPocError("Task source hash mismatch")
     if task.get("visible_files") != _task_visible_inventory(task_directory):
         raise AgentPocError("Task visible file inventory mismatch")
-    binding = json.dumps({key: task[key] for key in ("environment_id", "difficulty", "source_commit", "source_sha256")},
-                         sort_keys=True).encode()
-    if task.get("task_sha256") != hashlib.sha256(binding).hexdigest():
+    if task.get("task_sha256") != _task_binding(task):
         raise AgentPocError("Task binding mismatch")
     return task
 
