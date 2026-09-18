@@ -11,6 +11,7 @@ import unittest
 from unittest.mock import patch
 
 from runner.cli import ROOT, main, read_toml, scaffold
+from runner.agent_poc import CandidateSpec
 from runner.build import fetch_inputs
 from runner.compose import validate_compose
 from runner.lifecycle import promote, ready_check, refresh
@@ -55,6 +56,7 @@ class ExecutionTests(unittest.TestCase):
         output = self.root / "results" / "test-run"
         output.mkdir(parents=True, exist_ok=True)
         report = {"schema_version": 1, "environment_id": self.metadata["id"], "run_id": "test-run",
+                  "layer": "mechanism",
                   "fingerprint": fingerprint(self.root, self.directory, self.metadata), "rounds": 3,
                   "platform": "linux/amd64", "host_system": "Linux", "docker_operating_system": "Linux",
                   "host_architecture": "x86_64",
@@ -177,6 +179,13 @@ class ExecutionTests(unittest.TestCase):
         self.assertTrue((self.directory / "evidence/test-run/report.json").exists())
         self.assertTrue(list((self.directory / "evidence/history").glob("*.json")))
 
+    def test_agent_poc_report_cannot_promote_as_mechanism(self):
+        output, report = self.report()
+        report["layer"] = "agent_poc"
+        write_json(output / "report.json", report)
+        with self.assertRaisesRegex(ValueError, "Only mechanism reports"):
+            promote(self.root, self.directory, self.metadata, output / "report.json", ["maintainer"])
+
     def test_exception_requires_second_distinct_reviewer(self):
         self.metadata["runtime"]["exceptions"] = [{"rule": "network.lab.internal", "reason": "reviewed"}]
         output, _ = self.report()
@@ -209,6 +218,19 @@ class ExecutionTests(unittest.TestCase):
         report = json.loads(next((self.root / "results").rglob("report.json")).read_text())
         self.assertEqual(report["failure"]["actual"], "Docker missing")
         self.assertEqual(report["cases"], [])
+
+    def test_agent_evaluation_requires_an_accepted_adapter_before_docker(self):
+        args = Namespace(rounds=1, timeout=10, build=False, images=None, offline=True,
+                         allow_exceptions=False, scenario="all", keep_on_failure=False)
+        candidate = CandidateSpec(self.root, ("python3", "/candidate/poc.py"), 10, 1024, "a" * 64, "b" * 64)
+        task = {"task_sha256": "c" * 64, "difficulty": 1}
+        with patch("runner.runtime.preflight") as docker:
+            code = reproduce(self.root, self.directory, self.metadata, args, candidate=candidate,
+                             layer="agent_poc", task=task)
+        self.assertEqual(code, 2)
+        docker.assert_not_called()
+        report = json.loads(next((self.root / "results").rglob("report.json")).read_text())
+        self.assertEqual(report["failure"]["phase"], "agent_adapter")
 
 
 class ComposePolicyTests(unittest.TestCase):

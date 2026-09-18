@@ -10,7 +10,7 @@ import time
 import uuid
 
 from .compose import validate_compose
-from .protocol import (CASES, IMAGE, IMAGE_ID, SCHEMA, check_fixtures, fingerprint,
+from .protocol import (CASES, IMAGE, IMAGE_ID, SCHEMA, check_fixtures, digest, fingerprint,
                        read_json, runner_fingerprint, validate_verdict, write_json)
 
 
@@ -31,7 +31,8 @@ class Commands:
         self.sequence = 0
         self.deadline = None
 
-    def run(self, args, phase, cwd=None, env=None, accepted=(0,), timeout=None):
+    def run(self, args, phase, cwd=None, env=None, accepted=(0,), timeout=None,
+            output_limit=8 * 1024 * 1024):
         self.sequence += 1
         prefix = self.output / f"{self.sequence:04d}-{phase}"
         prefix.parent.mkdir(parents=True, exist_ok=True)
@@ -40,20 +41,33 @@ class Commands:
             seconds = min(seconds, max(0.01, self.deadline - time.monotonic()))
         try:
             with prefix.with_suffix(".stdout.log").open("w") as stdout, prefix.with_suffix(".stderr.log").open("w") as stderr:
-                result = subprocess.run(args, cwd=cwd, env=env, stdout=stdout, stderr=stderr, timeout=seconds, check=False)
+                process = subprocess.Popen(args, cwd=cwd, env=env, stdout=stdout, stderr=stderr)
+                started = time.monotonic()
+                while process.poll() is None:
+                    stdout_size = prefix.with_suffix(".stdout.log").stat().st_size
+                    stderr_size = prefix.with_suffix(".stderr.log").stat().st_size
+                    if stdout_size + stderr_size > output_limit:
+                        process.kill()
+                        process.wait()
+                        raise RunError(phase, f"Command output exceeds {output_limit} bytes")
+                    if time.monotonic() - started >= seconds:
+                        process.kill()
+                        process.wait()
+                        raise RunError(phase, f"Exceeded {seconds:.1f}s; see {prefix.name} logs", 3, "timeout")
+                    time.sleep(0.02)
+                result_code = process.returncode
         except FileNotFoundError as error:
             raise RunError(phase, str(error), 2, "not_run") from error
-        except subprocess.TimeoutExpired as error:
-            raise RunError(phase, f"Exceeded {seconds:.1f}s; see {prefix.name} logs", 3, "timeout") from error
-        if result.returncode not in accepted:
+        if result_code not in accepted:
             status = {"healthcheck": "healthcheck_failed", "compose_up": "startup_failed",
                       "preflight": "not_run", "cleanup": "cleanup_failed"}.get(phase, "infrastructure_error")
-            raise RunError(phase, f"Exit {result.returncode}; see {prefix.name} logs",
+            raise RunError(phase, f"Exit {result_code}; see {prefix.name} logs",
                            2 if phase == "preflight" else 3, status)
         output = prefix.with_suffix(".stdout.log")
-        if output.stat().st_size > 8 * 1024 * 1024:
-            raise RunError(phase, "Command output exceeds 8 MiB")
-        return result.returncode, output.read_text(errors="replace")
+        stderr_output = prefix.with_suffix(".stderr.log")
+        if output.stat().st_size + stderr_output.stat().st_size > output_limit:
+            raise RunError(phase, f"Command output exceeds {output_limit} bytes")
+        return result_code, output.read_text(errors="replace")
 
 
 def compose_env(images):
@@ -125,19 +139,53 @@ def inspect_config(commands, directory, images, project, metadata, allow_excepti
     return config
 
 
-def run_case(commands, directory, metadata, images, report, number, variant, scenario, args):
+def _collect_candidate_facts(child, container, output, context):
+    """Replace candidate-authored facts with a runner-owned evidence inventory."""
+    collected = output / "candidate-evidence"
+    collected.mkdir()
+    child.run(["docker", "cp", container + ":/lab/results/.", str(collected)], "candidate_collect")
+    evidence = []
+    for path in sorted(collected.rglob("*")):
+        relative = path.relative_to(collected)
+        if path.is_symlink() or not path.is_file():
+            raise ValueError(f"Candidate produced an invalid evidence path: {relative}")
+        if relative.name in {"facts.json", "verdict.json", "context.json", "agent-context.json"}:
+            continue
+        if path.stat().st_size > 8 * 1024 * 1024:
+            raise ValueError(f"Candidate evidence exceeds 8 MiB: {relative}")
+        evidence.append({"path": relative.as_posix(), "sha256": digest(path)})
+    facts = {**context, "execution_status": "completed", "evidence": evidence}
+    write_json(collected / "facts.json", facts)
+    child.run(["docker", "cp", str(collected / "facts.json"), container + ":/lab/results/facts.json"],
+              "candidate_setup")
+
+
+def _prepare_candidate_container(child, container):
+    """Hide evaluator files and make the product tree read-only for the candidate."""
+    child.run(["docker", "exec", container, "sh", "-c",
+               "rm -rf /inputs; find /lab -maxdepth 1 -type f -delete; "
+               "chmod -R a-w /lab; chmod -R a+rwX /lab/results"], "candidate_setup")
+
+
+def run_case(commands, directory, metadata, images, report, number, variant, scenario, args,
+             candidate=None, layer="mechanism"):
     case_id = f"{number:02d}-{variant}-{scenario}"
     output = commands.output / case_id
     output.mkdir()
     project = "avh-" + uuid.uuid4().hex[:20]
     context = {"schema_version": SCHEMA, "run_id": report["run_id"], "case_id": case_id,
                "variant": variant, "scenario": scenario}
+    agent_context = {"schema_version": context["schema_version"], "run_id": context["run_id"],
+                     "case_id": f"agent-{number:02d}-{uuid.uuid4().hex[:12]}",
+                     "scenario": context["scenario"]}
     result = {**context, "environment_id": metadata["id"], "round": number, "project": project,
-              "layer": "mechanism", "source_commit": metadata[variant]["commit"],
+              "layer": layer, "source_commit": metadata[variant]["commit"],
               "image": images[variant], "started_at": utc(), "outcome": "not_run", "cleaned": False,
               "platform": report["platform"], "toolchain": {k: report[k] for k in
               ("runner_fingerprint", "docker_version", "compose_version")}, "exit_code": 0}
     write_json(output / "context.json", context)
+    if candidate is not None:
+        write_json(output / "agent-context.json", agent_context)
     child = Commands(output, args.timeout)
     env = compose_env(images)
     created = False
@@ -180,14 +228,46 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
         state = json.loads(state)[0]
         if state.get("Config", {}).get("Labels", {}).get("com.docker.compose.project") != project:
             raise RunError("compose_up", "Container project identity mismatch")
-        child.run(["docker", "cp", str(output / "context.json"), container + ":/lab/results/context.json"], "setup")
         interpreter = harness(metadata)
-        status, _ = child.run(["docker", "exec", container, interpreter, "/lab/reproduce.py",
-                               "--context", "/lab/results/context.json", "--output", "/lab/results"],
-                              "reproduce", accepted=(0, 1, 2))
+        if candidate is None:
+            child.run(["docker", "cp", str(output / "context.json"), container + ":/lab/results/context.json"], "setup")
+            command = [interpreter, "/lab/reproduce.py", "--context", "/lab/results/context.json",
+                       "--output", "/lab/results"]
+            phase = "reproduce"
+            timeout = None
+            output_limit = 8 * 1024 * 1024
+        else:
+            _prepare_candidate_container(child, container)
+            child.run(["docker", "cp", str(candidate.directory) + "/.", container + ":/candidate"],
+                      "candidate_setup")
+            child.run(["docker", "cp", str(output / "agent-context.json"),
+                       container + ":/lab/results/agent-context.json"], "candidate_setup")
+            command = list(candidate.command)
+            phase = "candidate"
+            timeout = candidate.timeout_seconds
+            output_limit = candidate.max_output_bytes
+        exec_args = ["docker", "exec"]
+        if candidate is not None:
+            exec_args.extend(["-e", "AVH_AGENT_CONTEXT=/lab/results/agent-context.json",
+                              "--user", "65532:65532"])
+        exec_args.extend([container, *command])
+        status, _ = child.run(exec_args, phase,
+                              accepted=(0, 1, 2), timeout=timeout, output_limit=output_limit)
         if status:
-            raise RunError("reproduce", f"PoC exited {status}; no verification claim", 1 if status == 1 else 2,
+            raise RunError(phase, f"PoC exited {status}; no verification claim", 1 if status == 1 else 2,
                            "execution_failed" if status == 1 else "not_run")
+        if candidate is not None:
+            _collect_candidate_facts(child, container, output, context)
+            child.run(["docker", "exec", container, "sh", "-c",
+                       "chmod a+wx /lab; chmod -R a+rwX /lab/results"], "verifier_setup")
+            child.run(["docker", "cp", str(output / "context.json"), container + ":/lab/results/context.json"],
+                      "verifier_setup")
+            child.run(["docker", "cp", str(directory / "verify.py"), container + ":/lab/verify.py"],
+                      "verifier_setup")
+            helper = directory / "lab_support.py"
+            if helper.exists():
+                child.run(["docker", "cp", str(helper), container + ":/lab/lab_support.py"],
+                          "verifier_setup")
         # Separate invocation: verify only reads evidence and writes its verdict.
         status, _ = child.run(["docker", "exec", container, interpreter, "/lab/verify.py",
                                "--context", "/lab/results/context.json", "--output", "/lab/results"],
@@ -250,14 +330,33 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
     return result
 
 
-def reproduce(root, directory, metadata, args):
+def reproduce(root, directory, metadata, args, candidate=None, layer="mechanism", task=None,
+              agent_metadata=None):
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ-") + uuid.uuid4().hex[:12]
     output = root / "results" / metadata["id"] / run_id
     output.mkdir(parents=True)
     commands = Commands(output, args.timeout)
     report = {"schema_version": SCHEMA, "run_id": run_id, "environment_id": metadata["id"],
-              "rounds": args.rounds, "started_at": utc(), "cases": [], "outcome": "not_run", "exit_code": 2}
+              "layer": layer, "rounds": args.rounds, "started_at": utc(), "cases": [],
+              "outcome": "not_run", "exit_code": 2}
+    if candidate is not None:
+        report["candidate"] = {
+            "artifact_sha256": candidate.artifact_sha256,
+            "manifest_sha256": candidate.manifest_sha256,
+            "command": list(candidate.command),
+            "timeout_seconds": candidate.timeout_seconds,
+            "max_output_bytes": candidate.max_output_bytes,
+        }
+    if task is not None:
+        report["task"] = {"task_sha256": task["task_sha256"], "difficulty": task["difficulty"]}
+    if agent_metadata is not None:
+        report["agent"] = agent_metadata
     try:
+        if candidate is not None:
+            adapter = metadata.get("verification", {}).get("agent_poc", {})
+            if adapter.get("adapter_status") != "accepted":
+                raise RunError("agent_adapter", "Environment has no accepted Agent-PoC Adapter", 2, "not_run",
+                               "metadata verification.agent_poc.adapter_status = accepted")
         check_fixtures(directory)
         report["fingerprint"] = fingerprint(root, directory, metadata)
         binding = input_binding(root, directory, metadata)
@@ -289,9 +388,11 @@ def reproduce(root, directory, metadata, args):
         report["images"] = images
         for number in range(1, args.rounds + 1):
             for variant, scenario in CASES:
-                if args.scenario != "all" and args.scenario != ("benign" if scenario == "benign" else variant):
+                scenario_filter = getattr(args, "scenario", "all")
+                if scenario_filter != "all" and scenario_filter != ("benign" if scenario == "benign" else variant):
                     continue
-                result = run_case(commands, directory, metadata, images, report, number, variant, scenario, args)
+                result = run_case(commands, directory, metadata, images, report, number, variant, scenario, args,
+                                  candidate=candidate, layer=layer)
                 report["cases"].append(result)
                 write_json(output / "report.json", report)
                 if result["outcome"] == "interrupted":
@@ -315,3 +416,15 @@ def reproduce(root, directory, metadata, args):
         write_json(output / "report.json", report)
     print(f"{report['outcome']}: {output / 'report.json'}")
     return report["exit_code"]
+
+
+def agent_evaluate(root, directory, metadata, args):
+    """Run one submitted candidate through the existing isolated lifecycle."""
+    from .agent_poc import load_agent_metadata, validate_candidate, validate_task
+
+    task_directory = Path(args.task_dir)
+    candidate = validate_candidate(Path(args.candidate))
+    task = validate_task(task_directory, metadata["id"], metadata)
+    agent_metadata = load_agent_metadata(Path(args.agent_meta) if args.agent_meta else None)
+    return reproduce(root, directory, metadata, args, candidate=candidate, layer="agent_poc", task=task,
+                     agent_metadata=agent_metadata)

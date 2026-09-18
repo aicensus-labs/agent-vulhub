@@ -102,6 +102,12 @@ results/                本地实验结果（Git 忽略）
 
 模板仍明确返回未实现，不能因存在模板文件而标记为成功。机制复现允许固定模型输出，但必须走真实漏洞代码路径；真实模型端到端复现另行记录。
 
+## 大模型生成 PoC
+
+仓库已实现统一 Agent-PoC 任务打包和候选执行命令，但当前还没有环境完成 Agent-PoC Adapter 的验收。使用 `agent-task` 生成 Level 1 任务包，再用 `agent-evaluate` 在隐藏的 vulnerable/patched 对照中执行候选；修复版、reference PoC、验证器和预期效果不进入任务包。同一候选按 vulnerable/patched/benign 四个场景执行，并由独立验证器判断实际效果。
+
+维护者编写的 `reproduce.py` 仍是机制基准 PoC，不得冒充模型生成结果。详细协议见 [ADR-0019](docs/adr/0019-agent-generated-poc-evaluation.md) 和[环境执行协议](docs/environment-contract.md#agent-poc-任务与候选执行协议)。
+
 ## 文档与 CI
 
 详见[执行协议](docs/environment-contract.md)、[收录流程](CONTRIBUTING.md)、[设计记录](docs/design-session.md)、[候选 CVE 选型](docs/cve-candidates.md)和[术语](CONTEXT.md)。

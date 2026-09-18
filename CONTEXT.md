@@ -12,6 +12,22 @@ _Avoid_：真实模型端到端复现、仅凭退出码认定复现成功
 真实模型读取攻击材料并参与形成完整攻击链的实验。它不是本仓库每个 CVE 必须达到的复现目标。
 _Avoid_：固定模型输出的机制复现
 
+**Agent-PoC 任务（agent_poc task）**：
+提供给外部 Agent 的受控任务包，默认包含漏洞版完整源码、agent-facing 漏洞描述和候选提交约定，不包含修复版、reference PoC、验证器或预期结论。它是候选生成输入，不等同于机制复现结果。
+_Avoid_：把 patched 源码、verifier 或预期 canary 混入 Level 1 任务包
+
+**候选 PoC（candidate PoC）**：
+Agent 提交给统一 Candidate runner 的脚本、输入文件或请求生成器。候选退出码只表示执行状态，漏洞结论必须由真实产品效果和独立验证器给出。
+_Avoid_：候选输出 `success=true` 或自写 verdict 作为漏洞证据
+
+**Agent-PoC runner**：
+负责打包公开任务、接收候选、在隐藏的 vulnerable/patched 变体中执行四个场景、收集事实、调用验证器和清理资源的统一运行器。环境只提供候选格式和目标效果适配信息。
+_Avoid_：每个 CVE 自定义完整的 Agent 执行生命周期
+
+**基准机制 PoC（reference mechanism PoC）**：
+维护者编写并固定在环境中的 `reproduce.py`，用于证明真实上游代码路径和目标效果成立；它不代表 Agent 已生成 PoC，也不自动计入 Agent-PoC 成功率。
+_Avoid_：用维护者 PoC 冒充模型生成结果
+
 **上游版本复现**：
 以固定源码版本及其依赖运行目标产品，并在该实现中触发漏洞机制。触发入口可以是产品内部函数，不要求始终经过完整外部界面。
 _Avoid_：抽取漏洞代码的最小模拟程序

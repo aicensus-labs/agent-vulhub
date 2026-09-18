@@ -32,6 +32,8 @@ Compose 默认使用内部网络且不发布端口，不挂载宿主机目录，
 
 脚本职责和执行位置已确认，详见 [ADR-0003](adr/0003-reproduction-and-verifier-boundaries.md)。镜像来源和不可变标识已确认，详见 [ADR-0004](adr/0004-reproducible-immutable-images.md)。
 
+大模型生成 PoC 的任务打包、候选执行和隐藏修复对照另行定义在 [ADR-0019](adr/0019-agent-generated-poc-evaluation.md)。统一 runner 已提供任务打包和候选编排，但每个环境仍需完成独立效果采集 Adapter；维护者机制 PoC 不得当作模型结果，Agent-PoC 结果也不改变当前机制验收状态。
+
 ## 已确认的镜像策略
 
 每个环境提交可重建 Dockerfile 和构建上下文，分别构建漏洞版与修复版；源码固定完整 commit SHA，基础镜像固定 digest，最终镜像 digest 写入 `metadata.toml`。Compose 和复现记录只接受 `image@sha256:...`，不接受浮动 tag。

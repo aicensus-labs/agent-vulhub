@@ -83,6 +83,13 @@ def validate_metadata(data: dict, environment_id: str) -> None:
             raise RegistryError(f"{environment_id}: {layer} result needs date and evidence")
         if result["status"] == "not_applicable" and not result.get("notes"):
             raise RegistryError(f"{environment_id}: {layer} not_applicable needs a reason")
+    adapter = verification.get("agent_poc", {})
+    if not isinstance(adapter, dict) or adapter.get("status", "not_run") not in STATUSES:
+        raise RegistryError(f"{environment_id}: invalid verification.agent_poc.status")
+    if adapter.get("adapter_status", "not_run") not in {"not_run", "accepted"}:
+        raise RegistryError(f"{environment_id}: invalid verification.agent_poc.adapter_status")
+    if adapter.get("adapter_status") == "accepted" and not (adapter.get("verified_at") and adapter.get("evidence") and adapter.get("notes")):
+        raise RegistryError(f"{environment_id}: accepted Agent-PoC Adapter needs date, evidence and notes")
     if data["lifecycle"] == "ready":
         if not data.get("advisories") or not data.get("title") or str(data["title"]).startswith("TODO"):
             raise RegistryError(f"{environment_id}: ready environment needs title and advisories")
@@ -156,27 +163,37 @@ def main(argv: list[str] | None = None) -> int:
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("list", help="List registered environments")
     commands.add_parser("check", help="Validate metadata and required files without executing code")
+    agent_task = commands.add_parser("agent-task", help="Package a visible Agent-PoC task")
+    agent_task.add_argument("environment")
+    agent_task.add_argument("--level", choices=("0", "1"), default="1")
+    agent_task.add_argument("--out-dir", required=True)
+    agent_task.add_argument("--offline", action="store_true")
     new = commands.add_parser("new", help="Create and register a draft from the template")
     new.add_argument("product")
     new.add_argument("identifier", help="CVE or GHSA identifier")
     commands.add_parser("refresh", help="Downgrade stale ready environments; preserve historical evidence")
     lint = commands.add_parser("lint", help="Parse Compose via Docker CLI without starting containers")
     lint.add_argument("environment", nargs="?")
-    for name in ("fetch", "build", "reproduce", "promote", "publish"):
+    for name in ("fetch", "build", "reproduce", "agent-evaluate", "promote", "publish"):
         command = commands.add_parser(name)
         command.add_argument("environment")
-        if name in {"fetch", "build", "reproduce"}:
+        if name in {"fetch", "build", "reproduce", "agent-evaluate"}:
             command.add_argument("--offline", action="store_true")
-        if name in {"build", "reproduce", "publish"}:
+        if name in {"build", "reproduce", "agent-evaluate", "publish"}:
             command.add_argument("--timeout", type=positive_int, default=300)
-        if name == "reproduce":
+        if name in {"reproduce", "agent-evaluate"}:
             source = command.add_mutually_exclusive_group()
             source.add_argument("--build", action="store_true", help="Build pinned source locally before execution")
             source.add_argument("--images", help="Use a local build.json manifest")
             command.add_argument("--rounds", type=positive_int, default=1)
-            command.add_argument("--scenario", choices=("all", "vulnerable", "patched", "benign"), default="all")
             command.add_argument("--keep-on-failure", action="store_true")
             command.add_argument("--allow-exceptions", action="store_true", help="Apply only explicitly documented isolation exceptions")
+            if name == "reproduce":
+                command.add_argument("--scenario", choices=("all", "vulnerable", "patched", "benign"), default="all")
+        if name == "agent-evaluate":
+            command.add_argument("--task-dir", required=True)
+            command.add_argument("--candidate", required=True)
+            command.add_argument("--agent-meta", help="JSON provenance for the Agent/model/toolchain (no secrets)")
         if name == "promote":
             command.add_argument("--report", required=True)
             command.add_argument("--reviewer", action="append", required=True)
@@ -187,6 +204,18 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--repository", required=True, help="ghcr.io/owner/package")
     args = parser.parse_args(argv)
     try:
+        if args.command == "agent-task":
+            from .agent_poc import create_task
+            split_id(args.environment)
+            entries = load_registry(ROOT)
+            if args.environment not in {entry["id"] for entry in entries}:
+                raise RegistryError(f"Unknown environment: {args.environment}")
+            directory = ROOT / "environments" / args.environment
+            metadata = read_toml(directory / "metadata.toml")
+            validate_metadata(metadata, args.environment)
+            output = create_task(ROOT, directory, metadata, int(args.level), Path(args.out_dir), args.offline)
+            print(output)
+            return 0
         if args.command == "refresh":
             from .lifecycle import refresh
             for entry in load_registry(ROOT):
@@ -225,8 +254,8 @@ def main(argv: list[str] | None = None) -> int:
                         validate_sources(directory, data)
                     print(f"Static Compose check: {entry['id']}")
             return 0
-        if args.command in {"fetch", "build", "reproduce", "promote", "publish"}:
-            from .runtime import Commands, preflight, reproduce, utc
+        if args.command in {"fetch", "build", "reproduce", "agent-evaluate", "promote", "publish"}:
+            from .runtime import Commands, agent_evaluate, preflight, reproduce, utc
             from .build import build_images, fetch_inputs
             from .lifecycle import promote, refresh
             from .protocol import write_json
@@ -239,6 +268,8 @@ def main(argv: list[str] | None = None) -> int:
             data = read_toml(directory / "metadata.toml")
             refresh(ROOT, directory, data)
             validate_metadata(data, args.environment)
+            if args.command == "agent-evaluate":
+                return agent_evaluate(ROOT, directory, data, args)
             if args.command == "reproduce":
                 return reproduce(ROOT, directory, data, args)
             if args.command == "fetch":
@@ -283,7 +314,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     except (OSError, ValueError, KeyError, TypeError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
-        return 2 if args.command in {"fetch", "build", "reproduce", "promote", "publish"} else 1
+        return 2 if args.command in {"fetch", "build", "reproduce", "agent-task", "agent-evaluate", "promote", "publish"} else 1
     except Exception as error:
         from .runtime import RunError
         if not isinstance(error, RunError):

@@ -24,6 +24,8 @@ def ready_check(root, directory, metadata):
     if digest(summary) != review.get("report_sha256"):
         raise ValueError("Reviewed report hash mismatch")
     report = read_json(summary)
+    if report.get("layer") != "mechanism":
+        raise ValueError("ready report must be a mechanism report")
     validate_report(report, review["fingerprint"])
     if report.get("environment_id") != metadata["id"]:
         raise ValueError("Reviewed report belongs to another environment")
@@ -71,7 +73,10 @@ def promote(root, directory, metadata, report_path, reviewers):
     if len(set(reviewers)) < minimum or any(not x.strip() for x in reviewers):
         raise ValueError(f"Need {minimum} distinct reviewers")
     report_path = Path(report_path).resolve()
-    report = validate_report(read_json(report_path), fingerprint(root, directory, metadata))
+    raw_report = read_json(report_path)
+    if raw_report.get("layer") != "mechanism":
+        raise ValueError("Only mechanism reports can be promoted")
+    report = validate_report(raw_report, fingerprint(root, directory, metadata))
     if report.get("environment_id") != metadata["id"]:
         raise ValueError("Report belongs to another environment")
     archive = directory / "evidence" / report["run_id"]
