@@ -23,6 +23,20 @@ PHASES = ("setup", "trigger", "effect")
 VARIANTS = ("both", "vulnerable_only", "patched_only")
 ARROWS = {"both": "->>", "vulnerable_only": "-->>", "patched_only": "-x"}
 FLOW_ARROWS = {"both": "-->", "vulnerable_only": "-.->", "patched_only": "-.->"}
+# Diagram-visible text — node labels, arrow messages, subgraph titles, the summary
+# — explains the vulnerability itself. Vocabulary that belongs to this repository's
+# reproduction apparatus has to stay out of it and live either in the prose fields
+# (role, detail, note) or the provenance fields (source, evidence), which the README
+# renders as separate sections. Keep this list narrow: it runs in `runner check`,
+# and a false positive blocks a legitimate diagram.
+APPARATUS = (
+    "本仓库", "本实验", "本环境",
+    "fixture", "fixtures/",
+    "synthetic", "替身",
+    "本地假", "假 CLI",
+    "verify.py", "observation.json",
+    "复现工具链", "观测文件", "结果卷",
+)
 # Node and subgraph identifiers become Mermaid keywords verbatim; reject collisions.
 RESERVED = frozenset({
     "actor", "alt", "and", "call", "class", "classdef", "click", "deactivate", "default",
@@ -61,6 +75,18 @@ def _enum(value, allowed, field):
     return value
 
 
+def _vulnerability_only(value, field):
+    """Reject reproduction-apparatus vocabulary from diagram-visible text."""
+    lowered = str(value).lower()
+    for word in APPARATUS:
+        if word.lower() in lowered:
+            raise ValueError(
+                f"{field} describes the reproduction apparatus ({word!r}); "
+                "diagram-visible text must describe the vulnerability itself"
+            )
+    return value
+
+
 def _fixture_paths(directory):
     manifest = Path(directory) / "fixtures" / "manifest.toml"
     if not manifest.is_file():
@@ -85,7 +111,7 @@ def validate(directory, data):
     if data.get("schema_version") != SCHEMA:
         raise ValueError(f"diagram schema_version must be {SCHEMA}")
     _text(data.get("title"), "diagram title")
-    _text(data.get("summary"), "diagram summary")
+    _vulnerability_only(_text(data.get("summary"), "diagram summary"), "diagram summary")
 
     entities = data.get("entities")
     if not isinstance(entities, list) or not entities:
@@ -101,7 +127,7 @@ def validate(directory, data):
             raise ValueError(f"entity id is a Mermaid keyword: {identifier!r}")
         if identifier in by_id:
             raise ValueError(f"duplicate entity id: {identifier}")
-        _text(entity.get("label"), f"{identifier}.label")
+        _vulnerability_only(_text(entity.get("label"), f"{identifier}.label"), f"{identifier}.label")
         _enum(entity.get("kind"), KINDS, f"{identifier}.kind")
         _enum(entity.get("trust"), TRUST, f"{identifier}.trust")
         _text(entity.get("role"), f"{identifier}.role")
@@ -124,7 +150,7 @@ def validate(directory, data):
         if identifier in by_id:
             raise ValueError(f"boundary id collides with entity id: {identifier}")
         boundary_ids.add(identifier)
-        _text(boundary.get("label"), f"{identifier}.label")
+        _vulnerability_only(_text(boundary.get("label"), f"{identifier}.label"), f"{identifier}.label")
         _text(boundary.get("note"), f"{identifier}.note")
         members = boundary.get("members")
         if not isinstance(members, list) or not members:
@@ -150,7 +176,7 @@ def validate(directory, data):
         if not isinstance(number, int) or isinstance(number, bool) or number != index + 1:
             raise ValueError(f"steps must be numbered 1..N in order; expected n = {index + 1}")
         _enum(step.get("phase"), PHASES, f"steps[{index}].phase")
-        _text(step.get("action"), f"steps[{index}].action")
+        _vulnerability_only(_text(step.get("action"), f"steps[{index}].action"), f"steps[{index}].action")
         for key in ("from", "to"):
             value = step.get(key)
             if value not in by_id:

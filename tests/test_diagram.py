@@ -13,8 +13,8 @@ from runner.cli import ROOT, RegistryError, check, scaffold
 def base():
     return {
         "schema_version": 1,
-        "title": "synthetic diagram",
-        "summary": "synthetic summary",
+        "title": "sample diagram",
+        "summary": "sample summary",
         "entities": [
             {"id": "attacker", "label": "attacker", "kind": "actor",
              "trust": "attacker_controlled", "role": "sends the attack input"},
@@ -173,6 +173,33 @@ class DiagramTests(unittest.TestCase):
         data = base()
         data["steps"][0]["phase"] = "verify"
         self.reject(data, "phase must be one of")
+
+    def test_apparatus_vocabulary_is_rejected_from_diagram_text(self):
+        # Diagram-visible text explains the vulnerability itself, so the words
+        # that belong to this repository's reproduction apparatus must not reach
+        # a node label, an arrow message, a subgraph title or the summary.
+        for word in ("本仓库", "本实验", "本环境", "fixture", "synthetic", "替身", "本地假"):
+            for field in ("entity label", "step action", "summary", "boundary label"):
+                data = base()
+                if field == "entity label":
+                    data["entities"][0]["label"] = f"{word} attacker"
+                elif field == "step action":
+                    data["steps"][0]["action"] = f"send input ({word})"
+                elif field == "summary":
+                    data["summary"] = f"{word} summary"
+                else:
+                    data["boundaries"][0]["label"] = f"{word} side"
+                with self.subTest(word=word, field=field):
+                    self.reject(data, "reproduction apparatus")
+
+    def test_prose_and_provenance_may_name_the_apparatus(self):
+        # role, detail and note are rendered outside the diagram, and source and
+        # evidence are provenance columns, so they may describe the reproduction.
+        data = base()
+        data["entities"][0]["role"] = "提交 fixtures/attack.json 里的固定输入"
+        data["boundaries"][0]["note"] = "本实验用替身代替真实目标"
+        data["steps"][0]["detail"] = "本环境不连接真实渠道"
+        diagram.validate(self.root, data)
 
     def test_mermaid_keyword_ids_are_rejected(self):
         data = base()

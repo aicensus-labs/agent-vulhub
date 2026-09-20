@@ -79,9 +79,29 @@ evidence = "fixtures/attack.json"     # 可选：证据引用
 1. **攻击者想要的东西，必须是它自己拿不到的。** 如果图里越界读到的文件、泄露的凭据被标成 `attacker_controlled`，逻辑就崩了——它何必绕这一圈？这类目标应标 `trusted`，并放进一个"边界内侧/攻击者本来够不着"的边界。
 2. **分清"攻击者做了什么"和"环境本来是什么样"。** 符号链接、目录外的目标文件、被读取的配置通常来自 `metadata.toml` 的 `prerequisites`，是**前提条件**，不是攻击者的动作。别把它们写成"攻击者在允许目录里建了一条符号链接"，要写成"允许目录里本来就有这样一条符号链接"。
 3. **攻击者能控制的通常只有这次调用的参数。** 机制复现里尤其如此：攻击面是一个固定的工具调用，不是攻击者对宿主机的写权限。把攻击者写成能随意操作目标系统的文件，会高估复现证明的东西。
-4. **效果要落到攻击者手里。** 数据是从哪里流到哪里？`external_marker -> read_file_tool` 表示文件内容被读出；`kubectl_cli -> api_receiver` 表示凭据送到攻击者的接收端。方向错了，读者就看不出攻击者图什么。
+4. **效果要落到攻击者手里。** 数据是从哪里流到哪里？`outside_file -> read_file_tool` 表示文件内容被读出；`kubectl_cli -> attacker_api` 表示凭据送到攻击者的接收端。方向错了，读者就看不出攻击者图什么。
 
 只有攻击者**自己控制**的接收端、自己构造的输入才标 `attacker_controlled`；攻击者想要但够不着的数据标 `trusted`。
+
+## 只解释漏洞本身，不写复现脚手架
+
+图解里的文字——`summary`、主体 `label`、步骤 `action`、边界 `label`——**只描述漏洞本身**：攻击者可控的输入、受影响的上游组件、被读写的存储和最终效果。本仓库用来复现它的东西一律不进去：
+
+- `runner`、`verify.py`、结果卷、容器与网络编排、fixture 装载、观测文件、正常任务对照；
+- 「本仓库用 X 代替 Y」这类替身说明；
+- 「本实验没有执行 handler」这类局限声明。
+
+这些内容不是没价值，而是**放错了位置**。替身与来源写进 `source`/`evidence`，局限与端到端状态写进环境自己的 `## 前提`、`## 机制复现`、`## 端到端复现`、`## 输入与隔离` 小节。图解区块只回答一个问题：这个漏洞是怎么发生的。
+
+| 位置 | ✗ 混入脚手架 | ✓ 只讲漏洞 |
+| --- | --- | --- |
+| 主体 `label` | `kubectl 子进程（本地假 CLI）` | `kubectl 子进程` |
+| 主体 `label` | `synthetic kubeconfig 凭据存储` | `kubeconfig 凭据存储` |
+| 主体 `label` | `受控 API 接收器` | `攻击者指定的 API 地址` |
+| 步骤 `action` | `…进入本地专用命令的函数体（本实验没有执行 handler）` | `…进入本地专用命令的函数体` |
+| 步骤 `action` | `kubectl 把合成的 PodList 返回给调用方` | `kubectl 把响应返回给调用方` |
+
+`role`、`detail`、`note` 是给读者补背景的散文，可以说明复现方式；但只要能讲清漏洞本身，就不该把笔墨花在脚手架上。校验器会拦截图解可见字段里的装置词，见「校验规则」第 11 条。
 
 ## 渲染约定
 
@@ -122,7 +142,8 @@ evidence = "fixtures/attack.json"     # 可选：证据引用
 7. 每个主体至少被一个步骤引用，或显式 `static = true`；
 8. 边界 `id` 唯一且与主体 id 不重名，`members` 非空并引用已声明主体，`label`/`note` 非空，且一个主体最多属于一个边界；
 9. 引用 `fixtures/` 的 `evidence`/`source` 必须存在，且被 `fixtures/manifest.toml` 覆盖；
-10. `diagram/mechanism.mmd`、`diagram/entities.mmd` 和 `README.zh-cn.md` 图解区块与 `diagram.toml` 一致；不一致时提示运行 `python3 -m runner diagram <id>`。
+10. `diagram/mechanism.mmd`、`diagram/entities.mmd` 和 `README.zh-cn.md` 图解区块与 `diagram.toml` 一致；不一致时提示运行 `python3 -m runner diagram <id>`；
+11. `summary`、主体 `label`、边界 `label` 和步骤 `action` 里不得出现复现装置词（`本仓库`、`本实验`、`本环境`、`fixture`、`synthetic`、`替身`、`本地假`、`verify.py`、`observation.json` 等），词表见 `runner/diagram.py` 的 `APPARATUS`。`role`/`detail`/`note` 和 `source`/`evidence` 不在此列。
 
 ## 工作流
 
