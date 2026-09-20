@@ -7,6 +7,16 @@
 - 31 个通过环境的 metadata evidence 均指向对应的三轮 `report.json`；没有环境被标为 `ready`，也没有上传 GHCR 镜像。
 - 真实模型端到端测试仍按环境逐项标记为 `not_applicable`；机制验收不证明模型会选择工具或完成完整工作流。
 
+## 漏洞图解工具链（新增）
+
+- 新增 `diagram.toml` 图解契约、`runner/diagram.py` 渲染与校验模块、`python3 -m runner diagram` 命令和 `templates/environment/diagram.toml` 模板；字段与规则见[漏洞图解契约](diagram-contract.md)和 [ADR-0020](adr/0020-diagram-source-and-rendering.md)。
+- 图采用 Mermaid：`sequenceDiagram` 表达触发过程，`flowchart` 表达主体与信任边界；产物为 `diagram/mechanism.mmd`、`diagram/entities.mmd` 和 `README.zh-cn.md` 中的图解区块，全部由 `diagram.toml` 渲染，不手写。
+- 图只描述漏洞本身：主体类型限定为 `actor|client|service|tool|store|sink`，阶段限定为 `setup|trigger|effect`。`verifier`/`runtime` 类型和 `verify` 阶段被刻意删除，因此运行器、`verify.py`、结果卷、容器编排、协议替身等复现工具链在 schema 上写不进触发过程；替身与无害效果保留并标 `synthetic = true`。
+- 静态校验并入 `runner check`：主体必须有 `role`、步骤编号连续且引用已声明主体、至少一个 `diverges = true` 的分歧步骤、信任边界成员必须存在、`fixtures/...` 引用必须存在且被 fixture manifest 覆盖、生成物不得漂移。
+- 图解属于说明性文档，不参与输入指纹；修改图不会使既有 `ready` 证据失效，图解也不能替代证据。
+- `runner new` 生成的草稿自带可渲染的图解骨架并立即写入图解区块。
+- 覆盖状态：工具、模板和 3 个样例环境（`mcp-filesystem/CVE-2025-53109`、`mcp-server-kubernetes/CVE-2026-61459`、`openharness/CVE-2026-56696`）已完成；其余 36 个环境尚未补图，`python3 -m runner diagram --missing` 可列出。`diagram.toml` 当前是可选增强，全量覆盖后再加入 `REQUIRED_FILES` 强制要求。
+
 以下内容是 2026-09-10 的首版历史记录，保留当时的 6 个环境和 30 项测试统计。
 
 日期：2026-09-10。用户已确认设计并授权实现。本记录描述共享工具和 6 个机制环境；环境仍需维护者审阅后才能晋升 `ready`。

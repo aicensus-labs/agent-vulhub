@@ -18,6 +18,9 @@ GHCR 正式镜像用 `image@sha256:...`；本地源码构建用 Docker 返回的
 python3 -m runner new <product> <identifier>
 python3 -m runner check
 python3 -m runner lint
+python3 -m runner diagram <product>/<CVE-ID>
+python3 -m runner diagram --all
+python3 -m runner diagram --missing
 python3 -m runner fetch <product>/<CVE-ID>
 python3 -m runner build <product>/<CVE-ID> --offline
 python3 -m runner reproduce <product>/<CVE-ID> --build --rounds 3
@@ -33,6 +36,23 @@ python3 -m runner refresh
 默认 reproduce 使用元数据镜像，`--build` 选择完整源码构建；两条路径均受支持。`--scenario vulnerable|patched|benign` 用于局部调试，局部通过不满足晋升。`--timeout` 为单测试执行总期限（秒），构建、拉取另有命令超时，清理独立限时。下载设 socket 超时和 2 GiB 单文件上限，无自动重试。
 
 check 纯文件静态校验，不调用 Docker；lint 使用 Compose CLI 的 JSON 解析，不拉取、不构建、不运行环境。draft 模板可保留占位字段，不得宣称通过。
+
+## 漏洞图解
+
+每个环境用 `diagram.toml` 作为图解的单一来源，说明漏洞机制、触发过程和涉及的每个主体；渲染产物为 `diagram/mechanism.mmd`、`diagram/entities.mmd` 和 `README.zh-cn.md` 中的图解区块。作者和 AI 只编辑 `diagram.toml`，手写 Mermaid 不作为来源。
+
+图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储、受控效果落点。复现工具链（运行器、`verify.py`、结果卷、容器与网络编排、协议替身、fixture 装载、观测文件、正常任务对照）不属于漏洞的触发过程，也不属于漏洞的主体，不得出现在图里。这条规则落在 schema 上：主体类型只有 `actor|client|service|tool|store|sink`，阶段只有 `setup|trigger|effect`，`verifier`/`runtime` 类型和 `verify` 阶段被刻意删除。替身与无害效果仍保留并标 `synthetic = true`，因为它们扮演的是漏洞链上的真实角色；验证器与隔离方式写在 README 正文和 `metadata.toml` 里，不进入这张图。
+
+```sh
+python3 -m runner diagram <product>/<CVE-ID>            # 渲染并更新 README 图解区块
+python3 -m runner diagram <product>/<CVE-ID> --check    # 只报告漂移，不写入
+python3 -m runner diagram --all                         # 渲染所有已有 diagram.toml 的环境
+python3 -m runner diagram --missing                     # 列出还没有图解的环境
+```
+
+`check` 对每个存在 `diagram.toml` 的环境做纯静态校验：主体 id 唯一且每个主体都有 `role`，主体类型和步骤阶段在漏洞自身的枚举内，步骤编号 `1..N` 连续并引用已声明主体，至少一步 `diverges = true` 且其 `variant` 不是 `both`，每个主体要么被步骤引用要么 `static = true`，信任边界成员存在且一个主体最多属于一个边界，引用 `fixtures/...` 的证据必须存在并被 fixture manifest 覆盖，生成物与来源一致。规则细节见[漏洞图解契约](diagram-contract.md)。
+
+图解是说明性文档：它不参与输入指纹，修改图不会使既有 `ready` 证据失效，但图解也不能替代证据。图中每个效果都必须能在 `fixtures/` 或 `results/` 找到对应事实，`diverges` 步骤必须与 `verify.py` 的实际检查一致，且不得把机制复现表述为真实模型端到端复现。首版图解是可选增强；全量覆盖后把 `diagram.toml` 加入 `REQUIRED_FILES` 即切换为强制要求。
 
 ## Agent-PoC 任务与候选执行协议
 

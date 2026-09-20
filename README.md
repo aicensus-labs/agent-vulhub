@@ -56,6 +56,7 @@ Agent 安全漏洞的 Docker 机制复现仓库。每个环境固定完整上游
 python3 -m runner list
 python3 -m runner check
 python3 -m runner lint
+python3 -m runner diagram --missing
 python3 -m unittest discover -s tests -v
 ```
 
@@ -92,8 +93,8 @@ python3 -m runner refresh
 ```text
 environments.toml       环境索引
 environments/           真实 CVE/GHSA 环境（当前 39 个，均为 draft）
-templates/environment/  环境配方、PoC、验证器和 fixture 模板
-runner/                 索引、源码构建、Compose 编排、证据校验和晋升
+templates/environment/  环境配方、PoC、验证器、fixture 和图解模板
+runner/                 索引、源码构建、Compose 编排、证据校验、图解渲染和晋升
 tests/                  静态工具测试和显式 Docker smoke
 docs/                   执行协议、设计记录和 ADR
 results/                本地实验结果（Git 忽略）
@@ -101,6 +102,23 @@ results/                本地实验结果（Git 忽略）
 ```
 
 模板仍明确返回未实现，不能因存在模板文件而标记为成功。机制复现允许固定模型输出，但必须走真实漏洞代码路径；真实模型端到端复现另行记录。
+
+## 漏洞图解
+
+每个环境用 `diagram.toml` 作为图解的单一来源，说明漏洞机制、触发过程和涉及的每个主体。图用 Mermaid 渲染：时序图表达触发过程，流程图表达主体与信任边界。AI 或维护者只编辑结构化字段，渲染器负责生成 `diagram/mechanism.mmd`、`diagram/entities.mmd` 和 README 中的图解区块，因此不会出现只画不解释的孤立主体。
+
+图只描述**漏洞本身**——攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储、受控效果落点。运行器、`verify.py`、结果卷、容器编排、协议替身这类复现工具链不属于漏洞的触发过程，schema 里也没有对应取值，写不进去；替身与无害效果保留并标 ⚠。
+
+```sh
+python3 -m runner diagram <product>/<CVE-ID>          # 渲染并更新 README 图解区块
+python3 -m runner diagram --all                       # 渲染所有已有图解的环境
+python3 -m runner diagram --missing                   # 列出尚未补图的环境
+python3 -m runner diagram <product>/<CVE-ID> --check  # 只报告漂移，不写入
+```
+
+`runner check` 会静态校验每份图解：主体必须有职责说明，步骤编号必须连续并引用已声明主体，必须标出漏洞版/修复版的分歧步骤，引用 `fixtures/...` 的证据必须真实存在。图解是说明性文档，不参与输入指纹，也不能替代实验证据。
+
+格式与字段见[漏洞图解契约](docs/diagram-contract.md)和 [ADR-0020](docs/adr/0020-diagram-source-and-rendering.md)。目前 3 个环境已覆盖，其余 36 个待补；`diagram.toml` 当前是可选增强，全量覆盖后切换为强制要求。
 
 ## 大模型生成 PoC
 

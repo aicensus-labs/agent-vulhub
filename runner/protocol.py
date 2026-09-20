@@ -78,9 +78,12 @@ def fingerprint(root, directory, metadata):
         relative = path.relative_to(directory)
         if relative.parts[0] in {"evidence", "results", "__pycache__", ".cache", ".git"}:
             continue
+        if relative.parts[0] == "diagram":
+            # Rendered diagrams are documentation, like README prose.
+            continue
         if relative.parts[0] == ".env" or (relative.parts[0].startswith(".env.") and relative.parts[0] != ".env.example"):
             continue
-        if path.name.startswith("metadata.toml") or path.suffix == ".pyc":
+        if path.name.startswith("metadata.toml") or path.name == "diagram.toml" or path.suffix == ".pyc":
             continue
         if path.suffix == ".md" and relative.parts[0] != "fixtures":
             continue

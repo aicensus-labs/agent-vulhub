@@ -1,0 +1,85 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram {{PRODUCT}}/{{CVE}}
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# fixture 装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "{{PRODUCT}} / {{CVE}} 漏洞图解"
+summary = "TODO：用 2~4 句讲清三件事：漏洞的根因是什么、绕过了哪道边界、漏洞本身会造成什么效果。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（本仓库合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "attacker"
+label = "攻击者 / 攻击材料"
+kind = "actor"
+trust = "attacker_controlled"
+role = "TODO：这个主体能控制什么输入，它在漏洞里起什么作用。"
+
+[[entities]]
+id = "target"
+label = "TODO：受影响的上游组件"
+kind = "service"
+trust = "trusted"
+role = "TODO：这个组件执行的哪段校验或调用有缺陷，边界为什么没拦住。"
+
+[[entities]]
+id = "effect"
+label = "TODO：漏洞效果最终落到哪里"
+kind = "sink"
+trust = "trusted"
+synthetic = true
+role = "TODO：漏洞触发后效果落在哪里。如果这里是本仓库合成的 marker，请说明它不是真实的外部目标。"
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["attacker"]
+note = "TODO：攻击者在这里能控制什么、不能控制什么。"
+
+[[boundaries]]
+id = "product"
+label = "TODO：受影响的组件和它信任的数据"
+members = ["target", "effect"]
+note = "TODO：这道边界本来挡住什么，漏洞又是怎么让它失效的。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。至少一步 diverges = true 表示漏洞版与修复版
+# 的分叉点，且该步 variant 不能是 both。
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker"
+to = "target"
+action = "TODO：攻击者可控的输入进入了受影响组件"
+variant = "both"
+
+[[steps]]
+n = 2
+phase = "trigger"
+from = "target"
+to = "target"
+action = "TODO：漏洞版绕过了边界检查"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "target"
+to = "target"
+action = "TODO：修复版拒绝同一输入"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 4
+phase = "effect"
+from = "target"
+to = "effect"
+action = "TODO：漏洞版产生了实际效果"
+variant = "vulnerable_only"

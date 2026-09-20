@@ -115,8 +115,15 @@ def check(root: Path) -> list[dict]:
         validate_metadata(read_toml(directory / "metadata.toml"), entry["id"])
         from .protocol import check_fixtures
         from .lifecycle import ready_check
+        from . import diagram
         data = read_toml(directory / "metadata.toml")
         check_fixtures(directory)
+        try:
+            rendered = diagram.load(directory)
+            if rendered is not None:
+                diagram.check(directory, rendered)
+        except ValueError as error:
+            raise RegistryError(f"{entry['id']}: {error}") from error
         ready_check(root, directory, data)
     for path in (root / "environments").glob("*/*/metadata.toml"):
         if path.parent.relative_to(root).as_posix() not in indexed:
@@ -147,6 +154,11 @@ def scaffold(root: Path, product: str, identifier: str) -> Path:
         destination = target / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(content, encoding="utf-8")
+    from . import diagram
+    scaffolded = diagram.load(target)
+    if scaffolded is not None:
+        diagram.validate(target, scaffolded)
+        diagram.write_all(target, scaffolded)
     entries.append({"id": environment_id, "path": target.relative_to(root).as_posix()})
     lines = ["schema_version = 1", ""]
     for entry in sorted(entries, key=lambda entry: entry["id"]):
@@ -174,6 +186,11 @@ def main(argv: list[str] | None = None) -> int:
     commands.add_parser("refresh", help="Downgrade stale ready environments; preserve historical evidence")
     lint = commands.add_parser("lint", help="Parse Compose via Docker CLI without starting containers")
     lint.add_argument("environment", nargs="?")
+    diagram_command = commands.add_parser("diagram", help="Render Mermaid mechanism diagrams from diagram.toml")
+    diagram_command.add_argument("environment", nargs="?")
+    diagram_command.add_argument("--all", action="store_true", dest="every", help="Render every environment that has diagram.toml")
+    diagram_command.add_argument("--check", action="store_true", help="Report drift without writing")
+    diagram_command.add_argument("--missing", action="store_true", help="List environments without diagram.toml")
     for name in ("fetch", "build", "reproduce", "agent-evaluate", "promote", "publish"):
         command = commands.add_parser(name)
         command.add_argument("environment")
@@ -215,6 +232,51 @@ def main(argv: list[str] | None = None) -> int:
             validate_metadata(metadata, args.environment)
             output = create_task(ROOT, directory, metadata, int(args.level), Path(args.out_dir), args.offline)
             print(output)
+            return 0
+        if args.command == "diagram":
+            from . import diagram as diagrams
+            entries = load_registry(ROOT)
+            if args.missing:
+                for entry in entries:
+                    if diagrams.load(ROOT / entry["path"]) is None:
+                        print(entry["id"])
+                return 0
+            if args.every:
+                targets = list(entries)
+            elif args.environment:
+                if args.environment not in {entry["id"] for entry in entries}:
+                    raise RegistryError(f"Unknown environment: {args.environment}")
+                targets = [entry for entry in entries if entry["id"] == args.environment]
+            else:
+                raise RegistryError("diagram needs an environment, --all, or --missing")
+            problems = []
+            missing = []
+            rendered = 0
+            for entry in targets:
+                directory = ROOT / entry["path"]
+                data = diagrams.load(directory)
+                if data is None:
+                    if args.check:
+                        missing.append(entry["id"])
+                    elif not args.every:
+                        raise RegistryError(f"{entry['id']}: diagram.toml is missing")
+                    continue
+                diagrams.validate(directory, data)
+                if args.check:
+                    problems.extend(f"{entry['id']}: {item}" for item in diagrams.drift(directory, data))
+                    continue
+                changed = diagrams.write_all(directory, data)
+                rendered += 1
+                print(f"{entry['id']}: {', '.join(changed) if changed else 'already up to date'}")
+            for identifier in missing:
+                print(f"MISSING: {identifier}: no diagram.toml yet")
+            for problem in problems:
+                print(f"DRIFT: {problem}", file=sys.stderr)
+            if problems:
+                print("Fix with: python3 -m runner diagram <environment>", file=sys.stderr)
+                return 1
+            if not args.check:
+                print(f"Rendered {rendered} diagram(s)")
             return 0
         if args.command == "refresh":
             from .lifecycle import refresh
@@ -304,7 +366,10 @@ def main(argv: list[str] | None = None) -> int:
         else:
             entries = check(ROOT)
             if args.command == "check":
-                print(f"OK: {len(entries)} environment(s); static checks only, no reproductions executed")
+                from . import diagram as diagrams
+                covered = sum(1 for entry in entries if diagrams.load(ROOT / entry["path"]) is not None)
+                print(f"OK: {len(entries)} environment(s), {covered} with diagrams; "
+                      "static checks only, no reproductions executed")
             elif not entries:
                 print("No environments registered. Use 'python3 -m runner new --help' to add a draft.")
             else:

@@ -6,9 +6,10 @@
 4. 实现 `reproduce.py` 和 `verify.py` 的标准参数及证据协议。PoC 执行产品，验证器独立读证据；真实模型 `end_to_end.py` 可选，不伪造结果。
 5. 在 `fixtures/manifest.toml` 固定攻击及正常输入哈希；在 `build.inputs` 固定源码归档、依赖的 URL 和哈希。Dockerfile 必须能从缓存输入禁网安装完整产品。
 6. 使用 `runner reproduce <id> --build --rounds 3` 在独立 Linux amd64 环境验收，两版攻击和两版正常任务每轮各跑一次。阅读失败原因和日志，不隐藏失败后重试。
-7. 需要分发时显式运行 `runner publish <id> --images <build.json> --repository ghcr.io/<owner>/<package>`，将输出 digest 写回元数据，再使用这些正式镜像完成验收。
-8. 维护者审阅公告、代码、配方及完整证据，确认脱敏后执行 `runner promote <id> --report <report.json> --reviewer <login> --reviewed`。隔离例外需两位不同审阅者，用两次 `--reviewer` 记录。
-9. 运行 `python3 -m runner check`、`python3 -m runner lint` 和工具测试，再提交明确的环境目录和索引变更。
+7. 编写 `diagram.toml` 说明漏洞机制、触发过程和涉及的每个主体，再运行 `runner diagram <id>` 渲染时序图、主体图和 README 图解区块。图只写漏洞本身（攻击者可控输入、受影响组件、被调用的工具、被读写的存储、受控效果落点），不要写运行器、`verify.py`、结果卷、容器编排、协议替身等复现工具链；主体必须有职责说明，步骤必须按真实 `reproduce.py` 路径编号，并标出漏洞版/修复版的分歧步骤；引用 `fixtures/...` 的证据必须真实存在。字段和规则见[漏洞图解契约](docs/diagram-contract.md)。
+8. 需要分发时显式运行 `runner publish <id> --images <build.json> --repository ghcr.io/<owner>/<package>`，将输出 digest 写回元数据，再使用这些正式镜像完成验收。
+9. 维护者审阅公告、代码、配方及完整证据，确认脱敏后执行 `runner promote <id> --report <report.json> --reviewer <login> --reviewed`。隔离例外需两位不同审阅者，用两次 `--reviewer` 记录。
+10. 运行 `python3 -m runner check`、`python3 -m runner lint` 和工具测试，再提交明确的环境目录和索引变更。
 
 ## 大模型 PoC 评测材料
 
