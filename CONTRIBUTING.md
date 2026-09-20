@@ -1,5 +1,7 @@
 # 新增漏洞环境
 
+完整的分步工作流、每一步的验收标准和踩坑速查见[漏洞复现与图解工作流](docs/reproduction-workflow.md)。下面是可以直接照着勾的清单。
+
 1. 核对官方 CVE/GHSA、受影响版本和修复来源。重新判断 Agent 关联性，不直接照搬现有数据库的自动标签。
 2. 使用 `python3 -m runner new <product> <CVE-ID>` 创建草稿。产品目录用小写字母、数字和连字符，CVE 用大写规范编号。
 3. 填写 `metadata.toml`、README、镜像配方和 fixtures。保留第三方材料原始链接及许可。模板中的占位字符串必须替换。
