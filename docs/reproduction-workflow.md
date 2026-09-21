@@ -1,6 +1,6 @@
 # 漏洞复现与图解工作流
 
-面向接手这个仓库的人：从一个 CVE 编号开始，到一个「可复现的环境 + 两张说明图 + 在 AgentSec-Daily 网站上能看到」为止。
+面向接手这个仓库的人：从一个 CVE 编号开始，到一个「可复现的环境 + 两张说明图」为止。
 
 这份文档讲**按什么顺序做**、**每一步的验收标准**，以及**哪里容易踩坑**。字段和枚举的权威定义在[环境执行协议](environment-contract.md)和[漏洞图解契约](diagram-contract.md)，本文不重复。
 
@@ -201,39 +201,9 @@ python3 -m runner promote <product>/<CVE-ID> --report <report.json> --reviewer <
 
 ---
 
-## 9. 接入 AgentSec-Daily
-
-图解做完并推到 `main` 之后，**网站上不需要改任何代码**——AgentSec-Daily 的后端按 `environment_id` 从 GitHub raw 拉取 `diagram/mechanism.mmd` 和 `diagram/entities.mmd`。
-
-你要做的只有一件事：确认这个漏洞在 `agentsec_daily/reproduction_catalog.py` 的 `_ENVIRONMENTS` 里有一条目录项。
-
-```python
-{
-    "environment_id": "mcp-server-kubernetes/CVE-2026-61459",
-    "identifier": "CVE-2026-61459",
-    "identifier_type": "CVE",
-    "cve": "CVE-2026-61459",
-    "selection_scope": AGENT_UNIQUE_SELECTION_SCOPE,   # 或 LEGACY_SELECTION_SCOPE
-    "status": "draft",
-    "repository_url": AGENT_VULHUB_REPOSITORY_URL,
-    "environment_url": f"{AGENT_VULHUB_REPOSITORY_URL}/tree/main/environments/<environment_id>",
-}
-```
-
-关联时用 CVE/官方别名，**不要把环境加入时间当作漏洞披露时间**，也不要因此新增重复漏洞记录。约定见[关联约定](agentsec-integration.md)。
-
-> **两个常见误解**
->
-> 1. **目录里有条目 ≠ 网站上能看到。** 公开详情页带 `status="published"` 过滤。如果这条漏洞记录在 AgentSec-Daily 数据库里的 `status` 是空的，详情页直接 404，图解自然也不显示——和图解链路无关。收工前用真实 `raw_item_id` 打一次详情端点确认。
-> 2. **图推到 `main` 才会生效。** 后端读的是 `main` 分支的 raw 地址，本地提交不推等于没做。
-
----
-
-## 10. 踩坑速查
+## 9. 踩坑速查
 
 这些是实际踩过的，症状和原因都写清楚，方便你一眼认出来。
-
-### 仓库侧
 
 | 症状 | 原因 | 处理 |
 | --- | --- | --- |
@@ -245,26 +215,17 @@ python3 -m runner promote <product>/<CVE-ID> --report <report.json> --reviewer <
 | `--all --check` 报一堆 `MISSING` | 那些环境本来就还没补图 | 非致命；`DRIFT` 才是问题 |
 | 生成 Mermaid 用了 3.12 才支持的嵌套引号 f-string | Python 3.11 兼容性 | 拆成临时变量用 `%` 格式化 |
 
-### AgentSec-Daily 侧
-
-| 症状 | 原因 | 处理 |
-| --- | --- | --- |
-| 页面上图解**完全没有**，也不报错 | 后端在跑**改动之前**的代码。Python 不热重载，旧 `app.py` 里没有 `/diagrams` 路由 → 404 → 前端静默降级 | **改了后端必须重启**。先 `curl` 一下 `/diagrams` 端点确认 |
-| 内容更新了但页面还是旧的 | 后端有 15 分钟 TTL 缓存 | 等 TTL 过期，或重启后端 |
-| 图小到看不清字 | Mermaid 给 SVG 设了 `width="100%"`，浏览器把整张图**等比缩到容器宽度**，字跟着缩（实测桌面缩到 31%、手机缩到 9%） | 渲染后按 `viewBox` 设自然尺寸，让容器横向滚动。注意：只写 `overflow-x: auto` **不会生效**，因为 SVG 永远不溢出 |
-| 想从浏览器直连 GitHub raw | 后端 CSP 是 `connect-src 'self'` | 必须走后端代理，不能前端直连 |
-
 ### 通用方法
 
-**先量再改。** 上面「图小到看不清」这一条，如果只看现象去猜，很容易得出「字号太小」的结论去调字体，而真正的原因是等比缩放。用 Playwright 量一下 `getBoundingClientRect()` 和 `viewBox` 的比值，原因立刻清楚。
+**先量再改。** 「边上的文字叠在一起」这一条如果靠猜，很容易去调字号或换布局，而真正的原因是 Mermaid 把标签固定放在边中点、从不避让。用真实浏览器量一下每个 `g.edgeLabel` 的 `getBoundingClientRect()` 有没有相交，比挨个试写法快得多——我试了 5 种布局变体，量过之后才确定「仅步骤编号」是唯一在全部 6 种 LR/TB 组合下都不重叠的写法。
 
 **判断「是不是我改坏的」。** 测试挂了先别急着改代码，先建基线对比：用 `git archive HEAD | tar -x -C /tmp/base` 导出一份 HEAD，跑同一套测试。**但要注意工作区可能本来就有别人未提交的改动**——只有 HEAD 基线不够，还要构造一份「当前工作区减去我的改动」的基线。两次结果取交集，才是你真正引入的失败。
 
-另外注意**复现条件要一致**：复用热 dev server 和 `CI=1` 起全新 server，结果可能不同（我遇到过同一棵树两次跑出不同失败集，换成同条件后消失）。
+另外注意**复现条件要一致**：复用已经跑热的服务实例和重新起一个干净实例，结果可能不同（我遇到过同一棵树两次跑出不同的失败集合，换成同一种条件后就消失了）。
 
 ---
 
-## 11. 一页速查
+## 10. 一页速查
 
 ```sh
 # 建环境
@@ -302,6 +263,5 @@ python3 -m runner promote <product>/<CVE-ID> --report <report.json> --reviewer <
 - [环境执行协议](environment-contract.md) — 构建、入口、证据、晋升的权威定义
 - [漏洞图解契约](diagram-contract.md) — 图解字段、枚举、渲染约定、校验规则
 - [收录流程](../CONTRIBUTING.md) — 十步清单
-- [关联约定](agentsec-integration.md) — 与 AgentSec 数据库的关联字段
 - [术语](../CONTEXT.md)
 - [ADR 索引](adr/) — 每个设计决定的原因，尤其 [0019](adr/0019-agent-generated-poc-evaluation.md)、[0020](adr/0020-diagram-source-and-rendering.md)
