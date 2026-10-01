@@ -1,0 +1,38 @@
+%% dynatrace-mcp / GHSA-PC2W-4MQ8-32QW 漏洞图解 — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["攻击者侧"]
+    attacker["攻击者 / 攻击材料<br/>actor · attacker_controlled"]
+  end
+  subgraph tenant_side["租户侧写工具与人工批准边界"]
+    mcp_server["MCP server<br/>service · trusted"]
+    notebook_tool["create_dynatrace_notebook 写工具<br/>tool · trusted"]
+    approval_gate["requestHumanApproval 人工批准门<br/>tool · trusted"]
+    operator["操作者的 MCP 客户端<br/>client · trusted"]
+    document_api["文档写入端点<br/>⚠ sink · trusted"]
+  end
+  attacker -->|"1"| mcp_server
+  mcp_server -.->|"2"| notebook_tool
+  notebook_tool -.->|"3"| approval_gate
+  approval_gate -.->|"4"| operator
+  notebook_tool -.->|"5"| document_api
+  notebook_tool -.->|"6"| attacker
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class attacker actor
+  class mcp_server service
+  class notebook_tool tool
+  class approval_gate tool
+  class operator client
+  class document_api sink
+  class document_api synthetic
+  style attacker_side fill:transparent
+  style tenant_side fill:transparent
+  linkStyle 1 stroke:#c0392b,stroke-width:2px
+  linkStyle 2 stroke:#2e7d32,stroke-width:2px
+  linkStyle 3 stroke:#2e7d32,stroke-width:2px
+  linkStyle 5 stroke:#2e7d32,stroke-width:2px

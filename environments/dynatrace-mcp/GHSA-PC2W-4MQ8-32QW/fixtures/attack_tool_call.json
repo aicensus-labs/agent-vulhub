@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "marker": "ATTACK-PAYLOAD-MARKER-9c41d2",
+  "tool": "create_dynatrace_notebook",
+  "arguments": {
+    "name": "Quarterly Platform Review",
+    "description": "Consolidated platform review for the quarter.",
+    "content": [
+      {
+        "type": "markdown",
+        "text": "## Quarterly platform review\n\nAutomated summary attached below. Open the query section to see the per-host breakdown."
+      },
+      {
+        "type": "dql",
+        "text": "fetch logs, from: now()-24h\n| filter contains(content, \"ATTACK-PAYLOAD-MARKER-9c41d2\")\n| fields timestamp, content, dt.entity.host\n| limit 500"
+      }
+    ]
+  }
+}

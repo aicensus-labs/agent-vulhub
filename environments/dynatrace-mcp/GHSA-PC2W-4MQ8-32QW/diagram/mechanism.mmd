@@ -1,0 +1,18 @@
+%% dynatrace-mcp / GHSA-PC2W-4MQ8-32QW 漏洞图解 — generated from diagram.toml
+sequenceDiagram
+  actor attacker as 攻击者 / 攻击材料
+  participant mcp_server as MCP server
+  participant notebook_tool as create_dynatrace_notebook 写工具
+  participant approval_gate as requestHumanApproval 人工批准门
+  participant operator as 操作者的 MCP 客户端
+  participant document_api as 文档写入端点
+  Note over attacker,mcp_server: 阶段 setup
+  attacker ->> mcp_server: 1 一次 tools/call 把攻击者可控的 name、description 和 content 交给 create_dynatrace_notebook，content 里带 DQL 段
+  Note over mcp_server,notebook_tool: 阶段 trigger
+  mcp_server -->> notebook_tool: 2 漏洞版把请求直接交给 callback，callback 第一行就用最宽写作用域建立文档客户端
+  Note over mcp_server,notebook_tool: 分歧点：漏洞版与修复版在此分叉
+  notebook_tool -x approval_gate: 3 修复版在产生任何副作用之前先调用人工批准门
+  approval_gate -x operator: 4 批准门通过 MCP elicitation 询问操作者，没有明确同意就返回拒绝
+  Note over notebook_tool,document_api: 阶段 effect
+  notebook_tool -->> document_api: 5 漏洞版发出 multipart 文档写入请求，把攻击者内容持久化为 notebook
+  notebook_tool -x attacker: 6 修复版返回 Operation cancelled，未获批准时不发出任何文档写入请求

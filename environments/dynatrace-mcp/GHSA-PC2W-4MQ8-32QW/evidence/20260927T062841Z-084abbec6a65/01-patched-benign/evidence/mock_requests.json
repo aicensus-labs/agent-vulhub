@@ -1,0 +1,21 @@
+[
+  {
+    "method": "POST",
+    "target": "/platform/document/v1/documents",
+    "path": "/platform/document/v1/documents",
+    "headers": {
+      "host": "abc12345.apps.dynatrace.com",
+      "connection": "keep-alive",
+      "authorization": "<redacted>",
+      "user-agent": "dynatrace-mcp-server/v1.8.7 (linux-x64)",
+      "accept": "application/json",
+      "content-type": "multipart/form-data; boundary=----formdata-undici-042951944572",
+      "accept-language": "*",
+      "sec-fetch-mode": "cors",
+      "accept-encoding": "br, gzip, deflate",
+      "content-length": "980"
+    },
+    "authorization_present": true,
+    "body": "------formdata-undici-042951944572\r\nContent-Disposition: form-data; name=\"name\"\r\n\r\nWeekly Service Health\r\n------formdata-undici-042951944572\r\nContent-Disposition: form-data; name=\"type\"\r\n\r\nnotebook\r\n------formdata-undici-042951944572\r\nContent-Disposition: form-data; name=\"description\"\r\n\r\nRoutine weekly service health summary.\r\n------formdata-undici-042951944572\r\nContent-Disposition: form-data; name=\"content\"; filename=\"binary\"\r\nContent-Type: application/json\r\n\r\n{\"version\":\"7\",\"sections\":[{\"id\":\"ae82b406-4f39-4f54-8f70-f28606866b50\",\"type\":\"markdown\",\"markdown\":\"## Weekly service health\\n\\nLatency and error rates stayed inside the normal band for the whole week.\"},{\"id\":\"ae602409-b153-4f12-89eb-b8842be906a4\",\"type\":\"dql\",\"showTitle\":false,\"state\":{\"input\":{\"value\":\"fetch events, from: now()-7d\\n| filter contains(content, \\\"BENIGN-NOTEBOOK-MARKER-3a77e1\\\")\\n| summarize events = count(), by: {event.kind}\\n| sort events desc\"}}}]}\r\n------formdata-undici-042951944572--\r\n"
+  }
+]

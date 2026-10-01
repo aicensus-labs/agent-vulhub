@@ -1,0 +1,11 @@
+schema_version = 1
+
+# Keys are paths relative to fixtures/. Include attack AND benign inputs.
+[files]
+"attack_tool_call.json" = "15130e34665d3b6f237e82f6798f294e58ab805c39407fc7534f5031c7a6f2eb"
+"benign_tool_call.json" = "07a03865087decdbfd2bb2b21a4c24bf73d862fa81d30976c46ed7c4a3b69a2d"
+"client_policy.json" = "48f3362475cfc7a82d2a89d988d7a5d280fee8eca1208c634e69ef64569af615"
+"mock_document_response.json" = "353840b51c48f5bfb37de99e9f1337a607e3d0332a350210f1ba6e197bac0873"
+"tls/ca.crt" = "ffbc7d4a55d6237b3cc7d7549bf1e751278171cc67a448778a75e188fa8187c3"
+"tls/server.crt" = "cebe01a828e1bb5c4addd55eccd30d3d0d1cd6a40ab6d5de01eef0666082f828"
+"tls/server.key" = "89cc31e493e8c16c106bb69be5d9e75b31cb838afcd5935057f940623084ced8"

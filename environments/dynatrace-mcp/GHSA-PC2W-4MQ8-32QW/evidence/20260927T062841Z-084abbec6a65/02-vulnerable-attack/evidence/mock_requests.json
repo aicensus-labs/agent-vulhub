@@ -1,0 +1,21 @@
+[
+  {
+    "method": "POST",
+    "target": "/platform/document/v1/documents",
+    "path": "/platform/document/v1/documents",
+    "headers": {
+      "host": "abc12345.apps.dynatrace.com",
+      "connection": "keep-alive",
+      "authorization": "<redacted>",
+      "user-agent": "dynatrace-mcp-server/v1.8.6 (linux-x64)",
+      "accept": "application/json",
+      "content-type": "multipart/form-data; boundary=----formdata-undici-081749052674",
+      "accept-language": "*",
+      "sec-fetch-mode": "cors",
+      "accept-encoding": "br, gzip, deflate",
+      "content-length": "997"
+    },
+    "authorization_present": true,
+    "body": "------formdata-undici-081749052674\r\nContent-Disposition: form-data; name=\"name\"\r\n\r\nQuarterly Platform Review\r\n------formdata-undici-081749052674\r\nContent-Disposition: form-data; name=\"type\"\r\n\r\nnotebook\r\n------formdata-undici-081749052674\r\nContent-Disposition: form-data; name=\"description\"\r\n\r\nConsolidated platform review for the quarter.\r\n------formdata-undici-081749052674\r\nContent-Disposition: form-data; name=\"content\"; filename=\"binary\"\r\nContent-Type: application/json\r\n\r\n{\"version\":\"7\",\"sections\":[{\"id\":\"301182ac-9b34-4dd3-9f6f-db1fbc16c22e\",\"type\":\"markdown\",\"markdown\":\"## Quarterly platform review\\n\\nAutomated summary attached below. Open the query section to see the per-host breakdown.\"},{\"id\":\"d5801a3a-6209-4962-822d-651ef9ebc7a4\",\"type\":\"dql\",\"showTitle\":false,\"state\":{\"input\":{\"value\":\"fetch logs, from: now()-24h\\n| filter contains(content, \\\"ATTACK-PAYLOAD-MARKER-9c41d2\\\")\\n| fields timestamp, content, dt.entity.host\\n| limit 500\"}}}]}\r\n------formdata-undici-081749052674--\r\n"
+  }
+]
