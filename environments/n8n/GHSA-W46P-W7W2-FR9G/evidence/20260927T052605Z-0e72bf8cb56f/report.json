@@ -1,0 +1,1231 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T052605Z-0e72bf8cb56f",
+  "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+  "layer": "mechanism",
+  "rounds": 3,
+  "started_at": "2026-09-27T05:26:05.389250+00:00",
+  "cases": [
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "01-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 1,
+      "project": "avh-b23070d2c9dd4b5194ce",
+      "layer": "mechanism",
+      "source_commit": "60109bba8cae51bdb60615a41552cebf397b7438",
+      "image": "sha256:a01758d65f8d1afd04c4c7f1edcf58bcb49d29fa828dd993bf0e216281677808",
+      "started_at": "2026-09-27T05:26:17.756586+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "the project viewer's Run Shell node tool reaches the executor as n8n-nodes-base.executeCommandTool with cred-exec and returns the AVH-N8N-W46P-EXEC canary",
+          "actual": {
+            "executor_node_types": [
+              "n8n-nodes-base.executeCommandTool"
+            ],
+            "executor_credential_ids": [
+              "cred-exec"
+            ],
+            "resolved_tool_names": [
+              "run_shell"
+            ],
+            "filter_tools_for_user_present": false,
+            "tool_invocations": [
+              "run_shell"
+            ],
+            "result_statuses": [
+              "success"
+            ],
+            "result_markers": [
+              "AVH-N8N-W46P-EXEC"
+            ],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [
+              "n8n-nodes-base.executeCommandTool"
+            ],
+            "raw_executor_node_types": [
+              "n8n-nodes-base.executeCommandTool"
+            ],
+            "summary_resolved_tool_names": [
+              "run_shell"
+            ],
+            "raw_resolved_tool_names": [
+              "run_shell"
+            ],
+            "summary_credential_ids": [
+              "cred-exec"
+            ],
+            "raw_credential_ids": [
+              "cred-exec"
+            ]
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:26:31.465908+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "01-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 1,
+      "project": "avh-0dd595a95f26495ba398",
+      "layer": "mechanism",
+      "source_commit": "7786117e976664b67288f13d6cfcd1fcf1b1289b",
+      "image": "sha256:42ce5aac8263acbeba2e03a39a35737fe91897a71a032c78e2fb616fd050ce22",
+      "started_at": "2026-09-27T05:26:31.467957+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "the patched runtime's filterToolsForUser drops Run Shell (keeping the custom tool) and the executor is never called",
+          "actual": {
+            "executor_node_types": [],
+            "resolved_tool_names": [],
+            "filter_tools_for_user_present": true,
+            "filter_tools_for_user_kept": [
+              "Echo Note"
+            ],
+            "tool_invocations": [],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [],
+            "raw_executor_node_types": [],
+            "summary_resolved_tool_names": [],
+            "raw_resolved_tool_names": [],
+            "summary_credential_ids": [],
+            "raw_credential_ids": []
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:26:40.034023+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "01-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 1,
+      "project": "avh-0e9a9117ebc94173a482",
+      "layer": "mechanism",
+      "source_commit": "60109bba8cae51bdb60615a41552cebf397b7438",
+      "image": "sha256:a01758d65f8d1afd04c4c7f1edcf58bcb49d29fa828dd993bf0e216281677808",
+      "started_at": "2026-09-27T05:26:40.035919+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "a user holding workflow:execute and credential:read still runs Fetch Status as n8n-nodes-base.httpRequestTool with cred-api and gets the AVH-N8N-W46P-BENIGN canary",
+          "actual": {
+            "executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "executor_credential_ids": [
+              "cred-api"
+            ],
+            "resolved_tool_names": [
+              "fetch_status"
+            ],
+            "filter_tools_for_user_present": false,
+            "filter_tools_for_user_kept": null,
+            "tool_invocations": [
+              "fetch_status"
+            ],
+            "result_markers": [
+              "AVH-N8N-W46P-BENIGN"
+            ],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "raw_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "summary_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "raw_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "summary_credential_ids": [
+              "cred-api"
+            ],
+            "raw_credential_ids": [
+              "cred-api"
+            ]
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:26:49.292005+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "01-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 1,
+      "project": "avh-c4ae100c7c894196b1d9",
+      "layer": "mechanism",
+      "source_commit": "7786117e976664b67288f13d6cfcd1fcf1b1289b",
+      "image": "sha256:42ce5aac8263acbeba2e03a39a35737fe91897a71a032c78e2fb616fd050ce22",
+      "started_at": "2026-09-27T05:26:49.294706+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "a user holding workflow:execute and credential:read still runs Fetch Status as n8n-nodes-base.httpRequestTool with cred-api and gets the AVH-N8N-W46P-BENIGN canary",
+          "actual": {
+            "executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "executor_credential_ids": [
+              "cred-api"
+            ],
+            "resolved_tool_names": [
+              "fetch_status"
+            ],
+            "filter_tools_for_user_present": true,
+            "filter_tools_for_user_kept": [
+              "Fetch Status"
+            ],
+            "tool_invocations": [
+              "fetch_status"
+            ],
+            "result_markers": [
+              "AVH-N8N-W46P-BENIGN"
+            ],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "raw_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "summary_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "raw_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "summary_credential_ids": [
+              "cred-api"
+            ],
+            "raw_credential_ids": [
+              "cred-api"
+            ]
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:26:57.845172+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "02-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 2,
+      "project": "avh-5e8f1683ed5441818743",
+      "layer": "mechanism",
+      "source_commit": "60109bba8cae51bdb60615a41552cebf397b7438",
+      "image": "sha256:a01758d65f8d1afd04c4c7f1edcf58bcb49d29fa828dd993bf0e216281677808",
+      "started_at": "2026-09-27T05:26:57.847653+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "the project viewer's Run Shell node tool reaches the executor as n8n-nodes-base.executeCommandTool with cred-exec and returns the AVH-N8N-W46P-EXEC canary",
+          "actual": {
+            "executor_node_types": [
+              "n8n-nodes-base.executeCommandTool"
+            ],
+            "executor_credential_ids": [
+              "cred-exec"
+            ],
+            "resolved_tool_names": [
+              "run_shell"
+            ],
+            "filter_tools_for_user_present": false,
+            "tool_invocations": [
+              "run_shell"
+            ],
+            "result_statuses": [
+              "success"
+            ],
+            "result_markers": [
+              "AVH-N8N-W46P-EXEC"
+            ],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [
+              "n8n-nodes-base.executeCommandTool"
+            ],
+            "raw_executor_node_types": [
+              "n8n-nodes-base.executeCommandTool"
+            ],
+            "summary_resolved_tool_names": [
+              "run_shell"
+            ],
+            "raw_resolved_tool_names": [
+              "run_shell"
+            ],
+            "summary_credential_ids": [
+              "cred-exec"
+            ],
+            "raw_credential_ids": [
+              "cred-exec"
+            ]
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:27:05.248577+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "02-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 2,
+      "project": "avh-7c602f57acee4826a384",
+      "layer": "mechanism",
+      "source_commit": "7786117e976664b67288f13d6cfcd1fcf1b1289b",
+      "image": "sha256:42ce5aac8263acbeba2e03a39a35737fe91897a71a032c78e2fb616fd050ce22",
+      "started_at": "2026-09-27T05:27:05.250079+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "the patched runtime's filterToolsForUser drops Run Shell (keeping the custom tool) and the executor is never called",
+          "actual": {
+            "executor_node_types": [],
+            "resolved_tool_names": [],
+            "filter_tools_for_user_present": true,
+            "filter_tools_for_user_kept": [
+              "Echo Note"
+            ],
+            "tool_invocations": [],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [],
+            "raw_executor_node_types": [],
+            "summary_resolved_tool_names": [],
+            "raw_resolved_tool_names": [],
+            "summary_credential_ids": [],
+            "raw_credential_ids": []
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:27:17.826783+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "02-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 2,
+      "project": "avh-707b018bdf814c718576",
+      "layer": "mechanism",
+      "source_commit": "60109bba8cae51bdb60615a41552cebf397b7438",
+      "image": "sha256:a01758d65f8d1afd04c4c7f1edcf58bcb49d29fa828dd993bf0e216281677808",
+      "started_at": "2026-09-27T05:27:17.829577+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "a user holding workflow:execute and credential:read still runs Fetch Status as n8n-nodes-base.httpRequestTool with cred-api and gets the AVH-N8N-W46P-BENIGN canary",
+          "actual": {
+            "executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "executor_credential_ids": [
+              "cred-api"
+            ],
+            "resolved_tool_names": [
+              "fetch_status"
+            ],
+            "filter_tools_for_user_present": false,
+            "filter_tools_for_user_kept": null,
+            "tool_invocations": [
+              "fetch_status"
+            ],
+            "result_markers": [
+              "AVH-N8N-W46P-BENIGN"
+            ],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "raw_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "summary_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "raw_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "summary_credential_ids": [
+              "cred-api"
+            ],
+            "raw_credential_ids": [
+              "cred-api"
+            ]
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:27:24.514328+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "02-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 2,
+      "project": "avh-7360a928963b472eb232",
+      "layer": "mechanism",
+      "source_commit": "7786117e976664b67288f13d6cfcd1fcf1b1289b",
+      "image": "sha256:42ce5aac8263acbeba2e03a39a35737fe91897a71a032c78e2fb616fd050ce22",
+      "started_at": "2026-09-27T05:27:24.517250+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "a user holding workflow:execute and credential:read still runs Fetch Status as n8n-nodes-base.httpRequestTool with cred-api and gets the AVH-N8N-W46P-BENIGN canary",
+          "actual": {
+            "executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "executor_credential_ids": [
+              "cred-api"
+            ],
+            "resolved_tool_names": [
+              "fetch_status"
+            ],
+            "filter_tools_for_user_present": true,
+            "filter_tools_for_user_kept": [
+              "Fetch Status"
+            ],
+            "tool_invocations": [
+              "fetch_status"
+            ],
+            "result_markers": [
+              "AVH-N8N-W46P-BENIGN"
+            ],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "raw_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "summary_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "raw_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "summary_credential_ids": [
+              "cred-api"
+            ],
+            "raw_credential_ids": [
+              "cred-api"
+            ]
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:27:34.420186+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "03-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 3,
+      "project": "avh-5a147fd8fb88464daaae",
+      "layer": "mechanism",
+      "source_commit": "60109bba8cae51bdb60615a41552cebf397b7438",
+      "image": "sha256:a01758d65f8d1afd04c4c7f1edcf58bcb49d29fa828dd993bf0e216281677808",
+      "started_at": "2026-09-27T05:27:34.422009+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "the project viewer's Run Shell node tool reaches the executor as n8n-nodes-base.executeCommandTool with cred-exec and returns the AVH-N8N-W46P-EXEC canary",
+          "actual": {
+            "executor_node_types": [
+              "n8n-nodes-base.executeCommandTool"
+            ],
+            "executor_credential_ids": [
+              "cred-exec"
+            ],
+            "resolved_tool_names": [
+              "run_shell"
+            ],
+            "filter_tools_for_user_present": false,
+            "tool_invocations": [
+              "run_shell"
+            ],
+            "result_statuses": [
+              "success"
+            ],
+            "result_markers": [
+              "AVH-N8N-W46P-EXEC"
+            ],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [
+              "n8n-nodes-base.executeCommandTool"
+            ],
+            "raw_executor_node_types": [
+              "n8n-nodes-base.executeCommandTool"
+            ],
+            "summary_resolved_tool_names": [
+              "run_shell"
+            ],
+            "raw_resolved_tool_names": [
+              "run_shell"
+            ],
+            "summary_credential_ids": [
+              "cred-exec"
+            ],
+            "raw_credential_ids": [
+              "cred-exec"
+            ]
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:27:40.898905+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "03-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 3,
+      "project": "avh-9b34a5b92b7f428b935c",
+      "layer": "mechanism",
+      "source_commit": "7786117e976664b67288f13d6cfcd1fcf1b1289b",
+      "image": "sha256:42ce5aac8263acbeba2e03a39a35737fe91897a71a032c78e2fb616fd050ce22",
+      "started_at": "2026-09-27T05:27:40.901830+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "the patched runtime's filterToolsForUser drops Run Shell (keeping the custom tool) and the executor is never called",
+          "actual": {
+            "executor_node_types": [],
+            "resolved_tool_names": [],
+            "filter_tools_for_user_present": true,
+            "filter_tools_for_user_kept": [
+              "Echo Note"
+            ],
+            "tool_invocations": [],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [],
+            "raw_executor_node_types": [],
+            "summary_resolved_tool_names": [],
+            "raw_resolved_tool_names": [],
+            "summary_credential_ids": [],
+            "raw_credential_ids": []
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:27:46.695086+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "03-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 3,
+      "project": "avh-2a03dfc2d2984c2e8ad3",
+      "layer": "mechanism",
+      "source_commit": "60109bba8cae51bdb60615a41552cebf397b7438",
+      "image": "sha256:a01758d65f8d1afd04c4c7f1edcf58bcb49d29fa828dd993bf0e216281677808",
+      "started_at": "2026-09-27T05:27:46.698045+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "a user holding workflow:execute and credential:read still runs Fetch Status as n8n-nodes-base.httpRequestTool with cred-api and gets the AVH-N8N-W46P-BENIGN canary",
+          "actual": {
+            "executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "executor_credential_ids": [
+              "cred-api"
+            ],
+            "resolved_tool_names": [
+              "fetch_status"
+            ],
+            "filter_tools_for_user_present": false,
+            "filter_tools_for_user_kept": null,
+            "tool_invocations": [
+              "fetch_status"
+            ],
+            "result_markers": [
+              "AVH-N8N-W46P-BENIGN"
+            ],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "raw_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "summary_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "raw_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "summary_credential_ids": [
+              "cred-api"
+            ],
+            "raw_credential_ids": [
+              "cred-api"
+            ]
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:27:53.412487+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052605Z-0e72bf8cb56f",
+      "case_id": "03-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "n8n/GHSA-W46P-W7W2-FR9G",
+      "round": 3,
+      "project": "avh-b066f9e204fd4a4a87e7",
+      "layer": "mechanism",
+      "source_commit": "7786117e976664b67288f13d6cfcd1fcf1b1289b",
+      "image": "sha256:42ce5aac8263acbeba2e03a39a35737fe91897a71a032c78e2fb616fd050ce22",
+      "started_at": "2026-09-27T05:27:53.417344+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "a user holding workflow:execute and credential:read still runs Fetch Status as n8n-nodes-base.httpRequestTool with cred-api and gets the AVH-N8N-W46P-BENIGN canary",
+          "actual": {
+            "executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "executor_credential_ids": [
+              "cred-api"
+            ],
+            "resolved_tool_names": [
+              "fetch_status"
+            ],
+            "filter_tools_for_user_present": true,
+            "filter_tools_for_user_kept": [
+              "Fetch Status"
+            ],
+            "tool_invocations": [
+              "fetch_status"
+            ],
+            "result_markers": [
+              "AVH-N8N-W46P-BENIGN"
+            ],
+            "summary_matches_raw": true,
+            "summary_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "raw_executor_node_types": [
+              "n8n-nodes-base.httpRequestTool"
+            ],
+            "summary_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "raw_resolved_tool_names": [
+              "fetch_status"
+            ],
+            "summary_credential_ids": [
+              "cred-api"
+            ],
+            "raw_credential_ids": [
+              "cred-api"
+            ]
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json",
+            "harness-observation.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:28:01.848759+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    }
+  ],
+  "outcome": "passed",
+  "exit_code": 0,
+  "fingerprint": "d289d6aeec936d173a8830ce2b1190e9cf45788b9de0131ad92f588c8d97bcc9",
+  "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+  "docker_version": "29.6.1",
+  "compose_version": "5.3.0",
+  "platform": "linux/amd64",
+  "host_system": "Linux",
+  "docker_operating_system": "Ubuntu 24.04.3 LTS",
+  "host_architecture": "x86_64",
+  "images": {
+    "vulnerable": "sha256:a01758d65f8d1afd04c4c7f1edcf58bcb49d29fa828dd993bf0e216281677808",
+    "patched": "sha256:42ce5aac8263acbeba2e03a39a35737fe91897a71a032c78e2fb616fd050ce22"
+  },
+  "finished_at": "2026-09-27T05:28:01.957211+00:00"
+}

@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "target_ready": true,
+  "execution_status": "completed",
+  "upstream": {
+    "package": "n8n-mcp",
+    "version": "2.50.0",
+    "module": "/tmp/n8n-mcp-lab-btwxin8m/package/dist/services/n8n-api-client.js",
+    "telemetry_module": "/tmp/n8n-mcp-lab-btwxin8m/package/dist/telemetry/mutation-tracker.js",
+    "traversal_identifier": "../credentials",
+    "benign_identifier": "wf-normal-1"
+  },
+  "dependencies": {
+    "axios": "1.20.0",
+    "zod": "3.25.76"
+  },
+  "observer": {
+    "webhook_security_mode": "permissive",
+    "listener_ports": {
+      "api": "51569",
+      "redirect": "55347",
+      "target": "43403",
+      "webhook": "60727"
+    },
+    "telemetry_payload_mode": "credential-bearing"
+  },
+  "observed": {
+    "traversal": {
+      "operation": "traversal-get-workflow",
+      "node_outcome": "resolved",
+      "node_error": null,
+      "node_status": null,
+      "response_digest": "57d7d517ae5af40d044a0aa025daf009cc622220571c7977c4b071c9252e5662",
+      "response_keys": [
+        "data"
+      ],
+      "request_paths": [
+        "/api/v1/credentials"
+      ],
+      "api_key_present": true,
+      "request_carries_synthetic_credential": false
+    },
+    "redirect": {
+      "operation": "redirect-trigger-webhook",
+      "node_outcome": "resolved",
+      "node_error": null,
+      "node_status": 200,
+      "response_digest": "cb3cfe410e3932e5b07a4bcca7d69fd0df767c7c0caa8180b93bf60bcaa1ef75",
+      "response_keys": [
+        "reached",
+        "secret"
+      ],
+      "request_paths": [
+        "/stolen"
+      ],
+      "api_key_present": false,
+      "request_carries_synthetic_credential": false
+    },
+    "redirect_chain": {
+      "first_hop_paths": [
+        "/hook"
+      ],
+      "second_hop_paths": [
+        "/stolen"
+      ]
+    },
+    "benign_workflow": {
+      "operation": "benign-get-workflow",
+      "node_outcome": "resolved",
+      "node_error": null,
+      "node_status": null,
+      "response_digest": "bf290d071dc066839394d834a7df8d49be7ea7a98d927f333348d1f604a657a2",
+      "response_keys": [
+        "data"
+      ],
+      "request_paths": [
+        "/api/v1/workflows/wf-normal-1"
+      ],
+      "api_key_present": true,
+      "request_carries_synthetic_credential": false
+    },
+    "benign_webhook": {
+      "operation": "benign-trigger-webhook",
+      "node_outcome": "resolved",
+      "node_error": null,
+      "node_status": 200,
+      "response_digest": "84ddb0cf5ba05718330e4644933f311c0665c5c8c1cd39a955a67e3cd2d8a77e",
+      "response_keys": [
+        "status",
+        "workflowId"
+      ],
+      "request_paths": [
+        "/hook"
+      ],
+      "api_key_present": false,
+      "request_carries_synthetic_credential": false
+    },
+    "telemetry": {
+      "operation": "telemetry-process-mutation",
+      "node_outcome": "resolved",
+      "record_present": true,
+      "record_digest": "505e9f6f11f2034e42a43eadc481c6efcd0766321746b5d99522b88d1f4172f0",
+      "record_keys": [
+        "connectionsAdded",
+        "connectionsRemoved",
+        "durationMs",
+        "errorsIntroduced",
+        "errorsResolved",
+        "intentClassification",
+        "mutationError",
+        "mutationSuccess",
+        "nodesAdded",
+        "nodesModified",
+        "nodesRemoved",
+        "operationCount",
+        "operationTypes",
+        "operations",
+        "propertiesChanged",
+        "sessionId",
+        "toolName",
+        "userId",
+        "userIntent",
+        "validationAfter",
+        "validationBefore",
+        "validationImproved",
+        "workflowAfter",
+        "workflowBefore",
+        "workflowHashAfter",
+        "workflowHashBefore",
+        "workflowStructureHashAfter",
+        "workflowStructureHashBefore"
+      ],
+      "markers_in_fields": {
+        "operations": [
+          "sk-testtelemetry0000abcd"
+        ],
+        "validationBefore": [
+          "sk-testtelemetry0000abcd"
+        ],
+        "validationAfter": [
+          "sk-testtelemetry0000abcd"
+        ],
+        "mutationError": [
+          "sk-testtelemetry0000abcd"
+        ]
+      },
+      "markers_anywhere": [
+        "sk-testtelemetry0000abcd"
+      ],
+      "markers_in_workflow_body": []
+    }
+  },
+  "recorded_events": {
+    "api": [
+      {
+        "seq": 1,
+        "listener": "api",
+        "method": "GET",
+        "path": "/api/v1/credentials",
+        "headers": {
+          "x-n8n-api-key": "sk-test-n8n-api-key-0000",
+          "x-attack-marker": "traversal-get-workflow",
+          "content-type": "application/json"
+        },
+        "body": "",
+        "seen_at_ms": 1790483951522
+      },
+      {
+        "seq": 2,
+        "listener": "api",
+        "method": "GET",
+        "path": "/api/v1/workflows/wf-normal-1",
+        "headers": {
+          "x-n8n-api-key": "sk-test-n8n-api-key-0000",
+          "x-attack-marker": "benign-get-workflow",
+          "content-type": "application/json"
+        },
+        "body": "",
+        "seen_at_ms": 1790483951525
+      }
+    ],
+    "redirect": [
+      {
+        "seq": 1,
+        "listener": "redirect",
+        "method": "POST",
+        "path": "/hook",
+        "headers": {
+          "x-n8n-api-key": null,
+          "x-attack-marker": "redirect-trigger-webhook",
+          "content-type": "application/json"
+        },
+        "body": "{\"event\":\"attack\"}",
+        "seen_at_ms": 1790483951572
+      }
+    ],
+    "target": [
+      {
+        "seq": 1,
+        "listener": "target",
+        "method": "GET",
+        "path": "/stolen",
+        "headers": {
+          "x-n8n-api-key": null,
+          "x-attack-marker": "redirect-trigger-webhook",
+          "content-type": null
+        },
+        "body": "",
+        "seen_at_ms": 1790483951576
+      }
+    ],
+    "webhook": [
+      {
+        "seq": 1,
+        "listener": "webhook",
+        "method": "POST",
+        "path": "/hook",
+        "headers": {
+          "x-n8n-api-key": null,
+          "x-attack-marker": "benign-trigger-webhook",
+          "content-type": "application/json"
+        },
+        "body": "{\"event\":\"benign\"}",
+        "seen_at_ms": 1790483951579
+      }
+    ]
+  },
+  "credential_markers_in_observation": [],
+  "evidence_digest": "77e77cce6fe07cde5c22865e22174dfb10493dccf6d766d73c8c02f91b7b6479",
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T043820Z-51eb2875d369",
+    "case_id": "02-vulnerable-attack",
+    "variant": "vulnerable",
+    "scenario": "attack"
+  }
+}

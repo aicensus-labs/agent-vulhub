@@ -1,0 +1,38 @@
+{
+  "scenario": "attack",
+  "variant": "2.29.8",
+  "upstream_version": "2.29.8",
+  "subject": "user-member-4c77",
+  "resource": "http://127.0.0.1:5678/mcp/victim-mcp-path",
+  "resource_authorize_present": true,
+  "resource_authorize_consulted": true,
+  "consent": {
+    "details": {
+      "ok": false,
+      "reason": "forbidden",
+      "resourceName": null
+    },
+    "approved": false,
+    "code_minted": false,
+    "blocked": true,
+    "error": "ForbiddenError",
+    "http_status": 403
+  },
+  "token": {
+    "audience": "http://127.0.0.1:5678/mcp/victim-mcp-path",
+    "minted_for": "user-member-4c77",
+    "accepted": false,
+    "user": null,
+    "reason": "insufficient_scope",
+    "status": 403,
+    "code_present": false
+  },
+  "workflow_executed": false,
+  "executed_in_owner_context": false,
+  "execution_owner": null,
+  "blocked": true,
+  "blocked_by": "consent",
+  "subject_has_execute": false,
+  "authorized_user_expected": false,
+  "outcome": "blocked"
+}

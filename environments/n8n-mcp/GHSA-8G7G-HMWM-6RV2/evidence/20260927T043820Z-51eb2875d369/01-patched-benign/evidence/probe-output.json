@@ -1,0 +1,138 @@
+{
+  "upstream": {
+    "package": "n8n-mcp",
+    "version": "2.50.1",
+    "module": "/tmp/n8n-mcp-lab-02wuwryr/package/dist/services/n8n-api-client.js",
+    "telemetry_module": "/tmp/n8n-mcp-lab-02wuwryr/package/dist/telemetry/mutation-tracker.js",
+    "traversal_identifier": "../credentials",
+    "benign_identifier": "wf-normal-1"
+  },
+  "observer": {
+    "webhook_security_mode": "permissive",
+    "listener_ports": {
+      "api": "52841",
+      "redirect": "54653",
+      "target": "54439",
+      "webhook": "37825"
+    },
+    "telemetry_payload_mode": "plain"
+  },
+  "results": {
+    "benign-get-workflow": {
+      "operation": "benign-get-workflow",
+      "outcome": "resolved",
+      "body": {
+        "data": {
+          "id": "wf-normal-1",
+          "name": "normal workflow",
+          "active": false
+        }
+      }
+    },
+    "benign-trigger-webhook": {
+      "operation": "benign-trigger-webhook",
+      "outcome": "resolved",
+      "status": 200,
+      "body": {
+        "status": "accepted",
+        "workflowId": "wf-normal-1"
+      }
+    },
+    "telemetry-process-mutation": {
+      "operation": "telemetry-process-mutation",
+      "outcome": "resolved",
+      "record": {
+        "userId": "caller-1",
+        "sessionId": "session-1",
+        "workflowBefore": {
+          "nodes": [
+            {
+              "id": "1",
+              "name": "Webhook",
+              "type": "n8n-nodes-base.webhook",
+              "typeVersion": 1,
+              "position": [
+                0,
+                0
+              ],
+              "parameters": {}
+            }
+          ],
+          "connections": {}
+        },
+        "workflowAfter": {
+          "nodes": [
+            {
+              "id": "1",
+              "name": "Webhook",
+              "type": "n8n-nodes-base.webhook",
+              "typeVersion": 1,
+              "position": [
+                0,
+                0
+              ],
+              "parameters": {
+                "header": {
+                  "value": "demo-header-value"
+                }
+              }
+            }
+          ],
+          "connections": {}
+        },
+        "workflowHashBefore": "fef2c30e69472a1c",
+        "workflowHashAfter": "789fd41b0731902f",
+        "workflowStructureHashBefore": "98928e69e8bce12a",
+        "workflowStructureHashAfter": "98928e69e8bce12a",
+        "userIntent": "set the demo header for the webhook node",
+        "intentClassification": "modify_configuration",
+        "toolName": "n8n_update_partial_workflow",
+        "operations": [
+          {
+            "type": "updateNode",
+            "nodeName": "Webhook",
+            "updates": {
+              "parameters": {
+                "header": {
+                  "value": "demo-header-value"
+                }
+              }
+            }
+          }
+        ],
+        "operationCount": 1,
+        "operationTypes": [
+          "updateNode"
+        ],
+        "validationBefore": {
+          "valid": true,
+          "errors": [],
+          "warnings": [],
+          "note": "validated before the change"
+        },
+        "validationAfter": {
+          "valid": true,
+          "errors": [],
+          "warnings": [],
+          "note": "validated after the change"
+        },
+        "validationImproved": false,
+        "errorsResolved": 0,
+        "errorsIntroduced": 0,
+        "nodesAdded": 0,
+        "nodesRemoved": 0,
+        "nodesModified": 1,
+        "connectionsAdded": 0,
+        "connectionsRemoved": 0,
+        "propertiesChanged": 1,
+        "mutationSuccess": true,
+        "mutationError": null,
+        "durationMs": 12
+      }
+    }
+  },
+  "dependencies": {
+    "axios": "1.20.0",
+    "zod": "3.25.76"
+  }
+}

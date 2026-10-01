@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T043820Z-51eb2875d369",
+  "case_id": "02-vulnerable-benign",
+  "variant": "vulnerable",
+  "scenario": "benign",
+  "environment_id": "n8n-mcp/GHSA-8G7G-HMWM-6RV2",
+  "round": 2,
+  "project": "avh-e7f7355980734f5ab62a",
+  "layer": "mechanism",
+  "source_commit": "1ca40ce2bdf18b8c88cd571074cec3f61471c7eb",
+  "image": "sha256:df5d553aaff6017f6bcc2942fe76ad3e321d64f477cac1dd943070c33132a596",
+  "started_at": "2026-09-27T04:39:23.073971+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "both revisions still read a normal workflow, post a webhook directly and build the same credential-free telemetry record, while no crafted identifier or synthetic marker reaches any endpoint",
+      "actual": "{\"mechanism\": {\"benign_webhook_raw_digest_agrees\": true, \"benign_webhook_raw_outcome_agrees\": true, \"benign_workflow_raw_digest_agrees\": true, \"benign_workflow_raw_outcome_agrees\": true, \"credential_endpoint_never_reached\": true, \"no_attack_operation_emitted\": true, \"no_synthetic_marker_in_any_request\": true, \"observation_has_no_marker_leak\": true, \"pinned_version_matches\": true, \"telemetry_has_no_synthetic_marker\": true, \"telemetry_operations_unchanged\": true, \"telemetry_record_present\": true, \"telemetry_validation_unchanged\": true, \"webhook_digest_matches\": true, \"webhook_path_exact\": true, \"webhook_post_resolved\": true, \"webhook_raw_digest_matches\": true, \"workflow_api_key_attached\": true, \"workflow_digest_matches\": true, \"workflow_path_exact\": true, \"workflow_raw_digest_matches\": true, \"workflow_read_resolved\": true}, \"pinned_upstream\": {\"collection_error\": null, \"dependencies\": {\"axios\": \"1.20.0\", \"zod\": \"3.25.76\"}, \"module\": \"/tmp/n8n-mcp-lab-_hezaxx5/package/dist/services/n8n-api-client.js\", \"package\": \"n8n-mcp\", \"target_ready\": true, \"version\": \"2.50.0\"}}",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "probe-output.json"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-27T04:39:30.619262+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

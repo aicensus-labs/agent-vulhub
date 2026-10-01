@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T052605Z-0e72bf8cb56f",
+  "case_id": "03-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": "the project viewer's Run Shell node tool reaches the executor as n8n-nodes-base.executeCommandTool with cred-exec and returns the AVH-N8N-W46P-EXEC canary",
+      "actual": {
+        "executor_node_types": [
+          "n8n-nodes-base.executeCommandTool"
+        ],
+        "executor_credential_ids": [
+          "cred-exec"
+        ],
+        "resolved_tool_names": [
+          "run_shell"
+        ],
+        "filter_tools_for_user_present": false,
+        "tool_invocations": [
+          "run_shell"
+        ],
+        "result_statuses": [
+          "success"
+        ],
+        "result_markers": [
+          "AVH-N8N-W46P-EXEC"
+        ],
+        "summary_matches_raw": true,
+        "summary_executor_node_types": [
+          "n8n-nodes-base.executeCommandTool"
+        ],
+        "raw_executor_node_types": [
+          "n8n-nodes-base.executeCommandTool"
+        ],
+        "summary_resolved_tool_names": [
+          "run_shell"
+        ],
+        "raw_resolved_tool_names": [
+          "run_shell"
+        ],
+        "summary_credential_ids": [
+          "cred-exec"
+        ],
+        "raw_credential_ids": [
+          "cred-exec"
+        ]
+      },
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "effect.json",
+        "harness-observation.json"
+      ]
+    }
+  ]
+}

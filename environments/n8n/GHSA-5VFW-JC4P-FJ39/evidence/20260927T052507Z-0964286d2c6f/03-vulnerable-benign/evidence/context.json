@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T052507Z-0964286d2c6f",
+  "case_id": "03-vulnerable-benign",
+  "variant": "vulnerable",
+  "scenario": "benign"
+}

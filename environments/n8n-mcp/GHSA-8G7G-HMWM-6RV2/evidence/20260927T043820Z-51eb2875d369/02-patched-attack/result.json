@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T043820Z-51eb2875d369",
+  "case_id": "02-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "environment_id": "n8n-mcp/GHSA-8G7G-HMWM-6RV2",
+  "round": 2,
+  "project": "avh-42593179d05043cdbbc5",
+  "layer": "mechanism",
+  "source_commit": "1cfe9c6bddb4b1634e6e23323c18ea35fd196999",
+  "image": "sha256:2e914978f388ccd2d9c28b010772cb9a8b22b9935ea0c7d088e3e07ba78c1a7f",
+  "started_at": "2026-09-27T04:39:15.401193+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "patched_effect_blocked",
+      "passed": true,
+      "expected": "the same crafted identifier is rejected before any request leaves the client, the redirect is not followed onto the unvalidated host, the telemetry record keeps the diff structure without the synthetic token, and the legitimate calls still succeed",
+      "actual": "{\"mechanism\": {\"benign_webhook_intact\": true, \"benign_workflow_intact\": true, \"pinned_version_matches\": true, \"redirect_first_hop_validated_url\": true, \"redirect_raw_digest_agrees\": true, \"redirect_raw_outcome_agrees\": true, \"redirect_raw_stopped_at_redirect_status\": true, \"redirect_raw_target_body_absent\": true, \"redirect_second_hop_absent\": true, \"redirect_stopped_at_redirect_status\": true, \"telemetry_diff_still_recorded\": true, \"telemetry_record_present\": true, \"telemetry_secret_absent_everywhere\": true, \"traversal_never_reached_credentials\": true, \"traversal_no_request_emitted\": true, \"traversal_node_rejected\": true, \"traversal_raw_digest_agrees\": true, \"traversal_raw_outcome_agrees\": true, \"traversal_raw_rejection_names_identifier\": true, \"traversal_rejection_names_identifier\": true}, \"pinned_upstream\": {\"collection_error\": null, \"dependencies\": {\"axios\": \"1.20.0\", \"zod\": \"3.25.76\"}, \"module\": \"/tmp/n8n-mcp-lab-_eczxx5a/package/dist/services/n8n-api-client.js\", \"package\": \"n8n-mcp\", \"target_ready\": true, \"version\": \"2.50.1\"}}",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "probe-output.json"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-27T04:39:23.070036+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

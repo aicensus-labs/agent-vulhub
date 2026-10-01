@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "variant": "vulnerable",
+  "scenario": "benign",
+  "target_ready": true,
+  "execution_status": "completed",
+  "upstream": {
+    "package": "n8n-mcp",
+    "version": "2.50.0",
+    "module": "/tmp/n8n-mcp-lab-nv737a3i/package/dist/services/n8n-api-client.js",
+    "telemetry_module": "/tmp/n8n-mcp-lab-nv737a3i/package/dist/telemetry/mutation-tracker.js",
+    "traversal_identifier": "../credentials",
+    "benign_identifier": "wf-normal-1"
+  },
+  "dependencies": {
+    "axios": "1.20.0",
+    "zod": "3.25.76"
+  },
+  "observer": {
+    "webhook_security_mode": "permissive",
+    "listener_ports": {
+      "api": "40625",
+      "redirect": "35521",
+      "target": "56505",
+      "webhook": "53807"
+    },
+    "telemetry_payload_mode": "plain"
+  },
+  "observed": {
+    "benign_workflow": {
+      "operation": "benign-get-workflow",
+      "node_outcome": "resolved",
+      "node_error": null,
+      "node_status": null,
+      "response_digest": "bf290d071dc066839394d834a7df8d49be7ea7a98d927f333348d1f604a657a2",
+      "response_keys": [
+        "data"
+      ],
+      "request_paths": [
+        "/api/v1/workflows/wf-normal-1"
+      ],
+      "api_key_present": true,
+      "request_carries_synthetic_credential": false
+    },
+    "benign_webhook": {
+      "operation": "benign-trigger-webhook",
+      "node_outcome": "resolved",
+      "node_error": null,
+      "node_status": 200,
+      "response_digest": "84ddb0cf5ba05718330e4644933f311c0665c5c8c1cd39a955a67e3cd2d8a77e",
+      "response_keys": [
+        "status",
+        "workflowId"
+      ],
+      "request_paths": [
+        "/hook"
+      ],
+      "api_key_present": false,
+      "request_carries_synthetic_credential": false
+    },
+    "telemetry": {
+      "operation": "telemetry-process-mutation",
+      "node_outcome": "resolved",
+      "record_present": true,
+      "record_digest": "be68f7b68b005e7624134cdab8b9905337a335bac260b1c096087db53acc67aa",
+      "record_keys": [
+        "connectionsAdded",
+        "connectionsRemoved",
+        "durationMs",
+        "errorsIntroduced",
+        "errorsResolved",
+        "intentClassification",
+        "mutationError",
+        "mutationSuccess",
+        "nodesAdded",
+        "nodesModified",
+        "nodesRemoved",
+        "operationCount",
+        "operationTypes",
+        "operations",
+        "propertiesChanged",
+        "sessionId",
+        "toolName",
+        "userId",
+        "userIntent",
+        "validationAfter",
+        "validationBefore",
+        "validationImproved",
+        "workflowAfter",
+        "workflowBefore",
+        "workflowHashAfter",
+        "workflowHashBefore",
+        "workflowStructureHashAfter",
+        "workflowStructureHashBefore"
+      ],
+      "markers_in_fields": {
+        "operations": [],
+        "validationBefore": [],
+        "validationAfter": [],
+        "mutationError": []
+      },
+      "markers_anywhere": [],
+      "markers_in_workflow_body": []
+    }
+  },
+  "recorded_events": {
+    "api": [
+      {
+        "seq": 1,
+        "listener": "api",
+        "method": "GET",
+        "path": "/api/v1/workflows/wf-normal-1",
+        "headers": {
+          "x-n8n-api-key": "sk-test-n8n-api-key-0000",
+          "x-attack-marker": "benign-get-workflow",
+          "content-type": "application/json"
+        },
+        "body": "",
+        "seen_at_ms": 1790483937720
+      }
+    ],
+    "redirect": [],
+    "target": [],
+    "webhook": [
+      {
+        "seq": 1,
+        "listener": "webhook",
+        "method": "POST",
+        "path": "/hook",
+        "headers": {
+          "x-n8n-api-key": null,
+          "x-attack-marker": "benign-trigger-webhook",
+          "content-type": "application/json"
+        },
+        "body": "{\"event\":\"benign\"}",
+        "seen_at_ms": 1790483937727
+      }
+    ]
+  },
+  "credential_markers_in_observation": [],
+  "evidence_digest": "41f47a77ef2e3635a844c1987877d4bff2158479faefa32b2fa875f50d95ed67",
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T043820Z-51eb2875d369",
+    "case_id": "01-vulnerable-benign",
+    "variant": "vulnerable",
+    "scenario": "benign"
+  }
+}

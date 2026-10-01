@@ -1,0 +1,38 @@
+{
+  "scenario": "attack",
+  "variant": "2.29.7",
+  "upstream_version": "2.29.7",
+  "subject": "user-member-4c77",
+  "resource": "http://127.0.0.1:5678/mcp/victim-mcp-path",
+  "resource_authorize_present": false,
+  "resource_authorize_consulted": false,
+  "consent": {
+    "details": {
+      "ok": true,
+      "reason": null,
+      "resourceName": "Billing MCP Server"
+    },
+    "approved": true,
+    "code_minted": true,
+    "blocked": false,
+    "error": null,
+    "http_status": 302
+  },
+  "token": {
+    "audience": "http://127.0.0.1:5678/mcp/victim-mcp-path",
+    "minted_for": "user-member-4c77",
+    "accepted": true,
+    "user": "user-member-4c77",
+    "reason": null,
+    "status": 200,
+    "code_present": true
+  },
+  "workflow_executed": true,
+  "executed_in_owner_context": true,
+  "execution_owner": "user-owner-9f21",
+  "blocked": false,
+  "blocked_by": null,
+  "subject_has_execute": false,
+  "authorized_user_expected": false,
+  "outcome": "authorized_flow_completed"
+}

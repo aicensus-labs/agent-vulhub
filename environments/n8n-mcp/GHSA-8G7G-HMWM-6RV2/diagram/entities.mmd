@@ -1,0 +1,50 @@
+%% n8n-mcp 路径段穿越、跟随重定向 SSRF 与遥测载荷暴露 — generated from diagram.toml
+flowchart LR
+  subgraph caller_side["调用者侧"]
+    caller["已认证的 MCP 调用者<br/>actor · attacker_controlled"]
+    caller_endpoint["调用者控制的触发 URL 端点<br/>service · attacker_controlled"]
+  end
+  subgraph product_side["受影响的进程与同源 n8n API"]
+    api_client["持有 n8n API key 的 n8n API 客户端<br/>client · trusted"]
+    n8n_api["同源 n8n API<br/>service · trusted"]
+    credential_store["n8n 凭据存储<br/>store · trusted"]
+    telemetry_payload["待上传的遥测载荷<br/>store · trusted"]
+  end
+  subgraph protected_side["SSRF 校验本应挡住的目标"]
+    redirect_host["校验未覆盖的目标主机<br/>service · trusted"]
+  end
+  caller -->|"1"| api_client
+  api_client -.->|"2"| n8n_api
+  api_client -.->|"3"| api_client
+  n8n_api -.->|"4"| credential_store
+  credential_store -.->|"5"| caller
+  api_client -->|"6"| caller_endpoint
+  caller_endpoint -.->|"7"| redirect_host
+  api_client -.->|"8"| api_client
+  redirect_host -.->|"9"| caller
+  api_client -->|"10"| telemetry_payload
+  api_client -.->|"11"| telemetry_payload
+  api_client -.->|"12"| telemetry_payload
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class caller actor
+  class caller_endpoint service
+  class api_client client
+  class n8n_api service
+  class credential_store store
+  class redirect_host service
+  class telemetry_payload store
+  style caller_side fill:transparent
+  style product_side fill:transparent
+  style protected_side fill:transparent
+  linkStyle 1 stroke:#c0392b,stroke-width:2px
+  linkStyle 2 stroke:#2e7d32,stroke-width:2px
+  linkStyle 6 stroke:#c0392b,stroke-width:2px
+  linkStyle 7 stroke:#2e7d32,stroke-width:2px
+  linkStyle 10 stroke:#c0392b,stroke-width:2px
+  linkStyle 11 stroke:#2e7d32,stroke-width:2px

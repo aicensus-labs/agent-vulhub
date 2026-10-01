@@ -1,0 +1,156 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram n8n/GHSA-5VFW-JC4P-FJ39
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+schema_version = 1
+title = "n8n OAuth 2.1 受保护资源缺少按用户授权判定"
+summary = "n8n 的共享 OAuth 2.1 授权服务器把 MCP Server Trigger 暴露成受保护资源，但受保护资源只有 id、URL、audience、scopes 这些描述性字段，没有该用户能否执行这个 workflow 的判定。member 级用户因此能对自己无权执行的 workflow 走完同意流程，把授权码绑到自己名下，换取 aud 恰好等于受害 MCP 资源 URL 的 access token，而运行时校验只比对 aud 与用户是否存在。结果是 workflow 在属主的项目上下文里、用属主已保存的凭据执行。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+[[entities]]
+id = "member_account"
+label = "实例 member 级用户"
+kind = "actor"
+trust = "attacker_controlled"
+role = "已认证、但对受害 workflow 没有 workflow:execute 的普通用户；自行注册 OAuth client 并批准同意。"
+
+[[entities]]
+id = "oauth_client"
+label = "自行注册的 OAuth client"
+kind = "actor"
+trust = "attacker_controlled"
+role = "member 通过未认证的动态客户端注册端点登记，携带自己的 callback 与 PKCE challenge。"
+
+[[entities]]
+id = "oauth_server"
+label = "共享 OAuth 2.1 授权服务器"
+kind = "service"
+trust = "trusted"
+role = "签发授权码与 access token；同意流程与令牌校验两处都只确认资源存在、aud 匹配，缺少资源级授权判定。"
+
+[[entities]]
+id = "resource_authorization"
+label = "受保护资源按用户授权判定"
+kind = "service"
+trust = "trusted"
+role = "修复版为受保护资源引入的必需方法：按 workflow:execute 判断发起者能否使用该资源；漏洞版没有这个成员。"
+
+[[entities]]
+id = "mcp_trigger"
+label = "受害 workflow 的 MCP Server Trigger"
+kind = "service"
+trust = "trusted"
+role = "authentication 为 n8nOAuth2 的 MCP 端点；只校验 bearer token 的 aud，随后执行 workflow。"
+
+[[entities]]
+id = "workflow_owner"
+label = "属主项目中的执行上下文"
+kind = "service"
+trust = "trusted"
+role = "workflow 实际运行的位置；执行落在属主账户与项目下，并使用属主已保存的凭据。"
+
+[[entities]]
+id = "victim_credentials"
+label = "属主已保存的凭据"
+kind = "store"
+trust = "trusted"
+role = "属主连接外部集成时保存的凭据；攻击者本身无权读取，却随这次执行被使用。"
+
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["member_account", "oauth_client"]
+note = "只有 member 自己的会话、自己注册的 client 与 callback；属主的 workflow 与属主的凭据都不在这里。"
+
+[[boundaries]]
+id = "product"
+label = "实例的授权服务器与属主项目"
+members = ["oauth_server", "resource_authorization", "mcp_trigger", "workflow_owner", "victim_credentials"]
+note = "这道边界本来按项目与角色隔离用户；缺少资源级授权判定让 member 的令牌直接越到属主项目里。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。
+[[steps]]
+n = 1
+phase = "setup"
+from = "member_account"
+to = "oauth_client"
+action = "在未认证的动态客户端注册端点登记一个 OAuth client，并带上自己的 callback 与 PKCE challenge"
+variant = "both"
+
+[[steps]]
+n = 2
+phase = "setup"
+from = "oauth_client"
+to = "oauth_server"
+action = "发起授权请求，把受害 workflow 的 MCP 资源 URL 作为 resource 参数"
+variant = "both"
+
+[[steps]]
+n = 3
+phase = "setup"
+from = "oauth_server"
+to = "mcp_trigger"
+action = "按 resource 解析出受害 workflow 的受保护资源，并返回同意页面所需的资源名称"
+variant = "both"
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "member_account"
+to = "oauth_server"
+action = "以 member 身份批准同意，授权码因此绑定 member 自己，而 resource 指向受害 workflow"
+variant = "both"
+
+[[steps]]
+n = 5
+phase = "trigger"
+from = "oauth_server"
+to = "mcp_trigger"
+action = "用 member 的授权码换取 aud 等于受害资源 URL 的 access token，令牌校验只确认资源存在与 aud 匹配"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 6
+phase = "trigger"
+from = "oauth_server"
+to = "resource_authorization"
+action = "在签发授权码与校验令牌之前先调用受保护资源的按用户授权判定"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 7
+phase = "trigger"
+from = "resource_authorization"
+to = "oauth_server"
+action = "member 没有该 workflow 的 workflow:execute，判定失败，同意被拒且令牌校验报 insufficient_scope"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 8
+phase = "effect"
+from = "member_account"
+to = "mcp_trigger"
+action = "带 member 的 bearer token 调用受害 workflow 的 MCP 端点，token 被接受"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 9
+phase = "effect"
+from = "mcp_trigger"
+to = "workflow_owner"
+action = "workflow 在属主的项目上下文里执行"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 10
+phase = "effect"
+from = "workflow_owner"
+to = "victim_credentials"
+action = "执行过程读取属主已保存的凭据并访问其连接的集成"
+variant = "vulnerable_only"
+diverges = true

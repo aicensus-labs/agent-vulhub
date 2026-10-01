@@ -1,0 +1,13 @@
+{
+  "scenario": "attack",
+  "variant": "patched",
+  "mechanism_loaded": true,
+  "filter_tools_for_user_present": true,
+  "filter_tools_for_user_kept": [
+    "Echo Note"
+  ],
+  "resolved_tools": [],
+  "executor_calls": [],
+  "node_tool_invocations": [],
+  "harness_exit_code": 0
+}

@@ -1,0 +1,163 @@
+{
+  "upstream": {
+    "package": "n8n-mcp",
+    "version": "2.50.0",
+    "module": "/tmp/n8n-mcp-lab-k36659l2/package/dist/services/n8n-api-client.js",
+    "telemetry_module": "/tmp/n8n-mcp-lab-k36659l2/package/dist/telemetry/mutation-tracker.js",
+    "traversal_identifier": "../credentials",
+    "benign_identifier": "wf-normal-1"
+  },
+  "observer": {
+    "webhook_security_mode": "permissive",
+    "listener_ports": {
+      "api": "52711",
+      "redirect": "38965",
+      "target": "49023",
+      "webhook": "50143"
+    },
+    "telemetry_payload_mode": "credential-bearing"
+  },
+  "results": {
+    "traversal-get-workflow": {
+      "operation": "traversal-get-workflow",
+      "outcome": "resolved",
+      "body": {
+        "data": [
+          {
+            "id": "cred-1",
+            "name": "prod-n8n-api",
+            "type": "n8nApi",
+            "data": {
+              "apiKey": "sk-test-exposed-0000"
+            }
+          }
+        ]
+      }
+    },
+    "benign-get-workflow": {
+      "operation": "benign-get-workflow",
+      "outcome": "resolved",
+      "body": {
+        "data": {
+          "id": "wf-normal-1",
+          "name": "normal workflow",
+          "active": false
+        }
+      }
+    },
+    "redirect-trigger-webhook": {
+      "operation": "redirect-trigger-webhook",
+      "outcome": "resolved",
+      "status": 200,
+      "body": {
+        "secret": "sk-test-internal-9999",
+        "reached": "target"
+      }
+    },
+    "benign-trigger-webhook": {
+      "operation": "benign-trigger-webhook",
+      "outcome": "resolved",
+      "status": 200,
+      "body": {
+        "status": "accepted",
+        "workflowId": "wf-normal-1"
+      }
+    },
+    "telemetry-process-mutation": {
+      "operation": "telemetry-process-mutation",
+      "outcome": "resolved",
+      "record": {
+        "userId": "caller-1",
+        "sessionId": "session-1",
+        "workflowBefore": {
+          "nodes": [
+            {
+              "id": "1",
+              "name": "Webhook",
+              "type": "n8n-nodes-base.webhook",
+              "typeVersion": 1,
+              "position": [
+                0,
+                0
+              ],
+              "parameters": {}
+            }
+          ],
+          "connections": {}
+        },
+        "workflowAfter": {
+          "nodes": [
+            {
+              "id": "1",
+              "name": "Webhook",
+              "type": "n8n-nodes-base.webhook",
+              "typeVersion": 1,
+              "position": [
+                0,
+                0
+              ],
+              "parameters": {
+                "header": {
+                  "value": "Bearer [REDACTED_APIKEY]"
+                }
+              }
+            }
+          ],
+          "connections": {}
+        },
+        "workflowHashBefore": "fef2c30e69472a1c",
+        "workflowHashAfter": "eff43a7ebea03442",
+        "workflowStructureHashBefore": "98928e69e8bce12a",
+        "workflowStructureHashAfter": "98928e69e8bce12a",
+        "userIntent": "renew the webhook authorization header",
+        "intentClassification": "modify_configuration",
+        "toolName": "n8n_update_partial_workflow",
+        "operations": [
+          {
+            "type": "updateNode",
+            "nodeName": "Webhook",
+            "updates": {
+              "parameters": {
+                "header": {
+                  "value": "Bearer sk-testtelemetry0000abcd"
+                }
+              }
+            }
+          }
+        ],
+        "operationCount": 1,
+        "operationTypes": [
+          "updateNode"
+        ],
+        "validationBefore": {
+          "valid": true,
+          "errors": [],
+          "warnings": [],
+          "note": "pending sk-testtelemetry0000abcd"
+        },
+        "validationAfter": {
+          "valid": false,
+          "errors": [],
+          "warnings": [],
+          "note": "rejected sk-testtelemetry0000abcd"
+        },
+        "validationImproved": false,
+        "errorsResolved": 0,
+        "errorsIntroduced": 0,
+        "nodesAdded": 0,
+        "nodesRemoved": 0,
+        "nodesModified": 1,
+        "connectionsAdded": 0,
+        "connectionsRemoved": 0,
+        "propertiesChanged": 1,
+        "mutationSuccess": false,
+        "mutationError": "upstream rejected header sk-testtelemetry0000abcd",
+        "durationMs": 12
+      }
+    }
+  },
+  "dependencies": {
+    "axios": "1.20.0",
+    "zod": "3.25.76"
+  }
+}

@@ -1,0 +1,190 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram n8n-mcp/GHSA-8G7G-HMWM-6RV2
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# fixture 装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "n8n-mcp 路径段穿越、跟随重定向 SSRF 与遥测载荷暴露"
+summary = "n8n-mcp 的三处输入处理缺陷都缺少必要的边界检查：调用者给出的 workflow 标识符被原样拼进 n8n API 请求的路径段，使携带配置 API key 的同源请求规范化后落到 /credentials，返回调用者本无权读取的凭据列表；通过一次性 SSRF 校验的触发 URL 仍按 axios 默认设置跟随 302，把出站请求转交到校验从未覆盖的主机，并把该主机的响应体交回调用者；partial-update 的 operation diff 未经脱敏就进入默认开启的遥测载荷，node 参数里的 bearer token、API key 会随之离开进程。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（本仓库合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "caller"
+label = "已认证的 MCP 调用者"
+kind = "actor"
+trust = "attacker_controlled"
+role = "构造本次调用提交的 workflow 标识符、触发 URL 与 partial-update diff；它只能控制调用参数，拿不到同源凭据列表、校验外主机的响应和遥测载荷。"
+source = "fixtures/inputs.json"
+
+[[entities]]
+id = "caller_endpoint"
+label = "调用者控制的触发 URL 端点"
+kind = "service"
+trust = "attacker_controlled"
+role = "调用者自己提供的 webhook 接收端；初始 URL 能通过一次性的 SSRF 校验，再用 302 把后续请求指向别处。"
+
+[[entities]]
+id = "api_client"
+label = "持有 n8n API key 的 n8n API 客户端"
+kind = "client"
+trust = "trusted"
+role = "把调用者参数拼进出站请求，并在触发请求时只对初始 URL 做一次 SSRF 校验；路径段编码、重定向上限与遥测脱敏三处检查都缺失在这里。"
+
+[[entities]]
+id = "n8n_api"
+label = "同源 n8n API"
+kind = "service"
+trust = "trusted"
+role = "只依据请求携带的 API key 授权；路径经 URL 规范化后，穿越标识符指向的端点会被当作正常请求处理。"
+
+[[entities]]
+id = "credential_store"
+label = "n8n 凭据存储"
+kind = "store"
+trust = "trusted"
+role = "调用者本无权读取的同源凭据列表；请求一旦落到 /credentials，它就会随响应体离开。"
+source = "fixtures/inputs.json"
+
+[[entities]]
+id = "redirect_host"
+label = "校验未覆盖的目标主机"
+kind = "service"
+trust = "trusted"
+role = "SSRF 校验只判定初始 URL，重定向后的这个主机不会被再次检查，因此能收到本应被拒绝的请求。"
+source = "fixtures/inputs.json"
+
+[[entities]]
+id = "telemetry_payload"
+label = "待上传的遥测载荷"
+kind = "store"
+trust = "trusted"
+role = "partial-update 之后生成的遥测记录；默认开启遥测时它会被上传，operation diff 里的 node 参数值也随之离开进程。"
+source = "fixtures/inputs.json"
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "caller_side"
+label = "调用者侧"
+members = ["caller", "caller_endpoint"]
+note = "调用者只控制本次调用的参数和自己提供的接收端，不能直接读写受影响的进程或它的数据。"
+
+[[boundaries]]
+id = "product_side"
+label = "受影响的进程与同源 n8n API"
+members = ["api_client", "n8n_api", "credential_store", "telemetry_payload"]
+note = "边界内的 API key、凭据列表与遥测记录都按可信数据处理，三处缺失的检查本应在这里拦住调用者输入。"
+
+[[boundaries]]
+id = "protected_side"
+label = "SSRF 校验本应挡住的目标"
+members = ["redirect_host"]
+note = "对初始 URL 的一次性校验是这道边界的全部守卫，302 让请求绕过了它。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。
+[[steps]]
+n = 1
+phase = "setup"
+from = "caller"
+to = "api_client"
+action = "调用者提交自己构造的 workflow 标识符、触发 URL 与 partial-update diff"
+variant = "both"
+evidence = "fixtures/inputs.json"
+
+[[steps]]
+n = 2
+phase = "trigger"
+from = "api_client"
+to = "n8n_api"
+action = "标识符被原样拼进路径段，出站请求规范化后落到同源的凭据端点"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "api_client"
+to = "api_client"
+action = "同一标识符因含白名单外的字符，在发出任何请求前被拒绝"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 4
+phase = "effect"
+from = "n8n_api"
+to = "credential_store"
+action = "请求携带配置的 API key，读取调用者无权访问的凭据列表"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 5
+phase = "effect"
+from = "credential_store"
+to = "caller"
+action = "凭据列表作为响应体回到调用者手里"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 6
+phase = "trigger"
+from = "api_client"
+to = "caller_endpoint"
+action = "通过一次性 SSRF 校验的触发 URL 收到出站请求"
+variant = "both"
+
+[[steps]]
+n = 7
+phase = "trigger"
+from = "caller_endpoint"
+to = "redirect_host"
+action = "302 让请求跟随到校验从未覆盖的主机"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 8
+phase = "trigger"
+from = "api_client"
+to = "api_client"
+action = "客户端不再跟随重定向，停在 3xx 响应上"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 9
+phase = "effect"
+from = "redirect_host"
+to = "caller"
+action = "目标主机的响应体被原样交回调用者"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 10
+phase = "trigger"
+from = "api_client"
+to = "telemetry_payload"
+action = "partial-update 完成后生成含 operation diff 的遥测记录"
+variant = "both"
+
+[[steps]]
+n = 11
+phase = "effect"
+from = "api_client"
+to = "telemetry_payload"
+action = "diff 中的 node 参数原文（bearer token、API key）直接进入待上传载荷"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 12
+phase = "effect"
+from = "api_client"
+to = "telemetry_payload"
+action = "同一 diff 先经脱敏，凭据被替换为占位符后才进入载荷"
+variant = "patched_only"
+diverges = true

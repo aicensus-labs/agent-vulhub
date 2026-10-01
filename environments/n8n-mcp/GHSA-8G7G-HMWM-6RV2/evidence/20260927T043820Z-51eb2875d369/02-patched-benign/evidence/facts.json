@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T043820Z-51eb2875d369",
+  "case_id": "02-patched-benign",
+  "variant": "patched",
+  "scenario": "benign",
+  "execution_status": "completed",
+  "evidence": [
+    {
+      "path": "observation.json",
+      "sha256": "4730e39f34a661de1c62f6e20fe4fd89ca819baafbc9e6f46ad43a2b6afd7512"
+    },
+    {
+      "path": "probe-output.json",
+      "sha256": "c92af20017fac98a1003944bfd4d2d1eeaf5c74c55424a113832e74c22267e1c"
+    }
+  ]
+}

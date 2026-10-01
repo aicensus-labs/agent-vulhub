@@ -1,0 +1,23 @@
+%% n8n OAuth 2.1 受保护资源缺少按用户授权判定 — generated from diagram.toml
+sequenceDiagram
+  actor member_account as 实例 member 级用户
+  actor oauth_client as 自行注册的 OAuth client
+  participant oauth_server as 共享 OAuth 2.1 授权服务器
+  participant mcp_trigger as 受害 workflow 的 MCP Server Trigger
+  participant resource_authorization as 受保护资源按用户授权判定
+  participant workflow_owner as 属主项目中的执行上下文
+  participant victim_credentials as 属主已保存的凭据
+  Note over member_account,oauth_client: 阶段 setup
+  member_account ->> oauth_client: 1 在未认证的动态客户端注册端点登记一个 OAuth client，并带上自己的 callback 与 PKCE challenge
+  oauth_client ->> oauth_server: 2 发起授权请求，把受害 workflow 的 MCP 资源 URL 作为 resource 参数
+  oauth_server ->> mcp_trigger: 3 按 resource 解析出受害 workflow 的受保护资源，并返回同意页面所需的资源名称
+  Note over member_account,oauth_server: 阶段 trigger
+  member_account ->> oauth_server: 4 以 member 身份批准同意，授权码因此绑定 member 自己，而 resource 指向受害 workflow
+  oauth_server -->> mcp_trigger: 5 用 member 的授权码换取 aud 等于受害资源 URL 的 access token，令牌校验只确认资源存在与 aud 匹配
+  Note over oauth_server,mcp_trigger: 分歧点：漏洞版与修复版在此分叉
+  oauth_server -x resource_authorization: 6 在签发授权码与校验令牌之前先调用受保护资源的按用户授权判定
+  resource_authorization -x oauth_server: 7 member 没有该 workflow 的 workflow:execute，判定失败，同意被拒且令牌校验报 insufficient_scope
+  Note over member_account,mcp_trigger: 阶段 effect
+  member_account -->> mcp_trigger: 8 带 member 的 bearer token 调用受害 workflow 的 MCP 端点，token 被接受
+  mcp_trigger -->> workflow_owner: 9 workflow 在属主的项目上下文里执行
+  workflow_owner -->> victim_credentials: 10 执行过程读取属主已保存的凭据并访问其连接的集成

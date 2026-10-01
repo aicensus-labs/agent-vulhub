@@ -1,0 +1,123 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram n8n/GHSA-W46P-W7W2-FR9G
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+schema_version = 1
+title = "n8n AI Agents node 工具越权执行"
+summary = "n8n 2.29.7 的 Agent 运行时重建只按 project 校验 node 工具引用，不校验发起对话的用户：Project Viewer 拥有 agent:execute，能让引用项目凭据的节点工具通过重建并到达 EphemeralNodeExecutor，以项目凭据执行 executeCommand 等节点，从而在 n8n 主机上执行命令。2.29.8 在重建前用 filterToolsForUser 按 workflow:execute 与 credential:read 丢弃这类引用，并在执行器加了命令/文件类节点黑名单。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+[[entities]]
+id = "attacker"
+label = "项目内 Project Viewer 账号"
+kind = "actor"
+trust = "attacker_controlled"
+role = "被加入团队项目、只有只读权限但拥有 agent:execute 的成员；它只能控制这次对话的输入，不能自己读凭据或在主机上执行命令。"
+
+[[entities]]
+id = "agent_chat"
+label = "Agent 对话入口（POST agents/v2/:agentId/chat）"
+kind = "client"
+trust = "trusted"
+role = "接受 Project Viewer 的对话请求；漏洞版只把 userId 交给运行时重建，2.29.8 改为把完整 user 传下去，使按用户过滤成为可能。"
+
+[[entities]]
+id = "runtime"
+label = "AgentRuntimeReconstructionService"
+kind = "service"
+trust = "trusted"
+role = "按 agent 的 JSON 配置重建运行时并解析每个工具引用；漏洞版对 type=node 的引用不做任何用户级校验，修复版新增 filterToolsForUser。"
+
+[[entities]]
+id = "credential_store"
+label = "项目共享凭据表"
+kind = "store"
+trust = "trusted"
+role = "存放按 project 共享的凭据；漏洞版的执行器只确认凭据属于该 project，因此攻击者无权读取的密钥仍会被装进节点执行。"
+
+[[entities]]
+id = "executor"
+label = "EphemeralNodeExecutor 单节点内联执行"
+kind = "sink"
+trust = "trusted"
+role = "用节点参数与项目凭据执行 agent 选定的节点；漏洞版没有用户维度与命令类节点黑名单，修复版由黑名单兜底拦截。"
+
+[[entities]]
+id = "host_effect"
+label = "被执行的节点与命令效果记录"
+kind = "sink"
+trust = "trusted"
+synthetic = true
+role = "记录漏洞触发后真正到达执行器的节点类型、节点参数与凭据标识，是一处无害落点，不是真实主机上的外部目标。"
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "attacker_side"
+label = "低权限项目成员侧"
+members = ["attacker"]
+note = "攻击者在这里只有一个团队项目的只读成员身份和 agent:execute；它不能读项目凭据，也不能直接访问 n8n 主机。"
+
+[[boundaries]]
+id = "product"
+label = "n8n 服务端与它信任的项目数据"
+members = ["agent_chat", "runtime", "credential_store", "executor"]
+note = "这道边界应当保证只有具备 workflow:execute 与 credential:read 的调用者才能让节点工具落地执行；漏洞版重建时不看用户，边界因此失效。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker"
+to = "agent_chat"
+action = "Project Viewer 向启用了 node 工具的 agent 发起对话，请求里带的是正常聊天输入"
+variant = "both"
+
+[[steps]]
+n = 2
+phase = "setup"
+from = "agent_chat"
+to = "runtime"
+action = "入口把该 agent 的 JSON 配置交给运行时重建，让运行时解析其中的工具引用"
+variant = "both"
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "runtime"
+to = "runtime"
+action = "漏洞版直接按 agent 配置重建运行时，type=node 的工具引用不做用户级校验就进入工具解析"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "runtime"
+to = "runtime"
+action = "修复版先按调用者的 workflow:execute 与 credential:read 丢弃不可执行的 node 工具引用，再重建运行时"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 5
+phase = "trigger"
+from = "runtime"
+to = "executor"
+action = "保留下来的 node 工具被解析成可调用工具，其处理器调用单节点内联执行"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 6
+phase = "trigger"
+from = "executor"
+to = "credential_store"
+action = "执行器只确认凭据被共享给该 project，就把攻击者无权读取的密钥装进节点执行"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 7
+phase = "effect"
+from = "executor"
+to = "host_effect"
+action = "命令类节点以项目凭据实际执行，节点类型、参数与凭据标识落到效果记录上"
+variant = "vulnerable_only"

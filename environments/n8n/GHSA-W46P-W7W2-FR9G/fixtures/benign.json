@@ -1,0 +1,55 @@
+{
+  "marker": "AVH-N8N-W46P-BENIGN",
+  "projectId": "project-editor-workspace",
+  "sendUserObject": true,
+  "user": {
+    "id": "user-editor",
+    "role": "project:editor",
+    "scopes": [
+      "workflow:execute",
+      "credential:read"
+    ],
+    "projectScopes": []
+  },
+  "credentials": [
+    {
+      "id": "cred-api",
+      "name": "Status API",
+      "type": "httpHeaderAuth",
+      "projectId": "project-editor-workspace",
+      "owner": "user-editor",
+      "sharedWith": [
+        "user-editor"
+      ]
+    }
+  ],
+  "workflows": [],
+  "agent": {
+    "id": "agent-status",
+    "schema": {
+      "tools": [
+        {
+          "name": "Fetch Status",
+          "type": "node",
+          "description": "Reads the status endpoint",
+          "node": {
+            "nodeType": "n8n-nodes-base.httpRequest",
+            "nodeTypeVersion": 4,
+            "nodeParameters": {
+              "url": "http://127.0.0.1:5678/healthz"
+            },
+            "credentials": {
+              "httpHeaderAuth": {
+                "id": "cred-api",
+                "name": "Status API"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "invocation": {
+    "url": "http://127.0.0.1:5678/healthz"
+  }
+}

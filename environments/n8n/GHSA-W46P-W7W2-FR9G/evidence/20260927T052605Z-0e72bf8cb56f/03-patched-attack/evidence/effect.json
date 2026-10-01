@@ -1,0 +1,12 @@
+{
+  "mechanism_loaded": true,
+  "scenario": "attack",
+  "filter_tools_for_user_present": true,
+  "resolved_tool_names": [],
+  "resolved_tool_kinds": [],
+  "executor_node_types": [],
+  "executor_credential_ids": [],
+  "executor_node_parameters": [],
+  "node_tool_invoked": false,
+  "node_tool_results": []
+}
