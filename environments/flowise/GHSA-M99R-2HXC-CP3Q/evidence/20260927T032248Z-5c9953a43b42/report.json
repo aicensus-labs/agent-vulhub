@@ -1,0 +1,862 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T032248Z-5c9953a43b42",
+  "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+  "layer": "mechanism",
+  "rounds": 3,
+  "started_at": "2026-09-27T03:22:48.088169+00:00",
+  "cases": [
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "01-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 1,
+      "project": "avh-da86fe461a89424b9492",
+      "layer": "mechanism",
+      "source_commit": "34cf28546b700998e88a8f14d6f6d0754f572da4",
+      "image": "sha256:cba259f8c5e7ef100b1da6ccf3b1ae1323faec41e691e0bb368fd71b6f611411",
+      "started_at": "2026-09-27T03:22:58.660675+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "The double-slash stdio config passes validateMCPServerConfig and a real spawned child writes the fixed marker, while a normal absolute path is still rejected and the docker/npx bypasses are still accepted.",
+          "actual": "validation='accepted' negative_control='rejected' bypasses={'rce_local_file_via_double_slash': True, 'docker_build_remote_context': True, 'npx_yes_remote_package': True} command='node' args=['//lab/fixtures/mcp_payload.js'] child_process_executed=True marker='ghsa-mcp-stdio-child-executed /lab/fixtures/mcp_payload.js\\n'",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt",
+            ".ghsa-mcp-child-effect.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:23:03.591768+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "01-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 1,
+      "project": "avh-21d01c1013f64df885d1",
+      "layer": "mechanism",
+      "source_commit": "4114b3b506e7bbee155141175a2ba48e426919dd",
+      "image": "sha256:77c5d5c7e9da68a313737e42973b3ef2355f4d40adf0628ffd3785ff178da138",
+      "started_at": "2026-09-27T03:23:03.595619+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "The double-slash config and the docker/npx bypasses are rejected before any transport is created, so no child process runs and no marker file exists.",
+          "actual": "validation='rejected' negative_control='rejected' bypasses={'rce_local_file_via_double_slash': False, 'docker_build_remote_context': False, 'npx_yes_remote_package': False} command='node' args=['//lab/fixtures/mcp_payload.js'] child_process_executed=False marker=None validation_error='Argument contains potential local file access: \"//lab/fixtures/mcp_payload.js\"' tools=None",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:23:09.192065+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "01-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 1,
+      "project": "avh-ec840f6364a749dc82b0",
+      "layer": "mechanism",
+      "source_commit": "34cf28546b700998e88a8f14d6f6d0754f572da4",
+      "image": "sha256:cba259f8c5e7ef100b1da6ccf3b1ae1323faec41e691e0bb368fd71b6f611411",
+      "started_at": "2026-09-27T03:23:09.194958+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The legitimate relative-path stdio server passes the gate and completes a real MCP handshake and ghsa_echo round trip without writing any marker.",
+          "actual": "validation='accepted' negative_control='rejected' tools=['ghsa_echo'] toolkit_error=None round_trip='[{\"type\":\"text\",\"text\":\"ghsa-benign-round-trip\"}]' benign_task_ok=True marker=None",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt",
+            "benign_mcp_server.js"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:23:16.223909+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "01-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 1,
+      "project": "avh-8a5a2f626d3149e096f3",
+      "layer": "mechanism",
+      "source_commit": "4114b3b506e7bbee155141175a2ba48e426919dd",
+      "image": "sha256:77c5d5c7e9da68a313737e42973b3ef2355f4d40adf0628ffd3785ff178da138",
+      "started_at": "2026-09-27T03:23:16.226799+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The legitimate relative-path stdio server passes the gate and completes a real MCP handshake and ghsa_echo round trip without writing any marker.",
+          "actual": "validation='accepted' negative_control='rejected' tools=['ghsa_echo'] toolkit_error=None round_trip='[{\"type\":\"text\",\"text\":\"ghsa-benign-round-trip\"}]' benign_task_ok=True marker=None",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt",
+            "benign_mcp_server.js"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:23:20.917132+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "02-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 2,
+      "project": "avh-796d1eac5d5649e3908c",
+      "layer": "mechanism",
+      "source_commit": "34cf28546b700998e88a8f14d6f6d0754f572da4",
+      "image": "sha256:cba259f8c5e7ef100b1da6ccf3b1ae1323faec41e691e0bb368fd71b6f611411",
+      "started_at": "2026-09-27T03:23:20.920124+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "The double-slash stdio config passes validateMCPServerConfig and a real spawned child writes the fixed marker, while a normal absolute path is still rejected and the docker/npx bypasses are still accepted.",
+          "actual": "validation='accepted' negative_control='rejected' bypasses={'rce_local_file_via_double_slash': True, 'docker_build_remote_context': True, 'npx_yes_remote_package': True} command='node' args=['//lab/fixtures/mcp_payload.js'] child_process_executed=True marker='ghsa-mcp-stdio-child-executed /lab/fixtures/mcp_payload.js\\n'",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt",
+            ".ghsa-mcp-child-effect.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:23:25.736055+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "02-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 2,
+      "project": "avh-1c467ef2dd0a4d7fbb0f",
+      "layer": "mechanism",
+      "source_commit": "4114b3b506e7bbee155141175a2ba48e426919dd",
+      "image": "sha256:77c5d5c7e9da68a313737e42973b3ef2355f4d40adf0628ffd3785ff178da138",
+      "started_at": "2026-09-27T03:23:25.738681+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "The double-slash config and the docker/npx bypasses are rejected before any transport is created, so no child process runs and no marker file exists.",
+          "actual": "validation='rejected' negative_control='rejected' bypasses={'rce_local_file_via_double_slash': False, 'docker_build_remote_context': False, 'npx_yes_remote_package': False} command='node' args=['//lab/fixtures/mcp_payload.js'] child_process_executed=False marker=None validation_error='Argument contains potential local file access: \"//lab/fixtures/mcp_payload.js\"' tools=None",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:23:32.239234+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "02-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 2,
+      "project": "avh-862b344a43564e9ebd23",
+      "layer": "mechanism",
+      "source_commit": "34cf28546b700998e88a8f14d6f6d0754f572da4",
+      "image": "sha256:cba259f8c5e7ef100b1da6ccf3b1ae1323faec41e691e0bb368fd71b6f611411",
+      "started_at": "2026-09-27T03:23:32.243339+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The legitimate relative-path stdio server passes the gate and completes a real MCP handshake and ghsa_echo round trip without writing any marker.",
+          "actual": "validation='accepted' negative_control='rejected' tools=['ghsa_echo'] toolkit_error=None round_trip='[{\"type\":\"text\",\"text\":\"ghsa-benign-round-trip\"}]' benign_task_ok=True marker=None",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt",
+            "benign_mcp_server.js"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:23:37.458261+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "02-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 2,
+      "project": "avh-fe623b11e5b24b0097ee",
+      "layer": "mechanism",
+      "source_commit": "4114b3b506e7bbee155141175a2ba48e426919dd",
+      "image": "sha256:77c5d5c7e9da68a313737e42973b3ef2355f4d40adf0628ffd3785ff178da138",
+      "started_at": "2026-09-27T03:23:37.462422+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The legitimate relative-path stdio server passes the gate and completes a real MCP handshake and ghsa_echo round trip without writing any marker.",
+          "actual": "validation='accepted' negative_control='rejected' tools=['ghsa_echo'] toolkit_error=None round_trip='[{\"type\":\"text\",\"text\":\"ghsa-benign-round-trip\"}]' benign_task_ok=True marker=None",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt",
+            "benign_mcp_server.js"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:23:43.748768+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "03-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 3,
+      "project": "avh-97034541aa5640d3b914",
+      "layer": "mechanism",
+      "source_commit": "34cf28546b700998e88a8f14d6f6d0754f572da4",
+      "image": "sha256:cba259f8c5e7ef100b1da6ccf3b1ae1323faec41e691e0bb368fd71b6f611411",
+      "started_at": "2026-09-27T03:23:43.752255+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "The double-slash stdio config passes validateMCPServerConfig and a real spawned child writes the fixed marker, while a normal absolute path is still rejected and the docker/npx bypasses are still accepted.",
+          "actual": "validation='accepted' negative_control='rejected' bypasses={'rce_local_file_via_double_slash': True, 'docker_build_remote_context': True, 'npx_yes_remote_package': True} command='node' args=['//lab/fixtures/mcp_payload.js'] child_process_executed=True marker='ghsa-mcp-stdio-child-executed /lab/fixtures/mcp_payload.js\\n'",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt",
+            ".ghsa-mcp-child-effect.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:23:48.564651+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "03-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 3,
+      "project": "avh-cc358d146b714d2087e6",
+      "layer": "mechanism",
+      "source_commit": "4114b3b506e7bbee155141175a2ba48e426919dd",
+      "image": "sha256:77c5d5c7e9da68a313737e42973b3ef2355f4d40adf0628ffd3785ff178da138",
+      "started_at": "2026-09-27T03:23:48.568897+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "The double-slash config and the docker/npx bypasses are rejected before any transport is created, so no child process runs and no marker file exists.",
+          "actual": "validation='rejected' negative_control='rejected' bypasses={'rce_local_file_via_double_slash': False, 'docker_build_remote_context': False, 'npx_yes_remote_package': False} command='node' args=['//lab/fixtures/mcp_payload.js'] child_process_executed=False marker=None validation_error='Argument contains potential local file access: \"//lab/fixtures/mcp_payload.js\"' tools=None",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:23:53.278443+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "03-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 3,
+      "project": "avh-a3b13a17d6f14435a5f9",
+      "layer": "mechanism",
+      "source_commit": "34cf28546b700998e88a8f14d6f6d0754f572da4",
+      "image": "sha256:cba259f8c5e7ef100b1da6ccf3b1ae1323faec41e691e0bb368fd71b6f611411",
+      "started_at": "2026-09-27T03:23:53.282134+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The legitimate relative-path stdio server passes the gate and completes a real MCP handshake and ghsa_echo round trip without writing any marker.",
+          "actual": "validation='accepted' negative_control='rejected' tools=['ghsa_echo'] toolkit_error=None round_trip='[{\"type\":\"text\",\"text\":\"ghsa-benign-round-trip\"}]' benign_task_ok=True marker=None",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt",
+            "benign_mcp_server.js"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:23:58.854214+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T032248Z-5c9953a43b42",
+      "case_id": "03-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "flowise/GHSA-M99R-2HXC-CP3Q",
+      "round": 3,
+      "project": "avh-e034983ab2d84bffab64",
+      "layer": "mechanism",
+      "source_commit": "4114b3b506e7bbee155141175a2ba48e426919dd",
+      "image": "sha256:77c5d5c7e9da68a313737e42973b3ef2355f4d40adf0628ffd3785ff178da138",
+      "started_at": "2026-09-27T03:23:58.858968+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The legitimate relative-path stdio server passes the gate and completes a real MCP handshake and ghsa_echo round trip without writing any marker.",
+          "actual": "validation='accepted' negative_control='rejected' tools=['ghsa_echo'] toolkit_error=None round_trip='[{\"type\":\"text\",\"text\":\"ghsa-benign-round-trip\"}]' benign_task_ok=True marker=None",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "resolved_mcp_config.json",
+            "harness_result.json",
+            "harness_stdout.txt",
+            "benign_mcp_server.js"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:24:03.846490+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    }
+  ],
+  "outcome": "passed",
+  "exit_code": 0,
+  "fingerprint": "ea3fbd4642b0621754fc638ee47e393fc4ec7d8544946736293472b104e40d08",
+  "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+  "docker_version": "29.6.1",
+  "compose_version": "5.3.0",
+  "platform": "linux/amd64",
+  "host_system": "Linux",
+  "docker_operating_system": "Ubuntu 24.04.3 LTS",
+  "host_architecture": "x86_64",
+  "images": {
+    "vulnerable": "sha256:cba259f8c5e7ef100b1da6ccf3b1ae1323faec41e691e0bb368fd71b6f611411",
+    "patched": "sha256:77c5d5c7e9da68a313737e42973b3ef2355f4d40adf0628ffd3785ff178da138"
+  },
+  "finished_at": "2026-09-27T03:24:03.854538+00:00"
+}

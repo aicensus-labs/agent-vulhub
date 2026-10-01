@@ -1,0 +1,4 @@
+{
+  "command": "node",
+  "args": ["__MCP_PAYLOAD_PATH__"]
+}

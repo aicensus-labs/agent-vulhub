@@ -1,0 +1,39 @@
+%% grackle MCP 工具层 fail-open 授权（跨任务/跨会话 IDOR） — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["攻击者侧"]
+    scoped_agent["scoped agent 调用方<br/>actor · attacker_controlled"]
+  end
+  subgraph product_side["受影响的工具层与它保护的存储"]
+    mcp_tool_layer["MCP 工具层<br/>service · trusted"]
+    grpc_backend["gRPC 后端处理器<br/>⚠ service · trusted"]
+    victim_task["他人任务记录<br/>store · trusted"]
+    victim_session["他人会话<br/>store · trusted"]
+    mutation_effect["越权变更落地<br/>⚠ sink · trusted"]
+  end
+  scoped_agent -->|"1"| mcp_tool_layer
+  mcp_tool_layer -->|"2"| mcp_tool_layer
+  mcp_tool_layer -.->|"3"| mcp_tool_layer
+  mcp_tool_layer -.->|"4"| mcp_tool_layer
+  mcp_tool_layer -.->|"5"| grpc_backend
+  grpc_backend -.->|"6"| victim_task
+  grpc_backend -.->|"7"| victim_session
+  grpc_backend -.->|"8"| mutation_effect
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class scoped_agent actor
+  class mcp_tool_layer service
+  class grpc_backend service
+  class grpc_backend synthetic
+  class victim_task store
+  class victim_session store
+  class mutation_effect sink
+  class mutation_effect synthetic
+  style attacker_side fill:transparent
+  style product_side fill:transparent
+  linkStyle 2 stroke:#c0392b,stroke-width:2px
+  linkStyle 3 stroke:#2e7d32,stroke-width:2px

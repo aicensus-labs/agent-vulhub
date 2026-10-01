@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "scenario": "benign",
+  "description": "Legitimate calls that both revisions must keep working: a scoped orchestrator operating on its own descendants, and a non-scoped api-key caller using the same tools.",
+  "probes": [
+    {
+      "id": "delete_own_descendant_task",
+      "actor": "scoped",
+      "tool": "task_delete",
+      "args": {
+        "taskId": "task-caller-child"
+      },
+      "target": "task-caller-child",
+      "note": "The caller is an ancestor of the target, so the central scope gate must let it through on both revisions."
+    },
+    {
+      "id": "update_own_descendant_task",
+      "actor": "scoped",
+      "tool": "task_update",
+      "args": {
+        "taskId": "task-caller-child",
+        "title": "renamed-by-own-orchestrator"
+      },
+      "target": "task-caller-child",
+      "note": "Authorized mutation on a direct child task."
+    },
+    {
+      "id": "kill_own_descendant_session",
+      "actor": "scoped",
+      "tool": "session_kill",
+      "args": {
+        "sessionId": "sess-caller-child"
+      },
+      "target": "sess-caller-child",
+      "note": "The session resolves to a descendant task, so the session branch of the same gate must allow it."
+    },
+    {
+      "id": "delete_task_with_api_key",
+      "actor": "api_key",
+      "tool": "task_delete",
+      "args": {
+        "taskId": "task-sibling"
+      },
+      "target": "task-sibling",
+      "note": "Non-scoped api-key callers keep full tool access; the fix must not restrict them."
+    }
+  ]
+}

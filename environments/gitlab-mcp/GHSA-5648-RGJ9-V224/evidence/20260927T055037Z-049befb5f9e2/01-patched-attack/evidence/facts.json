@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T055037Z-049befb5f9e2",
+  "case_id": "01-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "execution_status": "completed",
+  "evidence": [
+    {
+      "path": "observation.json",
+      "sha256": "97ee45ee399a72cf57724194c4f6a56d8fd48ff597332c10d5a82944bed63def"
+    },
+    {
+      "path": "driver-results.json",
+      "sha256": "bf25914d41f69fd149b2c4073f18554b8c7176de24e5a4700de2e13d54e50de2"
+    },
+    {
+      "path": "driver-stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "driver-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

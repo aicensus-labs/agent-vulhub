@@ -1,0 +1,39 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "benign",
+  "variant": "vulnerable",
+  "upstream_repository": "https://github.com/zereight/gitlab-mcp",
+  "upstream_commit": "139a479147a52f65d47e8fee142214c4d5392468",
+  "upstream_tag": "v2.1.28",
+  "loaded_module": "/lab/upstream/vulnerable/utils/graphql-query.ts",
+  "loaded_module_sha256": "0ee49475446ca2eb4add393eca0014ad04e526281bd3d3171c538f04729e47e7",
+  "driver_returncode": 0,
+  "attack_query_ids": [
+    "leading_comma_mutation",
+    "comment_then_comma_mutation",
+    "trailing_comma_subscription",
+    "plain_mutation"
+  ],
+  "benign_query_ids": [
+    "read_current_user",
+    "read_project_metadata",
+    "read_subscription_field_name",
+    "read_alias_mutation_word"
+  ],
+  "observed": {
+    "project_scope_guard_present": false,
+    "read_only_guard_present": true,
+    "out_of_allowlist_project": "424242",
+    "raw_endpoint": "/api/graphql",
+    "benign_queries_allowed": true
+  },
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T055037Z-049befb5f9e2",
+    "case_id": "03-vulnerable-benign",
+    "variant": "vulnerable",
+    "scenario": "benign"
+  }
+}

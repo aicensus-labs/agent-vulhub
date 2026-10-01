@@ -1,0 +1,43 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "attack",
+  "variant": "patched",
+  "upstream_repository": "https://github.com/zereight/gitlab-mcp",
+  "upstream_commit": "cff3ebeec272d7cc609d9b3cab57f52cb15fae96",
+  "upstream_tag": "v2.1.30",
+  "loaded_module": "/lab/upstream/patched/utils/graphql-query.ts",
+  "loaded_module_sha256": "4fc7128c866cf4fb24fb3a723853a25c2582f4437bb4c3ae3533a9a191a7b6e5",
+  "driver_returncode": 0,
+  "attack_query_ids": [
+    "leading_comma_mutation",
+    "comment_then_comma_mutation",
+    "trailing_comma_subscription",
+    "plain_mutation"
+  ],
+  "benign_query_ids": [
+    "read_current_user",
+    "read_project_metadata",
+    "read_subscription_field_name",
+    "read_alias_mutation_word"
+  ],
+  "observed": {
+    "project_scope_guard_present": true,
+    "read_only_guard_present": true,
+    "out_of_allowlist_project": "424242",
+    "raw_endpoint": "/api/graphql",
+    "read_only_bypass_observed": false,
+    "comment_bypass_observed": false,
+    "separator_bypass_observed": false,
+    "plain_mutation_flagged": true,
+    "bypass_query_flagged": true
+  },
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T055037Z-049befb5f9e2",
+    "case_id": "02-patched-attack",
+    "variant": "patched",
+    "scenario": "attack"
+  }
+}

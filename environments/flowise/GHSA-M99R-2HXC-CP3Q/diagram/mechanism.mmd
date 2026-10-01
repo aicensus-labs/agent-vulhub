@@ -1,0 +1,23 @@
+%% flowise / GHSA-M99R-2HXC-CP3Q 漏洞图解 — generated from diagram.toml
+sequenceDiagram
+  actor attacker as 攻击者
+  participant uploaded_script as 预先落盘的服务端 JS 脚本
+  participant mcp_config as Custom MCP 节点配置 mcpServerConfig
+  participant config_validator as validateMCPServerConfig 校验闸门
+  participant mcp_node as Custom MCP 节点与 MCPToolkit
+  participant spawned_process as StdioClientTransport 启动的 node 子进程
+  participant child_effect as 被加载 JS 写出的执行标记
+  Note over attacker,uploaded_script: 阶段 setup
+  attacker ->> uploaded_script: 1 攻击者先把要用 node 执行的 JS 放到服务器本地路径上
+  attacker ->> mcp_config: 2 攻击者把 command 设为 node、args 写成双斜杠绝对路径，组成 Custom MCP 节点配置
+  mcp_config ->> config_validator: 3 配置经 POST /api/v1/prediction/{chatflow_id} 提交后原样进入服务端校验闸门
+  Note over config_validator: 阶段 trigger
+  config_validator ->> config_validator: 4 validateArgsForLocalFileAccess 的 /^\/[^/]/ 不匹配双斜杠开头的参数，命令白名单 node 又恰好放行，配置通过校验
+  mcp_node -->> spawned_process: 5 校验放行后 MCPToolkit.initialize() 把未改写的 serverParams.command 与 args 交给 StdioClientTransport 并 spawn node 子进程
+  Note over mcp_node,spawned_process: 分歧点：漏洞版与修复版在此分叉
+  Note over spawned_process,uploaded_script: 阶段 effect
+  spawned_process -->> uploaded_script: 6 子进程按命令行参数加载并执行攻击者落盘的 JS
+  uploaded_script -->> child_effect: 7 被加载的 JS 在服务器上写出执行标记，任意代码执行落地
+  Note over config_validator,mcp_node: 阶段 trigger
+  config_validator -x mcp_node: 8 修复版改用 /^\// 并在黑名单补上 npx --yes 与 docker build，同一份配置在校验阶段即被拒绝，不再进入 transport
+  Note over config_validator,mcp_node: 分歧点：漏洞版与修复版在此分叉

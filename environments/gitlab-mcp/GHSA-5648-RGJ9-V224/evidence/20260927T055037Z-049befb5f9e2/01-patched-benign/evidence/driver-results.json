@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "variant": "patched",
+  "complete": true,
+  "module": {
+    "path": "/lab/upstream/patched/utils/graphql-query.ts",
+    "sha256": "4fc7128c866cf4fb24fb3a723853a25c2582f4437bb4c3ae3533a9a191a7b6e5",
+    "export": "graphqlQueryContainsWriteOperation"
+  },
+  "results": {
+    "queries": {
+      "read_current_user": false,
+      "read_project_metadata": false,
+      "read_subscription_field_name": false,
+      "read_alias_mutation_word": false
+    },
+    "structure": {
+      "execute_graphql_branch_sha256": "30288628fe2aaebe76590ee66ac2e1a9001e3300504a4ac4e08c47372d5bb286",
+      "read_only_guard_present": true,
+      "project_scope_guard_present": true,
+      "scope_guard_definition_sha256": "0a70ef44c63f73cd705d8a9124b6c34ee15fe6b625ddf8ce395bef93529ba9f8"
+    }
+  }
+}

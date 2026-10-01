@@ -1,0 +1,9 @@
+schema_version = 1
+
+# Keys are paths relative to fixtures/. Include attack AND benign inputs.
+# Written last, after every fixture file was final.
+[files]
+"allowlist-scope.json" = "65a62f97945f320d530f98794863891cb09468a3c628d7523f0bfdcac3987f8e"
+"cases.json" = "6e2c86f88b713708351a2c1728a6e71cd99973a8264b20dbd8228db2ca381361"
+"graphql-driver.mjs" = "4b19477b95e0027ebcf06a505eebf264321e2ed2d0b03cec697895fde0272190"
+"pin.json" = "3a7765643721c14ff08db31583f258c6b0bd307c54ed5ebfd982a78394792afe"

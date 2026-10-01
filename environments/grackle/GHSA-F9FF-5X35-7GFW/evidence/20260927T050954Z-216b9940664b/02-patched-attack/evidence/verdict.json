@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T050954Z-216b9940664b",
+  "case_id": "02-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "patched_effect_blocked",
+      "passed": true,
+      "expected": "each non-descendant mutation is denied with PERMISSION_DENIED and never reaches the backend",
+      "actual": "4 unauthorized probes were blocked before the handler",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "tool-calls.json",
+        "scenario-input.json"
+      ]
+    }
+  ]
+}

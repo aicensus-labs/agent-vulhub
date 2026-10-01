@@ -1,0 +1,20 @@
+%% grackle MCP 工具层 fail-open 授权（跨任务/跨会话 IDOR） — generated from diagram.toml
+sequenceDiagram
+  actor scoped_agent as scoped agent 调用方
+  participant mcp_tool_layer as MCP 工具层
+  participant grpc_backend as gRPC 后端处理器
+  participant victim_task as 他人任务记录
+  participant victim_session as 他人会话
+  participant mutation_effect as 越权变更落地
+  Note over scoped_agent,mcp_tool_layer: 阶段 setup
+  scoped_agent ->> mcp_tool_layer: 1 攻击者用自己那份有效 scoped token 发起 MCP 工具调用，把 task_delete、task_update、session_kill 的目标 ID 指向自己不是祖先的任务或他人会话
+  mcp_tool_layer ->> mcp_tool_layer: 2 dispatcher 校验 token 签名与有效期，解析出调用者的 taskId、workspaceId、personaId，并按 persona 预设放行这个工具
+  Note over mcp_tool_layer: 阶段 trigger
+  mcp_tool_layer -->> mcp_tool_layer: 3 漏洞版 dispatcher 只对 task_show 做 workspace 门、只对 task_start/task_complete/session_attach/session_send_input 做内联祖先检查；该工具既没有声明式 scope 描述符也没有检查，授权被跳过后 handler 直接执行
+  Note over mcp_tool_layer: 分歧点：漏洞版与修复版在此分叉
+  mcp_tool_layer -x mcp_tool_layer: 4 修复版 dispatcher 在 Zod 校验与 handler 之前执行 enforceToolScope：读取工具声明式 scope，沿 getTask 父链断言调用者是目标任务或会话所属任务的祖先，否则抛 PermissionDenied
+  Note over mcp_tool_layer,grpc_backend: 阶段 effect
+  mcp_tool_layer -->> grpc_backend: 5 handler 把调用者给的 taskId/sessionId 原样转发给后端 RPC
+  grpc_backend -->> victim_task: 6 deleteTask 永久删除该任务记录，task_update 改写它的标题、状态、依赖或预算
+  grpc_backend -->> victim_session: 7 killAgent 终止他人的 agent 会话
+  grpc_backend -->> mutation_effect: 8 越权变更落地：他人任务消失或被改写、他人会话被终止，调用者收到成功响应

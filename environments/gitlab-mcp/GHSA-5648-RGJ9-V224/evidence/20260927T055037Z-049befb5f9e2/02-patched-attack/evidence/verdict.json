@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T055037Z-049befb5f9e2",
+  "case_id": "02-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "patched_effect_blocked",
+      "passed": true,
+      "expected": "the same three payloads are classified as writes (True), the plain mutation stays a write (True), and the execute_graphql branch (branch hash pinned) carries the project allow-list guard",
+      "actual": "{\"bypass_queries\": {\"comment_then_comma_mutation\": true, \"leading_comma_mutation\": true, \"trailing_comma_subscription\": true}, \"complete\": true, \"control_query\": true, \"execute_graphql_branch_sha256\": \"30288628fe2aaebe76590ee66ac2e1a9001e3300504a4ac4e08c47372d5bb286\", \"expected_execute_graphql_branch_sha256\": \"30288628fe2aaebe76590ee66ac2e1a9001e3300504a4ac4e08c47372d5bb286\", \"expected_module_sha256\": \"4fc7128c866cf4fb24fb3a723853a25c2582f4437bb4c3ae3533a9a191a7b6e5\", \"expected_project_scope_guard_present\": true, \"expected_read_only_guard_present\": true, \"expected_scope_guard_definition_sha256\": \"0a70ef44c63f73cd705d8a9124b6c34ee15fe6b625ddf8ce395bef93529ba9f8\", \"module_sha256\": \"4fc7128c866cf4fb24fb3a723853a25c2582f4437bb4c3ae3533a9a191a7b6e5\", \"observation_module_sha256\": \"4fc7128c866cf4fb24fb3a723853a25c2582f4437bb4c3ae3533a9a191a7b6e5\", \"observed\": {\"bypass_query_flagged\": true, \"comment_bypass_observed\": false, \"out_of_allowlist_project\": \"424242\", \"plain_mutation_flagged\": true, \"project_scope_guard_present\": true, \"raw_endpoint\": \"/api/graphql\", \"read_only_bypass_observed\": false, \"read_only_guard_present\": true, \"separator_bypass_observed\": false}, \"pin_matches\": true, \"project_scope_guard_present\": true, \"read_only_guard_present\": true, \"scope_guard_definition_sha256\": \"0a70ef44c63f73cd705d8a9124b6c34ee15fe6b625ddf8ce395bef93529ba9f8\", \"variant\": \"patched\"}",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "driver-results.json",
+        "driver-stdout.txt",
+        "driver-stderr.txt"
+      ]
+    }
+  ]
+}

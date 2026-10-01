@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T055037Z-049befb5f9e2",
+  "case_id": "01-vulnerable-benign",
+  "variant": "vulnerable",
+  "scenario": "benign",
+  "environment_id": "gitlab-mcp/GHSA-5648-RGJ9-V224",
+  "round": 1,
+  "project": "avh-2d080cff11824676aa2a",
+  "layer": "mechanism",
+  "source_commit": "139a479147a52f65d47e8fee142214c4d5392468",
+  "image": "sha256:314839c85a59bd9dcc64bb5ab19bff2408cdc9a3fd7cd74cc08eeffe7fa426e9",
+  "started_at": "2026-09-27T05:51:00.890416+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "every benign read-only document is classified as read-only (False) by the variant-pinned module and the pinned execute_graphql structure matches the revision",
+      "actual": "{\"benign_queries\": {\"read_alias_mutation_word\": false, \"read_current_user\": false, \"read_project_metadata\": false, \"read_subscription_field_name\": false}, \"complete\": true, \"execute_graphql_branch_sha256\": \"f7f1ba951ae5e1bbd83fc3a802c02aee791fe8914dfdf9edbc82b99073963959\", \"expected_execute_graphql_branch_sha256\": \"f7f1ba951ae5e1bbd83fc3a802c02aee791fe8914dfdf9edbc82b99073963959\", \"expected_module_sha256\": \"0ee49475446ca2eb4add393eca0014ad04e526281bd3d3171c538f04729e47e7\", \"expected_scope_guard_definition_sha256\": \"0a70ef44c63f73cd705d8a9124b6c34ee15fe6b625ddf8ce395bef93529ba9f8\", \"module_sha256\": \"0ee49475446ca2eb4add393eca0014ad04e526281bd3d3171c538f04729e47e7\", \"observation_module_sha256\": \"0ee49475446ca2eb4add393eca0014ad04e526281bd3d3171c538f04729e47e7\", \"pin_matches\": true, \"scope_guard_definition_sha256\": \"0a70ef44c63f73cd705d8a9124b6c34ee15fe6b625ddf8ce395bef93529ba9f8\", \"variant\": \"vulnerable\"}",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "driver-results.json",
+        "driver-stdout.txt",
+        "driver-stderr.txt"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-27T05:51:07.645788+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

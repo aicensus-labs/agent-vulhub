@@ -1,0 +1,8 @@
+schema_version = 1
+
+# Keys are paths relative to fixtures/. Include attack AND benign inputs.
+# manifest.toml and README.md are excluded by contract.
+[files]
+"attack.json" = "be30904348765da06a1012ac684398dfd6fc2b17b5100ce3956f258a44e44e9d"
+"benign.json" = "d45d3120b782e255fa6dcab5052f665fee5915dd758acc358951a1665b3bb694"
+"environment.json" = "3a48e6fe991ae304bb8557600a095c5a24a559973eb74776071e7982bcfb2d4c"

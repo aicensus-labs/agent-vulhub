@@ -1,0 +1,43 @@
+%% gitlab-mcp / GHSA-5648-rgj9-v224 漏洞图解 — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["攻击者侧"]
+    attacker["攻击者 / 攻击材料<br/>actor · attacker_controlled"]
+    tool_arguments["工具调用参数<br/>client · untrusted_input"]
+  end
+  subgraph product["gitlab-mcp 受信侧与它信任的部署凭据"]
+    mcp_server["gitlab-mcp 工具分发与 MCP 服务<br/>service · trusted"]
+    graphql_parser["graphqlQueryContainsWriteOperation() 只读判定器<br/>tool · trusted"]
+    read_only_guard["GITLAB_READ_ONLY_MODE 写操作闸门<br/>tool · trusted"]
+    graphql_endpoint["上游 GraphQL 端点 /api/graphql<br/>⚠ sink · trusted"]
+    server_token["服务器持有的操作员令牌<br/>store · trusted"]
+  end
+  attacker -->|"1"| tool_arguments
+  tool_arguments -->|"2"| mcp_server
+  mcp_server -->|"3"| graphql_parser
+  graphql_parser -.->|"4"| graphql_parser
+  graphql_parser -.->|"5"| graphql_parser
+  read_only_guard -.->|"6"| read_only_guard
+  read_only_guard -.->|"7"| mcp_server
+  mcp_server -.->|"8"| graphql_endpoint
+  graphql_endpoint -.->|"9"| graphql_endpoint
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class attacker actor
+  class tool_arguments client
+  class mcp_server service
+  class graphql_parser tool
+  class read_only_guard tool
+  class graphql_endpoint sink
+  class graphql_endpoint synthetic
+  class server_token store
+  style attacker_side fill:transparent
+  style product fill:transparent
+  linkStyle 3 stroke:#c0392b,stroke-width:2px
+  linkStyle 4 stroke:#2e7d32,stroke-width:2px
+  linkStyle 5 stroke:#2e7d32,stroke-width:2px
+  linkStyle 6 stroke:#c0392b,stroke-width:2px

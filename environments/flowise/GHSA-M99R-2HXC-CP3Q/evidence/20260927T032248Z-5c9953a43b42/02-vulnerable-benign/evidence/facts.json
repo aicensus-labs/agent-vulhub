@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T032248Z-5c9953a43b42",
+  "case_id": "02-vulnerable-benign",
+  "variant": "vulnerable",
+  "scenario": "benign",
+  "execution_status": "completed",
+  "evidence": [
+    {
+      "path": "observation.json",
+      "sha256": "160d9f52c386beb4eed14b6c2cc14a517fc7cc9b154716a4eb752fdbbad78659"
+    },
+    {
+      "path": "resolved_mcp_config.json",
+      "sha256": "b45d2fca3f99c62ecedc394c9aba688be4acce1744b95b064a9e6f6a2bf1ac95"
+    },
+    {
+      "path": "harness_result.json",
+      "sha256": "c52aba8f91768703fbc7742fa9e77d84f71399f94e4f0ce77355c4aa2121ce13"
+    },
+    {
+      "path": "harness_stdout.txt",
+      "sha256": "9ef0c459023eb50fb3a18de80d77db539f27b3776581b2da69072815d40e94df"
+    },
+    {
+      "path": "benign_mcp_server.js",
+      "sha256": "03d70a4351a187869ff02fa4d71563d6a28d0138b9cf40417de632645e3f0482"
+    }
+  ]
+}

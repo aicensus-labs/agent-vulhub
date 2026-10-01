@@ -1,0 +1,40 @@
+%% flowise / GHSA-M99R-2HXC-CP3Q 漏洞图解 — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["攻击者可控输入"]
+    attacker["攻击者<br/>actor · attacker_controlled"]
+    uploaded_script["预先落盘的服务端 JS 脚本<br/>store · attacker_controlled"]
+    mcp_config["Custom MCP 节点配置 mcpServerConfig<br/>client · untrusted_input"]
+  end
+  subgraph server_side["Flowise 服务端与它信任的数据"]
+    config_validator["validateMCPServerConfig 校验闸门<br/>service · trusted"]
+    mcp_node["Custom MCP 节点与 MCPToolkit<br/>service · trusted"]
+    spawned_process["StdioClientTransport 启动的 node 子进程<br/>tool · trusted"]
+    child_effect["被加载 JS 写出的执行标记<br/>⚠ sink · trusted"]
+  end
+  attacker -->|"1"| uploaded_script
+  attacker -->|"2"| mcp_config
+  mcp_config -->|"3"| config_validator
+  config_validator -->|"4"| config_validator
+  mcp_node -.->|"5"| spawned_process
+  spawned_process -.->|"6"| uploaded_script
+  uploaded_script -.->|"7"| child_effect
+  config_validator -.->|"8"| mcp_node
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class attacker actor
+  class uploaded_script store
+  class mcp_config client
+  class config_validator service
+  class mcp_node service
+  class spawned_process tool
+  class child_effect sink
+  class child_effect synthetic
+  style attacker_side fill:transparent
+  style server_side fill:transparent
+  linkStyle 4 stroke:#c0392b,stroke-width:2px
+  linkStyle 7 stroke:#2e7d32,stroke-width:2px

@@ -1,0 +1,6 @@
+{
+  "command": "node",
+  "args": [
+    "mcp_server.js"
+  ]
+}

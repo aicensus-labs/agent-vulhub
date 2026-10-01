@@ -1,0 +1,6 @@
+{
+  "command": "node",
+  "args": [
+    "//lab/fixtures/mcp_payload.js"
+  ]
+}
