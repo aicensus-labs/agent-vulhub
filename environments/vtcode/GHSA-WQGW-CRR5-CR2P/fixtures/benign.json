@@ -1,0 +1,4 @@
+{
+  "command": "touch {MARKER}",
+  "note": "The same command used as a user-level (non-workspace) hook. It must keep running after the fix, because the approval gate applies to workspace-controlled hook content, not to the user's own configuration."
+}

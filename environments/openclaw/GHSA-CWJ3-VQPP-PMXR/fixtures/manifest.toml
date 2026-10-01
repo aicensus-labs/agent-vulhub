@@ -1,0 +1,9 @@
+schema_version = 1
+
+# Keys are paths relative to fixtures/. Include attack AND benign inputs.
+[files]
+"attack-apply.json" = "c1f5dca3e7a9e6de6f2fb38055f802760c9016b86cb9a72614a3c5273db8a1ac"
+"attack-patch.json" = "f4be2abefe7e1e6a5126dc82a0826442c8a02e76a35a26e909ee4538f4916b0f"
+"benign-patch.json" = "35da7f22cad1ee59ae62b37908369e14d70d8ccf942580a49215f620703d6080"
+"control-protected-patch.json" = "411d9f51fabac776e17fa2506027ef1c1bd4643b1533ed0d971e934469e2e925"
+"current-config.json" = "5339e7d0db062079b76ca43be750af026b93e00d7f6a5de1c7990f3996afea6e"

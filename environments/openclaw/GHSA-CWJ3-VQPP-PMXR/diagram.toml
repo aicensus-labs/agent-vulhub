@@ -1,0 +1,129 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram openclaw/GHSA-CWJ3-VQPP-PMXR
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# fixture 装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "openclaw / GHSA-CWJ3-VQPP-PMXR 漏洞图解"
+summary = "面向 agent 的 gateway 工具在 config.apply / config.patch 持久化之前，用手工维护的受保护路径清单做变更判定，只拒绝命中清单的改动。清单之外的 operator 级配置键（gateway.remote.url、memory.qmd.command、browser.executablePath、tools.allow、tools.elevated.enabled）因此能随模型提交的原始配置一起写入，越过 model -> operator 信任边界。修复版改成 fail-closed 的允许清单：先收集实际变更的叶子路径，再拒绝任何不在清单内的路径。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（本仓库合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "attacker"
+label = "注入指令与越界配置值"
+kind = "actor"
+trust = "attacker_controlled"
+role = "在会话内容里下达指令，并提供要写入 operator 配置的越界键值。它不能直接读写配置存储，只能借模型之手提交这次 config.patch。"
+source = "fixtures/attack-patch.json"
+
+[[entities]]
+id = "agent"
+label = "模型 / Agent 会话"
+kind = "client"
+trust = "semi_trusted"
+role = "gateway 工具虽然是 owner-only，但按安全模型模型与 agent 本身不是受信主体；它把模型给出的 raw 配置变更原样交给 gateway 工具。"
+
+[[entities]]
+id = "gateway_tool"
+label = "gateway 工具的配置变更判定"
+kind = "service"
+trust = "trusted"
+role = "config.apply / config.patch 写入之前执行 assertGatewayConfigMutationAllowed：漏洞版逐条比对手工维护的受保护路径清单，修复版收集实际变更路径后按允许清单 fail closed。"
+source = "src/agents/tools/gateway-tool.ts"
+
+[[entities]]
+id = "config_store"
+label = "operator 持久配置"
+kind = "store"
+trust = "trusted"
+role = "保存只有 operator 才能改动的配置键，是攻击者想写入却够不着的目标；一旦写入就持久生效。"
+source = "fixtures/current-config.json"
+
+[[entities]]
+id = "attacker_target"
+label = "配置中指定的攻击者端点与命令路径"
+kind = "sink"
+trust = "attacker_controlled"
+synthetic = true
+role = "被越界写入配置的远端 URL、记忆索引命令与浏览器可执行路径所指向的目标。端点使用保留域名与无害路径，不代表真实外部主机。"
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["attacker", "attacker_target"]
+note = "攻击者只能提供注入指令、配置值和自己的端点地址；它既不能读也不能写 operator 配置。"
+
+[[boundaries]]
+id = "agent_side"
+label = "模型与 Agent 会话"
+members = ["agent"]
+note = "gateway 工具在这个会话里被调用，但模型输出只是待判定的输入，不能当作受信来源。"
+
+[[boundaries]]
+id = "operator_side"
+label = "Operator 信任域"
+members = ["gateway_tool", "config_store"]
+note = "这里保存 operator 才能修改的配置键，并在写入前判定变更是否越界；漏洞版的清单没有覆盖全部受信路径。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。至少一步 diverges = true 表示漏洞版与修复版
+# 的分叉点，且该步 variant 不能是 both。
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker"
+to = "agent"
+action = "注入指令与越界配置键值随会话输入到达模型"
+variant = "both"
+evidence = "fixtures/attack-patch.json"
+
+[[steps]]
+n = 2
+phase = "setup"
+from = "agent"
+to = "gateway_tool"
+action = "模型调用 gateway 工具提交 config.patch，raw 里带着清单之外的配置键"
+variant = "both"
+evidence = "fixtures/attack-patch.json"
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "gateway_tool"
+to = "gateway_tool"
+action = "漏洞版只比对手工维护的受保护路径清单，清单外的键值不触发拒绝"
+variant = "vulnerable_only"
+diverges = true
+evidence = "fixtures/attack-patch.json"
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "gateway_tool"
+to = "gateway_tool"
+action = "修复版收集实际变更的叶子路径，不在允许清单内的一律拒绝"
+variant = "patched_only"
+diverges = true
+evidence = "fixtures/attack-patch.json"
+
+[[steps]]
+n = 5
+phase = "effect"
+from = "gateway_tool"
+to = "config_store"
+action = "越界配置写入 operator 持久配置并跨重启生效"
+variant = "vulnerable_only"
+evidence = "fixtures/attack-patch.json"
+
+[[steps]]
+n = 6
+phase = "effect"
+from = "config_store"
+to = "attacker_target"
+action = "持久配置把远端 URL、记忆索引命令与浏览器可执行路径指向攻击者指定的目标"
+variant = "vulnerable_only"

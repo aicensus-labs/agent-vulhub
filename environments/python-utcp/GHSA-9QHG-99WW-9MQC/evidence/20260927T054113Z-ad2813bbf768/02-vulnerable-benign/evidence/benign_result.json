@@ -1,0 +1,11 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "tool_url": "http://127.0.0.1:18080/health",
+  "endpoint_requests": 1,
+  "call_returned": true,
+  "call_error": null,
+  "benign_marker": "AVH-BENIGN-OK-9QHG-99WW-9MQC",
+  "benign_marker_observed": true,
+  "response_excerpt": "{\"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\", \"service\": \"local-health\", \"status\": \"ok\"}"
+}

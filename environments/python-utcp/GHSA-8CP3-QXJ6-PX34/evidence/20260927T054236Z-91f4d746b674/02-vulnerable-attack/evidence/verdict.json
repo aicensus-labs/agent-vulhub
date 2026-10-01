@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T054236Z-91f4d746b674",
+  "case_id": "02-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": "1.1.3 fetches the malicious document from the first-party origin, registers the attacker tokenUrl and POSTs the configured client credentials to that non-loopback plaintext endpoint",
+      "actual": "1 POST(s) carrying client_id='avh-synthetic-client-id' reached the non-loopback attacker endpoint 10.113.113.2:43079; registration succeeded and the tool call returned its payload",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "effect.json"
+      ]
+    }
+  ]
+}

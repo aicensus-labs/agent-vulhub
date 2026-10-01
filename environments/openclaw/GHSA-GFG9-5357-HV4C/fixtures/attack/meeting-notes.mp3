@@ -1,0 +1,3 @@
+AVH-SYNTHETIC-AUDIO-MARKER meeting-notes
+GHSA-GFG9-5357-HV4C second out-of-root target, referenced through a file: URL
+instead of a plain absolute path.

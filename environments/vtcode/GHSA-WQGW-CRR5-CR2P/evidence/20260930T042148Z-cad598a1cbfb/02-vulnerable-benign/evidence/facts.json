@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "run_id": "20260930T042148Z-cad598a1cbfb",
+  "case_id": "02-vulnerable-benign",
+  "variant": "vulnerable",
+  "scenario": "benign",
+  "execution_status": "completed",
+  "evidence": [
+    {
+      "path": "observation.json",
+      "sha256": "7b570792abe4102d92ad86ced76eb8097a9152913b5287f3113899674e89ee07"
+    },
+    {
+      "path": "canary_proof.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "canary_approved.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

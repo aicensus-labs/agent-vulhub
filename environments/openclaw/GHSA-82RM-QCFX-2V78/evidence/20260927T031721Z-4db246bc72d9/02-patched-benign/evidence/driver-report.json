@@ -1,0 +1,50 @@
+{
+  "package_version": "2026.4.14",
+  "package_root": "/lab/openclaw",
+  "queue_chunk": "delivery-queue-cUZQxuAc.js",
+  "recovery_chunk": "delivery-queue-CyLvtZHG.js",
+  "media_chunk": "deliver-CdmJhlMF.js",
+  "load_chunk": "delivery-queue-cUZQxuAc.js",
+  "policy_chunk": "deliver-CdmJhlMF.js",
+  "queued_id": "861176fd-ffc0-4a0c-81c4-06547f95019a",
+  "recovered_deliver_calls": 1,
+  "stored_entry_available": true,
+  "stored_entry_error": null,
+  "stored_entry_has_session": true,
+  "stored_entry_session_keys": [
+    "key",
+    "agentId",
+    "requesterAccountId",
+    "requesterSenderId",
+    "requesterSenderName",
+    "requesterSenderUsername",
+    "requesterSenderE164"
+  ],
+  "recovered_params_has_session": true,
+  "recovered_params_session_keys": [
+    "key",
+    "agentId",
+    "requesterAccountId",
+    "requesterSenderId",
+    "requesterSenderName",
+    "requesterSenderUsername",
+    "requesterSenderE164"
+  ],
+  "recovered_params_channel": "telegram",
+  "recovered_params_skip_queue": true,
+  "group_policy_present": true,
+  "group_policy_resolved": {
+    "allow": [
+      "read"
+    ]
+  },
+  "policy_error": null,
+  "media_read_file_granted": true,
+  "media_access_keys": [
+    "localRoots",
+    "readFile",
+    "workspaceDir"
+  ],
+  "media_read_bytes_sha256": "00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43",
+  "media_read_error": null
+}

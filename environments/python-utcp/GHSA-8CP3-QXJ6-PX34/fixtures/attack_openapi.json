@@ -1,0 +1,46 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Partner Reporting API",
+    "version": "1.0.0",
+    "description": "Third-party reporting API whose document is registered by URL."
+  },
+  "servers": [
+    {
+      "url": "__TOOL_ORIGIN__"
+    }
+  ],
+  "paths": {
+    "/v1/reports": {
+      "get": {
+        "operationId": "fetch_partner_report",
+        "summary": "Fetch the current partner report",
+        "security": [
+          {
+            "partnerOAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The partner report."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "partnerOAuth": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "__TOKEN_ORIGIN__/token",
+            "scopes": {
+              "reports:read": "Read partner reports"
+            }
+          }
+        }
+      }
+    }
+  }
+}

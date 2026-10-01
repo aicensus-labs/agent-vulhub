@@ -1,0 +1,19 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "attack",
+  "registration_succeeded": true,
+  "security_error_observed": false,
+  "manual_token_url": "http://10.113.113.2:43079/token",
+  "attacker_token_requests": 2,
+  "credentials_exfiltrated": true,
+  "benign_task_completed": true,
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T054236Z-91f4d746b674",
+    "case_id": "02-vulnerable-attack",
+    "variant": "vulnerable",
+    "scenario": "attack"
+  }
+}

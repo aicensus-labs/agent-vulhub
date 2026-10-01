@@ -1,6 +1,6 @@
 # vtcode / GHSA-WQGW-CRR5-CR2P
 
-状态：草稿。本环境缺少稳定非交互触发前提，仓库内尚未复现，不能宣称已验证。
+状态：草稿，机制层已复现（三轮 12/12 通过）。TUI 交互层未复现，但审批闸门在引擎层且是非交互的，因此可直接驱动真实上游 `LifecycleHookEngine`。
 
 ## 公告与机制
 
@@ -24,17 +24,34 @@ Compose 中 `vulnerable` 与 `patched` profiles 分开使用；未指定 profile
 
 ## 机制复现
 
-`reproduce.py` 目前不执行 TUI。上游 session_start 触发发生在交互式终端初始化路径；容器协议要求稳定非交互触发，否则无法区分 hook 执行与启动失败。
-因此 PoC 记录前提不足并返回退出码 2，不使用 shell surrogate 冒充 VTCode。
+TUI 交互层（`prompt_workspace_hook_approval` 的覆盖层）确实无法在容器内稳定驱动。但**审批闸门本身不在 TUI 里**：
+它在 `LifecycleHookEngine` 上，且是非交互 API——`workspace_gated()` / `workspace_hooks_need_approval()` /
+`run_session_start()` / `approve_workspace_hooks()`。上游自己的修复就附带了这个层面的测试
+（`hooks/lifecycle/tests/workspace_hook_approval.rs`），本环境用同样方式挂载自己的模块并调用真实引擎。
 
-完成实现后使用 `python3 -m runner reproduce vtcode/GHSA-WQGW-CRR5-CR2P --build --rounds 3`。
+- 漏洞版：`new_with_session` 没有 gated 参数，`run_session_start` 直接执行全部 hook，没有审批概念。
+- 补丁版：存在工作区控制的 hook 内容时整个引擎被 gate，未审批前**所有** hook 都不执行，并给出 "not approved" 提示。
+
+**阳性对照（必要）**：仅证明"hook 没跑"不够——一个把生命周期 hook 整个禁掉的假修复结果相同。
+因此补丁版 attack 场景额外要求：用上游 `approve_workspace_hooks()` 审批后，同一命令集**必须确实执行**。
+
+**benign 场景为何用 ungated 引擎**：补丁对*仓库来源*的 hook 一律要求审批，即使命令无害——这是有意的安全权衡，
+不是回归。所以"合法仓库命令被拦"不能当作良性对照。真正要防的是修复过宽，故 benign 用 ungated（用户级）hook，
+要求它在两版都照常执行。
+
+平台适配：Rust 工具链（1.93.0，与仓库 `rust-toolchain.toml` 一致）作为 build input，**不修改基础镜像**
+（否则会丢掉 `runtime.harness` 需要的 Python 3）；crates 已 vendored 且 SHA-256 固定，构建全程 `--network none`。
+harness 作为 crate 内测试模块运行，因为 `LifecycleHookEngine` 的构造器是 crate 内部可见，外部 crate
+无法在不放宽上游可见性的前提下组装同样的调用。
+
+使用 `python3 -m runner reproduce vtcode/GHSA-WQGW-CRR5-CR2P --build --rounds 3`。
 两脚本统一接受 `--context <context.json> --output <目录>`，详细字段见仓库 `docs/environment-contract.md`。
 PoC 输出 `facts.json` 和效果文件；验证器只读证据，输出含 `target_ready` 及对应效果断言的 `verdict.json`。
 镜像必须包含 Python 3 和 `/lab/` 下的脚本、fixtures；`runtime.mode` 选择 `oneshot` 或有 healthcheck 的 `service`。
 
 ## 端到端复现
 
-`end_to_end.py` 保持退出码 2；在机制触发尚未解决前，真实模型端到端测试不适用。
+`end_to_end.py` 保持退出码 2；TUI 触发层未复现，真实模型端到端测试不适用。
 
 ## 验证与修复对照
 

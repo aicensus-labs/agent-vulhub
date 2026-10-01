@@ -1,0 +1,42 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "benign",
+  "variant": "patched",
+  "fixture": "benign/legitimate_reply.json",
+  "upstream_module": "src/gateway/server-methods/chat-webchat-media.ts",
+  "upstream_module_sha256": "051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1",
+  "upstream_calls_containment_check": true,
+  "allowed_local_roots": [
+    "/tmp/openclaw-media-root"
+  ],
+  "reply_payloads": [
+    {
+      "text": "Here is the greeting you generated.",
+      "mediaUrl": "/tmp/openclaw-media-root/greeting.mp3"
+    }
+  ],
+  "materialized_paths": [
+    "/tmp/openclaw-media-root/greeting.mp3"
+  ],
+  "toolchain": {
+    "source_root": "/opt/openclaw",
+    "esbuild": "/opt/esbuild/bin/esbuild",
+    "deps_root": "/opt/openclaw-deps/node_modules",
+    "node": "/usr/local/bin/node"
+  },
+  "audio_content_blocks": 1,
+  "media_types": [
+    "audio/mpeg"
+  ],
+  "denied_local_audio_access": [],
+  "error": null,
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T043058Z-d574d83ea3d2",
+    "case_id": "01-patched-benign",
+    "variant": "patched",
+    "scenario": "benign"
+  }
+}

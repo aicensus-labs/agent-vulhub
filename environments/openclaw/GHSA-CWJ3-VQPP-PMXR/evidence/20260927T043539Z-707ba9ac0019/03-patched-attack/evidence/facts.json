@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T043539Z-707ba9ac0019",
+  "case_id": "03-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "execution_status": "completed",
+  "evidence": [
+    {
+      "path": "observation.json",
+      "sha256": "9727add5f67cc2bd05ccb65099e4e80cf7a4204a98e36be5251315c2ad44acbe"
+    },
+    {
+      "path": "guard-result.json",
+      "sha256": "918c675f5d5590cf2b4c7a57a317bed720671cf8e3239a2a46c5c1a8565961aa"
+    }
+  ]
+}

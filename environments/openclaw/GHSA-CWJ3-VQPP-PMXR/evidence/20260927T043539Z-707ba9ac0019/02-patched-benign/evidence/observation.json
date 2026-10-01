@@ -1,0 +1,26 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "variant": "patched",
+  "scenario": "benign",
+  "pinned_version": "2026.4.23",
+  "pinned_commit": "bceda6089aa7b3695cc7696b43c61ae3d01bb0ec",
+  "expected_guard_sha256": "6f33eee61ca985a7230060cf070001a26bb74250609449e745f0fa144fcf2e40",
+  "guard_module": "/lab/src/src/agents/tools/gateway-tool.ts",
+  "guard_module_sha256": "6f33eee61ca985a7230060cf070001a26bb74250609449e745f0fa144fcf2e40",
+  "runner_command": "/lab/src/node_modules/.bin/tsx /tmp/avh-guard-mbxjo54x/guard-driver.mjs /tmp/avh-guard-mbxjo54x/request.json /tmp/avh-guard-mbxjo54x/response.json",
+  "guard_outcome": "allowed",
+  "guard_error": null,
+  "case_outcomes": {
+    "primary": "allowed",
+    "control_protected": "rejected"
+  },
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T043539Z-707ba9ac0019",
+    "case_id": "02-patched-benign",
+    "variant": "patched",
+    "scenario": "benign"
+  }
+}

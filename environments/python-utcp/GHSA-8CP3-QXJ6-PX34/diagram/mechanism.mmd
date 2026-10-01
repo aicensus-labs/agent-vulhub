@@ -1,0 +1,17 @@
+%% python-utcp / GHSA-8CP3-QXJ6-PX34 漏洞图解 — generated from diagram.toml
+sequenceDiagram
+  actor attacker_spec as 攻击者提供的 OpenAPI 规范
+  participant converter as utcp-http 的 OpenAPI 转换器
+  participant call_template as 注册后的工具调用模板
+  participant http_protocol as utcp-http 的 OAuth2 令牌获取流程
+  participant token_endpoint as 攻击者指定的 token 端点
+  participant credentials as 受害者的 OAuth2 客户端凭据
+  Note over attacker_spec,converter: 阶段 setup
+  attacker_spec ->> converter: 1 带攻击者指定 tokenUrl 的 OpenAPI 规范进入转换流程
+  Note over converter,call_template: 阶段 trigger
+  converter -->> call_template: 2 不可信的 tokenUrl 被原样写入 OAuth2Auth，没有 HTTPS/回环校验
+  Note over converter,call_template: 分歧点：漏洞版与修复版在此分叉
+  converter -x converter: 3 同一 tokenUrl 因是非回环明文 HTTP 而被拒绝，工具注册失败
+  call_template -->> http_protocol: 4 工具被调用，按模板里固化的 tokenUrl 获取 OAuth2 令牌
+  Note over http_protocol,token_endpoint: 阶段 effect
+  http_protocol -->> token_endpoint: 5 client_id 与 client_secret 被 POST 到攻击者指定的 token 端点

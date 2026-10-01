@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T051505Z-0e7e04cbd2eb",
+  "case_id": "01-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": "SafeInstall 0.10.1 classifies a plain install as an install finding while the crafted case-fold, redirection-prefix, wrapper-flag and remote-exec commands yield no finding at all (guard fails open)",
+      "actual": "20 manager invocations classified as no_finding (shapes=['case-fold', 'install', 'redirection-prefix', 'remote-exec', 'wrapper']); 2 still detected (install controls=['baseline-plain-install', 'path-qualified-npm']); 1/1 path-qualified rewrites kept the path text; 0 entries disagree with the declared 0.10.1 expectation",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "guard-analysis.json"
+      ]
+    }
+  ]
+}

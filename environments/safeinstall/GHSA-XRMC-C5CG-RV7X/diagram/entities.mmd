@@ -1,0 +1,34 @@
+%% safeinstall / GHSA-XRMC-C5CG-RV7X 漏洞图解 — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["攻击者侧"]
+    attacker["受攻击者影响的指令文本<br/>actor · attacker_controlled"]
+  end
+  subgraph guard_boundary["开发者机器上的 SafeInstall 策略边界"]
+    coding_agent["编码 agent 的命令发起方<br/>client · semi_trusted"]
+    guard["SafeInstall agent guard 命令分类器<br/>service · trusted"]
+    package_manager["原始包管理器进程<br/>tool · trusted"]
+    package_code["未经策略评估的包代码执行（包名占位）<br/>⚠ sink · trusted"]
+  end
+  attacker -->|"1"| coding_agent
+  coding_agent -->|"2"| guard
+  guard -.->|"3"| guard
+  guard -.->|"4"| guard
+  coding_agent -.->|"5"| package_manager
+  package_manager -.->|"6"| package_code
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class attacker actor
+  class coding_agent client
+  class guard service
+  class package_manager tool
+  class package_code sink
+  class package_code synthetic
+  style attacker_side fill:transparent
+  style guard_boundary fill:transparent
+  linkStyle 2 stroke:#c0392b,stroke-width:2px
+  linkStyle 3 stroke:#2e7d32,stroke-width:2px

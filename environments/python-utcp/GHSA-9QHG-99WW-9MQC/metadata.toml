@@ -1,0 +1,90 @@
+schema_version = 1
+id = "python-utcp/GHSA-9QHG-99WW-9MQC"
+ghsa = "GHSA-9QHG-99WW-9MQC"
+product = "python-utcp"
+title = "utcp-http SSRF: HTTP tool invocation follows redirects without re-validating the target"
+lifecycle = "draft"
+agent_specificity = "agent_unique"
+# Advisory severity from the authoritative source, normalized to
+# CRITICAL/HIGH/MEDIUM/LOW/NONE. Use "UNKNOWN" when no source publishes one.
+severity = "HIGH"
+advisories = ["https://github.com/advisories/GHSA-9qhg-99ww-9mqc"]
+description = "utcp-http <= 1.1.3 validates only the originally registered tool URL (ensure_secure_url) and then asks aiohttp to follow HTTP redirects; a redirect Location is fetched without re-validation, so an attacker-controlled tool endpoint can bounce the request to an internal address and return the protected body to the caller. 1.1.4 re-validates every redirect hop and raises before contacting the internal service."
+prerequisites = []
+
+[vulnerable]
+version = "1.1.3"
+source_url = "https://github.com/universal-tool-calling-protocol/python-utcp"
+commit = "4ed0a48b84a452338bd3e996efb0d169e8d75ac2"
+image = ""
+archive = "vulnerable-source.tar.gz"
+
+[patched]
+version = "1.1.4"
+source_url = "https://github.com/universal-tool-calling-protocol/python-utcp"
+commit = "fc3268e2a62e1181f91a63faf0a9bcee7639db29"
+image = ""
+archive = "patched-source.tar.gz"
+
+[build]
+base_image = "python:3.11-slim@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534"
+dockerfile = "Dockerfile"
+# Each entry: { name = "...", url = "https://...", sha256 = "..." }
+# Include source archives AND every dependency needed by network-disabled builds.
+inputs = [
+  { name = "vulnerable-source.tar.gz", url = "https://codeload.github.com/universal-tool-calling-protocol/python-utcp/tar.gz/4ed0a48b84a452338bd3e996efb0d169e8d75ac2", sha256 = "66dec5cd7d8f878e2eeaab9a53c0ee9126837ebedca923679b8cf7a95d2900f1" },
+  { name = "patched-source.tar.gz", url = "https://codeload.github.com/universal-tool-calling-protocol/python-utcp/tar.gz/fc3268e2a62e1181f91a63faf0a9bcee7639db29", sha256 = "680ac175e31b21a768149a2703d6176a4d959570e6bad6bf0d290f3553387cdd" },
+  { name = "aiohappyeyeballs-2.7.1-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/71/43/1947f06babed6b3f1d7f38b0c767f52df66bfb2bc10b468c4a7de9eceff2/aiohappyeyeballs-2.7.1-py3-none-any.whl", sha256 = "9243213661e29250eb41368e5daa826fc017156c3b8a11440826b2e3ed376472" },
+  { name = "aiohttp-3.14.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", url = "https://files.pythonhosted.org/packages/a5/b9/2b8f0c0ce09c87a1daf80fd483431b56b1435d3f62789bc86f572e1245de/aiohttp-3.14.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", sha256 = "53e7b4ce82b54a8bcc71b3b67a5cbd177ca1d7f592cbc92cd38b7349f73482db" },
+  { name = "aiosignal-1.4.0-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/fb/76/641ae371508676492379f16e2fa48f4e2c11741bd63c48be4b12a6b09cba/aiosignal-1.4.0-py3-none-any.whl", sha256 = "053243f8b92b990551949e63930a839ff0cf0b0ebbe0597b0f3fb19e1a0fe82e" },
+  { name = "annotated_types-0.8.0-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/99/91/8acff4f5e50511b911bbccb72b8628a49c68ce14148cd9f6431094859a90/annotated_types-0.8.0-py3-none-any.whl", sha256 = "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0" },
+  { name = "attrs-26.1.0-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl", sha256 = "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309" },
+  { name = "authlib-1.8.0-py2.py3-none-any.whl", url = "https://files.pythonhosted.org/packages/b8/c6/6f124bcfbbfb20fba22c939b4e43a06dccfc0e1ca20e5634ca573cb1e271/authlib-1.8.0-py2.py3-none-any.whl", sha256 = "88aebbd9af6757e14e912d5dc007ae1dc1f3e27e3b2152ce7c552ee2c3b3c121" },
+  { name = "cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", url = "https://files.pythonhosted.org/packages/f7/a4/4399daaf8f7dfee9d7c3327fdb0426ee041cc63edc358b93911ceb2bfc7a/cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", sha256 = "34e261f78cb6ceaaa36f42f2613f4380d94d9c759a9c73c769ee6e0247364632" },
+  { name = "cryptography-50.0.1-cp311-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", url = "https://files.pythonhosted.org/packages/57/26/e6d4fc8512a51a5f9ee7bfdbfb853bce1197087df40c9ad993ad370b846f/cryptography-50.0.1-cp311-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", sha256 = "ff838d62ec1bfce4f9ba7fa16f4a7b554cd8d0c299e6be37502161a660c84eef" },
+  { name = "frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", url = "https://files.pythonhosted.org/packages/11/b1/71a477adc7c36e5fb628245dfbdea2166feae310757dea848d02bd0689fd/frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", sha256 = "2552f44204b744fba866e573be4c1f9048d6a324dfe14475103fd51613eb1d1f" },
+  { name = "idna-3.20-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/58/a2/bb081bab032533a855d44de1d56f8e8426114ff1ba5d1f07a438a0a654f8/idna-3.20-py3-none-any.whl", sha256 = "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c" },
+  { name = "joserfc-1.7.5-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/67/c5/82addfd375e5ee6520644e0553e4aadde92d668c4fc99cc716d337fe7bb3/joserfc-1.7.5-py3-none-any.whl", sha256 = "add2c2c84e8373b084d526a8b53daba5d7a513a118cd2dcd9fc9f979d0922159" },
+  { name = "multidict-6.9.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", url = "https://files.pythonhosted.org/packages/27/50/f420de3683f9b047fc5588064d84043ef57a7152ef451b8373dfc7068d22/multidict-6.9.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", sha256 = "e8f1e362c9352b50ed120f001046fdbb80810c9d56580f4c3fc13bbe30823387" },
+  { name = "packaging-26.3-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl", sha256 = "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c" },
+  { name = "propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", url = "https://files.pythonhosted.org/packages/c7/06/519a5ebb48b6f94beb48396e55c905f12246a25c3a3608a7ec7bceabf50e/propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", sha256 = "6e9368e87a3efc285e559131092c5db643eb8e56de4ee42064d5baec22ef2bb5" },
+  { name = "pycparser-3.0-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/0c/c3/44f3fbbfa403ea2a7c779186dc20772604442dde72947e7d01069cbe98e3/pycparser-3.0-py3-none-any.whl", sha256 = "b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992" },
+  { name = "pydantic-2.13.5-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/eb/47/c95ffc2009878c7aac0c5e08528022dcb885933252a88b5f170058014464/pydantic-2.13.5-py3-none-any.whl", sha256 = "346a034f080da3755d8e9cb5e00e8b07de1d39e4f6e2c87d8ab7cafa0b269a73" },
+  { name = "pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", url = "https://files.pythonhosted.org/packages/cf/bc/3fa2d76b83162820a17da7f645b28d1cba99fc8e1e5fc6517067ec450fa1/pydantic_core-2.46.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", sha256 = "49776eab08766a08dfff7012f8b422dcd7e25e43b316eedf0477c24fcfa84b7c" },
+  { name = "python_dotenv-1.2.3-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/0d/17/c5c6b53ddc18f297992099b3d9ec16c855c0ccc83263a21fe4d1c625ec6c/python_dotenv-1.2.3-py3-none-any.whl", sha256 = "904552145e8bfed22162c09dab1c2b9b54fefa7b23ba780f4f26ca0316b0f0d9" },
+  { name = "pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", url = "https://files.pythonhosted.org/packages/71/60/917329f640924b18ff085ab889a11c763e0b573da888e8404ff486657602/pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", sha256 = "b8bb0864c5a28024fac8a632c443c87c5aa6f215c0b126c449ae1a150412f31d" },
+  { name = "setuptools-84.0.0-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl", sha256 = "51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670" },
+  { name = "tomli-2.4.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", url = "https://files.pythonhosted.org/packages/48/c1/f41d9cb618acccca7df82aaf682f9b49013c9397212cb9f53219e3abac37/tomli-2.4.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", sha256 = "5a881ab208c0baf688221f8cecc5401bd291d67e38a1ac884d6736cbcd8247e9" },
+  { name = "typing_extensions-4.16.0-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl", sha256 = "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8" },
+  { name = "typing_inspection-0.4.4-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/67/81/4add07e5172b7ac40d8ed5ff580409a7801a4fe26d529bdd915401dabfbe/typing_inspection-0.4.4-py3-none-any.whl", sha256 = "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147" },
+  { name = "wheel-0.48.0-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/2e/29/69cfbb602cd91690c55d38ba9fe53e6a7e76a6fa647bf38f19c138d25449/wheel-0.48.0-py3-none-any.whl", sha256 = "3217dcc807155e45db462d7ef2431f5ddda0d7273b700d05a67b271ceb1287ab" },
+  { name = "yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", url = "https://files.pythonhosted.org/packages/95/0c/a71501bbc1a674ff72c4d6c2b75f4d9a5af819f5244c3a7558080a8802c5/yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", sha256 = "d5add7b4ca7afeea91d52e4d4e4db3b1fe9885b71f07054560d8c4296b7441a2" },
+]
+
+[runtime]
+isolation = "container"
+platforms = ["linux/amd64"]
+mode = "oneshot"
+harness = "python3"
+exceptions = []
+requires_model = false
+network_requirements = "none: all build inputs are pinned HTTPS artifacts cached by SHA-256, docker build runs with --network none, and reproduce.py binds only loopback plus the container's own non-loopback interface"
+
+[verification.mechanism]
+status = "passed"
+verified_at = "2026-09-27T05:42:55.527946+00:00"
+evidence = ["evidence/20260927T054113Z-ad2813bbf768/report.json"]
+notes = "四场景三轮（12/12）已通过；归档报告 run_id=20260927T054113Z-ad2813bbf768，由 staging 验证结果迁移并按当前输入指纹复核。"
+
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
+
+[verification.agent_poc]
+status = "not_run"
+adapter_status = "not_run"
+verified_at = ""
+evidence = []
+notes = "An independently reviewed Agent-PoC Adapter is required before candidate evaluation."

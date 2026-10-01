@@ -1,0 +1,46 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Internal Status API",
+    "version": "1.0.0",
+    "description": "First-party status API whose OAuth2 token endpoint stays on the loopback interface."
+  },
+  "servers": [
+    {
+      "url": "__TOOL_ORIGIN__"
+    }
+  ],
+  "paths": {
+    "/v1/status": {
+      "get": {
+        "operationId": "get_status",
+        "summary": "Read the service status",
+        "security": [
+          {
+            "statusOAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The service status."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "statusOAuth": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "__LOOPBACK_ORIGIN__/token",
+            "scopes": {
+              "status:read": "Read status"
+            }
+          }
+        }
+      }
+    }
+  }
+}

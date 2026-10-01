@@ -1,0 +1,23 @@
+%% openclaw / GHSA-82RM-QCFX-2V78 漏洞图解 — generated from diagram.toml
+sequenceDiagram
+  actor attacker as 群组会话攻击者
+  participant delivery_queue as 写前投递队列
+  participant recovery as 投递队列恢复重放
+  participant group_policy as 群组工具策略判定
+  participant media_read as 主机媒体读取能力
+  participant host_media as 被群组策略保护的主机媒体
+  participant group_channel as 攻击者所在的群组出站渠道
+  participant policy_config as 群组工具策略配置
+  Note over attacker,delivery_queue: 阶段 setup
+  attacker ->> delivery_queue: 1 群组会话的媒体消息在发送前被写前投递队列落盘
+  delivery_queue ->> recovery: 2 进程重启后，恢复路径读回队列条目并重建投递参数
+  Note over recovery: 阶段 trigger
+  recovery -->> recovery: 3 漏洞版重建的参数不含会话上下文，sessionKey 与请求者字段全部为空
+  Note over recovery: 分歧点：漏洞版与修复版在此分叉
+  recovery -x recovery: 4 修复版从队列条目回放原始会话上下文，sessionKey 与请求者字段完整
+  recovery -->> group_policy: 5 sessionKey 为空，解析不出任何群组覆盖，读取判定被跳过
+  recovery -x group_policy: 6 sessionKey 解出群组覆盖，命中 deny read，读取判定拒绝
+  Note over group_policy,media_read: 阶段 effect
+  group_policy -->> media_read: 7 读取判定未命中群组覆盖，主机媒体读取能力被创建
+  media_read -->> host_media: 8 读取被群组策略禁止的主机媒体
+  media_read -->> group_channel: 9 媒体经出站渠道投递到攻击者所在的群组

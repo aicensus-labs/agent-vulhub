@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "scenario": "benign",
+  "variant": "patched",
+  "upstream": {
+    "module": "/lab/upstream/node_modules/safeinstall-cli/dist/guard-commands.js",
+    "name": "safeinstall-cli",
+    "version": "0.10.2",
+    "guard_commands_sha256": "8df556da455d099ea38b7e047a04b23e0ac612bac2e19b01f9945fd9fba92409"
+  },
+  "runtime": {
+    "node": "/usr/local/bin/node",
+    "node_version": "v22.23.3"
+  },
+  "commands": [
+    {
+      "id": "control-plain-install",
+      "command": "npm install lodash@4.17.21",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "npm install lodash@4.17.21"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "safeinstall npm install lodash@4.17.21",
+      "writeTargets": [],
+      "group": "control",
+      "category": "plain-install",
+      "expect_vulnerable": "install_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "control-script-run",
+      "command": "npm run build",
+      "installs": [],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": null,
+      "writeTargets": [],
+      "group": "control",
+      "category": "non-install-subcommand",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "no_finding"
+    },
+    {
+      "id": "control-safeinstall-wrapper",
+      "command": "safeinstall npm install lodash@4.17.21",
+      "installs": [],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": true,
+      "rewrittenCommand": null,
+      "writeTargets": [],
+      "group": "control",
+      "category": "already-routed",
+      "expect_vulnerable": "uses_safeinstall",
+      "expect_patched": "uses_safeinstall"
+    }
+  ]
+}

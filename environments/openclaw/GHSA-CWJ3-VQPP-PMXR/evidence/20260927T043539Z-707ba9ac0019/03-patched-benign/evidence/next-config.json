@@ -1,0 +1,63 @@
+{
+  "agents": {
+    "defaults": {
+      "model": "anthropic/claude-sonnet-4-20250514",
+      "systemPromptOverride": "You are the operator's assistant. Keep answers short and cite the runbook.",
+      "workspace": "/srv/openclaw/workspace"
+    },
+    "list": [
+      {
+        "id": "assistant",
+        "model": "anthropic/claude-sonnet-4-20250514",
+        "systemPromptOverride": "Be concise and ask before destructive actions."
+      }
+    ]
+  },
+  "browser": {
+    "executablePath": "/usr/bin/chromium",
+    "ssrfPolicy": {
+      "dangerouslyAllowPrivateNetwork": false
+    }
+  },
+  "channels": {
+    "telegram": {
+      "groups": {
+        "-1002000000001": {
+          "topics": {
+            "42": {
+              "requireMention": false
+            }
+          }
+        }
+      },
+      "requireMention": true
+    }
+  },
+  "gateway": {
+    "auth": {
+      "mode": "token"
+    },
+    "remote": {
+      "url": "wss://gateway.operator.internal/control"
+    }
+  },
+  "memory": {
+    "qmd": {
+      "command": "/usr/local/bin/qmd"
+    }
+  },
+  "tools": {
+    "exec": {
+      "ask": "on-miss",
+      "safeBins": [
+        "ls",
+        "cat",
+        "rg"
+      ],
+      "security": "allowlist"
+    },
+    "fs": {
+      "workspaceOnly": true
+    }
+  }
+}

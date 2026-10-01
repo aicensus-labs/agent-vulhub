@@ -1,0 +1,7 @@
+# Fixture inventory. Every file under fixtures/ except this manifest and
+# README.md is listed with its SHA-256; regenerate after changing a fixture.
+schema_version = 1
+
+[files]
+"attack.json" = "59e01ca787cd8a0c97ce16c1727b05c29816e810f3ffde90c57f417c67901b5f"
+"benign.json" = "8131c8f6137abc98b40bc4ac7226b961a34c142fc96fa9f26cbc4bd768e495d1"

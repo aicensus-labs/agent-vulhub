@@ -1,0 +1,34 @@
+{
+  "id": "c162bb94-1fe4-4dd7-bdd7-7a5d61b5b656",
+  "enqueuedAt": 1790479135328,
+  "channel": "telegram",
+  "to": "group:ops-room",
+  "accountId": "default",
+  "payloads": [
+    {
+      "text": "queued group media replay",
+      "mediaUrls": [
+        "/tmp/openclaw-repro-fkkb3s_c/workspace/canary-media.txt"
+      ]
+    }
+  ],
+  "mirror": {
+    "agentId": "main",
+    "sessionKey": "telegram:group:ops-room",
+    "isGroup": true,
+    "groupId": "ops-room"
+  },
+  "session": {
+    "key": "telegram:group:ops-room",
+    "agentId": "main",
+    "requesterAccountId": "default",
+    "requesterSenderId": "user-1042",
+    "requesterSenderName": "Sample Sender",
+    "requesterSenderUsername": "sample_sender",
+    "requesterSenderE164": "+15550000123"
+  },
+  "gatewayClientScopes": [
+    "gateway.chat.send"
+  ],
+  "retryCount": 0
+}

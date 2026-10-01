@@ -1,0 +1,4 @@
+{
+  "command": "touch {MARKER}",
+  "note": "Repository-controlled session_start hook. The advisory's payload shape is a workspace vtcode.toml that declares this command; the effect is a filesystem write performed by the hook."
+}

@@ -5,6 +5,7 @@ product = "vtcode"
 title = "VT Code workspace lifecycle hook commands execute without per-command approval"
 lifecycle = "draft"
 agent_specificity = "agent_unique"
+severity = "HIGH"
 advisories = ["https://github.com/vinhnx/VTCode/security/advisories/GHSA-WQGW-CRR5-CR2P"]
 description = "VT Code automatically loads a workspace-root vtcode.toml. In the vulnerable version, its session_start lifecycle command is passed to sh -c in the workspace during normal session setup without a per-command approval bound to the effective command. The patched version gates workspace-sourced lifecycle hooks behind an approval keyed to the exact command set and skips them in non-interactive modes until approval is granted."
 prerequisites = ["A workspace-controlled vtcode.toml with a session_start hook", "Starting or resuming an Agent session in that workspace", "A harmless fixed marker command for mechanism validation"]
@@ -14,25 +15,26 @@ version = "0.144.0"
 source_url = "https://github.com/vinhnx/VTCode"
 commit = "058ec4166eaea25bdbedb3f577c905a761cab823"
 image = ""
-archive = "vulnerable-source.tar.gz"
+archive = "vtcode-vulnerable-source.tar.gz"
 
 [patched]
 version = "0.145.0"
 source_url = "https://github.com/vinhnx/VTCode"
 commit = "9bbdc9123d4e01fa8f2e12e7abe341d4c69af66b"
 image = ""
-archive = "patched-source.tar.gz"
+archive = "vtcode-patched-source.tar.gz"
 
 [build]
-base_image = "codex-universal@sha256:55e6ae2ade43eb3ca29741f475d833a0f52bffe4208ca199ee717c1f8ef8188b"
+base_image = "buildpack-deps@sha256:97d2909fdc9d46ae7f9d3bd081749549c1078899585e37abb60fd5f4cd593484"
 dockerfile = "Dockerfile"
 # Each entry: { name = "...", url = "https://...", sha256 = "..." }
 # Include source archives AND every dependency needed by network-disabled builds.
 inputs = [
   { name = "vtcode-vulnerable-source.tar.gz", url = "https://github.com/vinhnx/VTCode/archive/058ec4166eaea25bdbedb3f577c905a761cab823.tar.gz", sha256 = "3c3064e7778366f7da8632d608b9610c6e3cd2192189538e638ee033c02692ce" },
   { name = "vtcode-patched-source.tar.gz", url = "https://github.com/vinhnx/VTCode/archive/9bbdc9123d4e01fa8f2e12e7abe341d4c69af66b.tar.gz", sha256 = "71cbda5f8b388f3e32ffc1eecbf74460363609da536b9f08b469c660f7a6c6e7" },
-  { name = "vtcode-vulnerable-cargo-vendor.tar.gz", url = "https://raw.githubusercontent.com/glmgbj233/agent-vulhub/main/environments/vtcode/GHSA-WQGW-CRR5-CR2P/inputs/vtcode-vulnerable-cargo-vendor.tar.gz", sha256 = "917667d6aff21e5037344fcc7bf68f2a0a9348ce2e8799f08919c3ca3c2f0b3f" },
-  { name = "vtcode-patched-cargo-vendor.tar.gz", url = "https://raw.githubusercontent.com/glmgbj233/agent-vulhub/main/environments/vtcode/GHSA-WQGW-CRR5-CR2P/inputs/vtcode-patched-cargo-vendor.tar.gz", sha256 = "860431852076ad949d3b0affca680ab30a628ad4a770442c80fbe089f586e850" },
+  { name = "vtcode-vulnerable-cargo-vendor.tar.gz", url = "https://media.githubusercontent.com/media/aicensus-labs/agent-vulhub/main/environments/vtcode/GHSA-WQGW-CRR5-CR2P/inputs/vtcode-vulnerable-cargo-vendor.tar.gz", sha256 = "917667d6aff21e5037344fcc7bf68f2a0a9348ce2e8799f08919c3ca3c2f0b3f" },
+  { name = "vtcode-patched-cargo-vendor.tar.gz", url = "https://media.githubusercontent.com/media/aicensus-labs/agent-vulhub/main/environments/vtcode/GHSA-WQGW-CRR5-CR2P/inputs/vtcode-patched-cargo-vendor.tar.gz", sha256 = "860431852076ad949d3b0affca680ab30a628ad4a770442c80fbe089f586e850" },
+  { name = "rust-1.93.0-x86_64-unknown-linux-gnu.tar.xz", url = "https://static.rust-lang.org/dist/2026-01-22/rust-1.93.0-x86_64-unknown-linux-gnu.tar.xz", sha256 = "b9d9f01a96a2542852ccfddd82194276ba1c86bc76353309ff636b737fc0a772" },
 ]
 
 [runtime]
@@ -45,11 +47,10 @@ requires_model = false
 network_requirements = "No network; source and vendored Cargo dependencies are bundled in the image"
 
 [verification.mechanism]
-status = "not_run"
-verified_at = ""
-evidence = []
-notes = ""
-
+status = "passed"
+verified_at = "2026-09-30T04:52:18.488766+00:00"
+evidence = ["evidence/20260930T042148Z-cad598a1cbfb/report.json"]
+notes = "All 12 cases passed across three rounds; compact per-case evidence is retained with the report."
 [verification.end_to_end]
 status = "not_applicable"
 verified_at = ""

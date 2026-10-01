@@ -1,0 +1,468 @@
+{
+  "schema_version": 1,
+  "scenario": "attack",
+  "variant": "patched",
+  "upstream": {
+    "module": "/lab/upstream/node_modules/safeinstall-cli/dist/guard-commands.js",
+    "name": "safeinstall-cli",
+    "version": "0.10.2",
+    "guard_commands_sha256": "8df556da455d099ea38b7e047a04b23e0ac612bac2e19b01f9945fd9fba92409"
+  },
+  "runtime": {
+    "node": "/usr/local/bin/node",
+    "node_version": "v22.23.3"
+  },
+  "commands": [
+    {
+      "id": "baseline-plain-install",
+      "command": "npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "safeinstall npm install evil-pkg",
+      "writeTargets": [],
+      "group": "baseline",
+      "category": "plain-install",
+      "expect_vulnerable": "install_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "case-npm-upper",
+      "command": "NPM install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "NPM install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "safeinstall npm install evil-pkg",
+      "writeTargets": [],
+      "group": "case-sensitivity",
+      "category": "case-sensitivity",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "case-npm-title",
+      "command": "Npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "Npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "safeinstall npm install evil-pkg",
+      "writeTargets": [],
+      "group": "case-sensitivity",
+      "category": "case-sensitivity",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "case-pnpm-upper",
+      "command": "PNPM add evil-pkg",
+      "installs": [
+        {
+          "manager": "pnpm",
+          "subcommand": "add",
+          "segmentText": "PNPM add evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "safeinstall pnpm add evil-pkg",
+      "writeTargets": [],
+      "group": "case-sensitivity",
+      "category": "case-sensitivity",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "case-bun-title",
+      "command": "Bun add evil-pkg",
+      "installs": [
+        {
+          "manager": "bun",
+          "subcommand": "add",
+          "segmentText": "Bun add evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "safeinstall bun add evil-pkg",
+      "writeTargets": [],
+      "group": "case-sensitivity",
+      "category": "case-sensitivity",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "case-wrapper-sudo",
+      "command": "SUDO npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "SUDO npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "SUDO safeinstall npm install evil-pkg",
+      "writeTargets": [],
+      "group": "case-sensitivity",
+      "category": "case-sensitivity",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "redir-lead-stdin",
+      "command": "< in npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "< in npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "< in safeinstall npm install evil-pkg",
+      "writeTargets": [],
+      "group": "redirection-prefix",
+      "category": "redirection-prefix",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "redir-lead-stdout",
+      "command": "> out npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "> out npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "> out safeinstall npm install evil-pkg",
+      "writeTargets": [
+        "out"
+      ],
+      "group": "redirection-prefix",
+      "category": "redirection-prefix",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "redir-lead-stdout-nospace",
+      "command": ">out npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": ">out npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": ">out safeinstall npm install evil-pkg",
+      "writeTargets": [
+        "out"
+      ],
+      "group": "redirection-prefix",
+      "category": "redirection-prefix",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "redir-lead-fd",
+      "command": "2>err npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "2>err npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "2>err safeinstall npm install evil-pkg",
+      "writeTargets": [
+        "err"
+      ],
+      "group": "redirection-prefix",
+      "category": "redirection-prefix",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "redir-lead-variable-fd",
+      "command": "{audit}>out npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "{audit}>out npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "{audit}>out safeinstall npm install evil-pkg",
+      "writeTargets": [
+        "out"
+      ],
+      "group": "redirection-prefix",
+      "category": "redirection-prefix",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "wrapper-sudo-user",
+      "command": "sudo -u root npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "sudo -u root npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "sudo -u root safeinstall npm install evil-pkg",
+      "writeTargets": [],
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "wrapper-sudo-preserve",
+      "command": "sudo -E npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "sudo -E npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "sudo -E safeinstall npm install evil-pkg",
+      "writeTargets": [],
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "wrapper-command-p",
+      "command": "command -p npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "command -p npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "command -p safeinstall npm install evil-pkg",
+      "writeTargets": [],
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "wrapper-env-ignore",
+      "command": "env -i npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "env -i npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "env -i safeinstall npm install evil-pkg",
+      "writeTargets": [],
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "wrapper-env-split-string",
+      "command": "env -S 'npm install evil-pkg'",
+      "installs": [],
+      "runners": [],
+      "unanalyzable": [
+        {
+          "segmentText": "env -S 'npm install evil-pkg'",
+          "reason": "env split-string command text requires shell-aware parsing and cannot be inspected safely. SafeInstall fails closed because the segment also mentions a package manager."
+        }
+      ],
+      "usesSafeInstall": false,
+      "rewrittenCommand": null,
+      "writeTargets": [],
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "unanalyzable"
+    },
+    {
+      "id": "wrapper-time-p",
+      "command": "time -p npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "time -p npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "time -p safeinstall npm install evil-pkg",
+      "writeTargets": [],
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "exec-npm-create",
+      "command": "npm create vite@latest",
+      "installs": [],
+      "runners": [
+        {
+          "tool": "npm create",
+          "packageHint": "vite@latest",
+          "fetchesRemote": true,
+          "segmentText": "npm create vite@latest"
+        }
+      ],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": null,
+      "writeTargets": [],
+      "group": "remote-exec-subcommand",
+      "category": "remote-exec-subcommand",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "runner_finding"
+    },
+    {
+      "id": "exec-npm-init",
+      "command": "npm init foo",
+      "installs": [],
+      "runners": [
+        {
+          "tool": "npm init",
+          "packageHint": "foo",
+          "fetchesRemote": true,
+          "segmentText": "npm init foo"
+        }
+      ],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": null,
+      "writeTargets": [],
+      "group": "remote-exec-subcommand",
+      "category": "remote-exec-subcommand",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "runner_finding"
+    },
+    {
+      "id": "exec-pnpm-create",
+      "command": "pnpm create vite",
+      "installs": [],
+      "runners": [
+        {
+          "tool": "pnpm create",
+          "packageHint": "vite",
+          "fetchesRemote": true,
+          "segmentText": "pnpm create vite"
+        }
+      ],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": null,
+      "writeTargets": [],
+      "group": "remote-exec-subcommand",
+      "category": "remote-exec-subcommand",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "runner_finding"
+    },
+    {
+      "id": "exec-yarn-create",
+      "command": "yarn create foo",
+      "installs": [],
+      "runners": [
+        {
+          "tool": "yarn create",
+          "packageHint": "foo",
+          "fetchesRemote": true,
+          "segmentText": "yarn create foo"
+        }
+      ],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": null,
+      "writeTargets": [],
+      "group": "remote-exec-subcommand",
+      "category": "remote-exec-subcommand",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "runner_finding"
+    },
+    {
+      "id": "path-qualified-npm",
+      "command": "/usr/bin/npm install evil-pkg",
+      "installs": [
+        {
+          "manager": "npm",
+          "subcommand": "install",
+          "segmentText": "/usr/bin/npm install evil-pkg"
+        }
+      ],
+      "runners": [],
+      "unanalyzable": [],
+      "usesSafeInstall": false,
+      "rewrittenCommand": "safeinstall npm install evil-pkg",
+      "writeTargets": [],
+      "group": "routing",
+      "category": "routing",
+      "expect_vulnerable": "install_finding",
+      "expect_patched": "install_finding"
+    }
+  ]
+}

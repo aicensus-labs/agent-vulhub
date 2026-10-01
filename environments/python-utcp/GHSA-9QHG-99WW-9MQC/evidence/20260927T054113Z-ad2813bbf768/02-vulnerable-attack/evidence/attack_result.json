@@ -1,0 +1,14 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "tool_url": "http://127.0.0.1:18080/utcp/http-tool",
+  "redirect_location": "http://10.42.42.2:19090/latest/meta-data/iam/security-credentials/lab-role",
+  "internal_service_url": "http://10.42.42.2:19090/latest/meta-data/iam/security-credentials/lab-role",
+  "attacker_requests": 1,
+  "internal_service_requests": 1,
+  "call_returned": true,
+  "call_error": null,
+  "canary_marker": "AVH-CANARY-9QHG-99WW-9MQC",
+  "canary_observed": true,
+  "response_excerpt": "{\"AccessKeyId\": \"AKIAVHNOTAREALKEY9QHG\", \"Code\": \"Success\", \"Expiration\": \"2030-01-01T00:00:00Z\", \"SecretAccessKey\": \"not-a-real-secret-9qhg-99ww-9mqc\", \"Token\": \"AVH-CANARY-9QHG-99WW-9MQC\", \"Type\": \"AWS-HMAC\"}"
+}

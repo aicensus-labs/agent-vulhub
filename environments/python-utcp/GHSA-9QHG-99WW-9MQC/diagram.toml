@@ -1,0 +1,158 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram python-utcp/GHSA-9QHG-99WW-9MQC
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# fixture 装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "utcp-http 重定向 SSRF：工具调用跟随未校验的 Location"
+summary = "utcp-http 的工具调用只用 ensure_secure_url 校验初始 URL，随后让 aiohttp 以默认的 allow_redirects=True 发请求，重定向之后的落点从未被重新校验。攻击者让自己的端点通过初始校验（任意 HTTPS 主机，或 loopback 的 http），再用 3xx 与 Location 把请求导向非 loopback 的内网地址，就越过了只挡初始 URL 的那道信任边界。内网服务对未认证请求返回的受保护数据（例如云元数据里的 IAM 凭证）会被原样交回调用方，形成可读 SSRF 与数据外泄。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "attacker"
+label = "攻击者可控的工具端点"
+kind = "actor"
+trust = "attacker_controlled"
+role = "提供能通过初始 URL 校验的工具端点，并让该端点以 3xx 与 Location 把工具调用导向内网地址。"
+source = "fixtures/attack_redirect.json"
+
+[[entities]]
+id = "caller"
+label = "UTCP 调用方"
+kind = "client"
+trust = "semi_trusted"
+role = "注册攻击者给的端点并调用 call_tool，把工具返回值交回上层，是内网响应最终落到的一方。"
+
+[[entities]]
+id = "utcp_http"
+label = "utcp-http 协议插件"
+kind = "service"
+trust = "trusted"
+role = "call_tool 只对初始 URL 执行 ensure_secure_url，之后直接发请求，因此跟随重定向时不再校验 Location 落点。"
+
+[[entities]]
+id = "internal_service"
+label = "内网 HTTP 服务"
+kind = "service"
+trust = "trusted"
+synthetic = true
+role = "监听非 loopback 地址、对未认证请求返回受保护数据的内部服务；攻击者本不可直达，重定向把它和调用方连了起来。"
+source = "fixtures/internal_canary.json"
+
+[[entities]]
+id = "protected_data"
+label = "内网受保护数据（IAM 凭证）"
+kind = "store"
+trust = "trusted"
+static = true
+role = "内网服务持有的受保护资源，是攻击者想要却够不着的目标；漏洞把它读出并交回调用方。"
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["attacker"]
+note = "攻击者只控制自己端点的 URL 和它返回的 3xx 与 Location，不能直接访问内网地址。"
+
+[[boundaries]]
+id = "utcp_host"
+label = "运行 UTCP 的调用方进程"
+members = ["caller", "utcp_http"]
+note = "这道边界靠 ensure_secure_url 挡住指向内网的初始 URL，但它只检查发起请求前的那一个 URL。"
+
+[[boundaries]]
+id = "internal_net"
+label = "内网受保护服务"
+members = ["internal_service", "protected_data"]
+note = "内网服务只应被同网段的可信组件访问；漏洞让它接受来自重定向的调用并把数据交出去。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。至少一步 diverges = true 表示漏洞版与修复版
+# 的分叉点，且该步 variant 不能是 both。
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker"
+to = "caller"
+action = "攻击者提供一个通过初始校验的工具端点 URL（任意 HTTPS 主机，或 loopback 的 http）"
+variant = "both"
+evidence = "fixtures/attack_redirect.json"
+
+[[steps]]
+n = 2
+phase = "setup"
+from = "caller"
+to = "utcp_http"
+action = "调用方用该 URL 构造工具调用并调用 call_tool"
+variant = "both"
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "utcp_http"
+to = "utcp_http"
+action = "call_tool 仅对初始 URL 调用 ensure_secure_url，loopback 的 http 与任意 https 都被放行"
+variant = "both"
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "utcp_http"
+to = "attacker"
+action = "utcp-http 按工具调用请求攻击者端点"
+variant = "both"
+
+[[steps]]
+n = 5
+phase = "trigger"
+from = "attacker"
+to = "utcp_http"
+action = "端点返回 3xx 与指向内网非 loopback 地址的 Location"
+variant = "both"
+
+[[steps]]
+n = 6
+phase = "trigger"
+from = "utcp_http"
+to = "utcp_http"
+action = "漏洞版由 aiohttp 默认跟随重定向，不再校验 Location 落点"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 7
+phase = "trigger"
+from = "utcp_http"
+to = "utcp_http"
+action = "修复版对每一跳 Location 重新执行 ensure_secure_url，校验失败就抛 ValueError 中止链路"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 8
+phase = "effect"
+from = "utcp_http"
+to = "internal_service"
+action = "漏洞版实际请求 Location 指向的内网服务"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 9
+phase = "effect"
+from = "internal_service"
+to = "utcp_http"
+action = "内网服务对未认证请求返回受保护数据"
+variant = "vulnerable_only"
+evidence = "fixtures/internal_canary.json"
+
+[[steps]]
+n = 10
+phase = "effect"
+from = "utcp_http"
+to = "caller"
+action = "内网响应体原样交回调用方，受保护数据外泄到攻击者一侧"
+variant = "vulnerable_only"

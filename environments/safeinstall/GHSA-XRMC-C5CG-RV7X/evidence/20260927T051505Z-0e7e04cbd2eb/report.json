@@ -1,0 +1,829 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T051505Z-0e7e04cbd2eb",
+  "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+  "layer": "mechanism",
+  "rounds": 3,
+  "started_at": "2026-09-27T05:15:05.421609+00:00",
+  "cases": [
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "01-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 1,
+      "project": "avh-69ea3c72fac7457cb310",
+      "layer": "mechanism",
+      "source_commit": "06e8370d7cff0916169b28b61b20a826958db223",
+      "image": "sha256:32d489bf69b87ab8c95084498e35433cd0d1994e71302e0f76797e3783760733",
+      "started_at": "2026-09-27T05:15:14.987778+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "SafeInstall 0.10.1 classifies a plain install as an install finding while the crafted case-fold, redirection-prefix, wrapper-flag and remote-exec commands yield no finding at all (guard fails open)",
+          "actual": "20 manager invocations classified as no_finding (shapes=['case-fold', 'install', 'redirection-prefix', 'remote-exec', 'wrapper']); 2 still detected (install controls=['baseline-plain-install', 'path-qualified-npm']); 1/1 path-qualified rewrites kept the path text; 0 entries disagree with the declared 0.10.1 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:15:23.604683+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "01-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 1,
+      "project": "avh-366f18137ba445298f7b",
+      "layer": "mechanism",
+      "source_commit": "b19d262938a52bc799878e48a6c2f9e4bfdaa50b",
+      "image": "sha256:7a5e740d356b12812100a5ee52acd3e1793c80b5e2a1f0c99e89b7e605705e00",
+      "started_at": "2026-09-27T05:15:23.607878+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "SafeInstall 0.10.2 returns an install, runner or unanalyzable finding for every crafted command, so none of the 0.10.1 bypasses survives",
+          "actual": "0 manager invocations still classified as no_finding; 20 previously missed commands now produce a finding; 1/1 path-qualified rewrites normalized; 17/17 install findings rewritten through safeinstall; 0 entries disagree with the declared 0.10.2 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:15:30.070600+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "01-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 1,
+      "project": "avh-ce0af47d13734492b14e",
+      "layer": "mechanism",
+      "source_commit": "06e8370d7cff0916169b28b61b20a826958db223",
+      "image": "sha256:32d489bf69b87ab8c95084498e35433cd0d1994e71302e0f76797e3783760733",
+      "started_at": "2026-09-27T05:15:30.073084+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The ordinary developer commands keep working in both revisions: the plain install is rewritten, the script run is left alone and an already routed command is recognised without a new finding",
+          "actual": "1 install(s) -> ['install_finding'], rewrites=[True]; 1 safeinstall-routed -> ['uses_safeinstall']; 1 script run(s) -> ['no_finding']; 0 entries disagree with the declared 0.10.1 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:15:41.465280+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "01-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 1,
+      "project": "avh-d24d4fae02604850a54d",
+      "layer": "mechanism",
+      "source_commit": "b19d262938a52bc799878e48a6c2f9e4bfdaa50b",
+      "image": "sha256:7a5e740d356b12812100a5ee52acd3e1793c80b5e2a1f0c99e89b7e605705e00",
+      "started_at": "2026-09-27T05:15:41.469137+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The ordinary developer commands keep working in both revisions: the plain install is rewritten, the script run is left alone and an already routed command is recognised without a new finding",
+          "actual": "1 install(s) -> ['install_finding'], rewrites=[True]; 1 safeinstall-routed -> ['uses_safeinstall']; 1 script run(s) -> ['no_finding']; 0 entries disagree with the declared 0.10.2 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:15:47.061831+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "02-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 2,
+      "project": "avh-44346a33624c4357a045",
+      "layer": "mechanism",
+      "source_commit": "06e8370d7cff0916169b28b61b20a826958db223",
+      "image": "sha256:32d489bf69b87ab8c95084498e35433cd0d1994e71302e0f76797e3783760733",
+      "started_at": "2026-09-27T05:15:47.063816+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "SafeInstall 0.10.1 classifies a plain install as an install finding while the crafted case-fold, redirection-prefix, wrapper-flag and remote-exec commands yield no finding at all (guard fails open)",
+          "actual": "20 manager invocations classified as no_finding (shapes=['case-fold', 'install', 'redirection-prefix', 'remote-exec', 'wrapper']); 2 still detected (install controls=['baseline-plain-install', 'path-qualified-npm']); 1/1 path-qualified rewrites kept the path text; 0 entries disagree with the declared 0.10.1 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:15:51.861141+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "02-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 2,
+      "project": "avh-b1607bd206f649279b49",
+      "layer": "mechanism",
+      "source_commit": "b19d262938a52bc799878e48a6c2f9e4bfdaa50b",
+      "image": "sha256:7a5e740d356b12812100a5ee52acd3e1793c80b5e2a1f0c99e89b7e605705e00",
+      "started_at": "2026-09-27T05:15:51.864199+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "SafeInstall 0.10.2 returns an install, runner or unanalyzable finding for every crafted command, so none of the 0.10.1 bypasses survives",
+          "actual": "0 manager invocations still classified as no_finding; 20 previously missed commands now produce a finding; 1/1 path-qualified rewrites normalized; 17/17 install findings rewritten through safeinstall; 0 entries disagree with the declared 0.10.2 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:15:59.424428+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "02-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 2,
+      "project": "avh-12854800ce1843c3a03c",
+      "layer": "mechanism",
+      "source_commit": "06e8370d7cff0916169b28b61b20a826958db223",
+      "image": "sha256:32d489bf69b87ab8c95084498e35433cd0d1994e71302e0f76797e3783760733",
+      "started_at": "2026-09-27T05:15:59.428482+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The ordinary developer commands keep working in both revisions: the plain install is rewritten, the script run is left alone and an already routed command is recognised without a new finding",
+          "actual": "1 install(s) -> ['install_finding'], rewrites=[True]; 1 safeinstall-routed -> ['uses_safeinstall']; 1 script run(s) -> ['no_finding']; 0 entries disagree with the declared 0.10.1 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:16:05.322281+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "02-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 2,
+      "project": "avh-43a599e57ba94bf98ef2",
+      "layer": "mechanism",
+      "source_commit": "b19d262938a52bc799878e48a6c2f9e4bfdaa50b",
+      "image": "sha256:7a5e740d356b12812100a5ee52acd3e1793c80b5e2a1f0c99e89b7e605705e00",
+      "started_at": "2026-09-27T05:16:05.325929+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The ordinary developer commands keep working in both revisions: the plain install is rewritten, the script run is left alone and an already routed command is recognised without a new finding",
+          "actual": "1 install(s) -> ['install_finding'], rewrites=[True]; 1 safeinstall-routed -> ['uses_safeinstall']; 1 script run(s) -> ['no_finding']; 0 entries disagree with the declared 0.10.2 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:16:14.144490+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "03-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 3,
+      "project": "avh-b34ee3be41cd4d2ab50e",
+      "layer": "mechanism",
+      "source_commit": "06e8370d7cff0916169b28b61b20a826958db223",
+      "image": "sha256:32d489bf69b87ab8c95084498e35433cd0d1994e71302e0f76797e3783760733",
+      "started_at": "2026-09-27T05:16:14.148586+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "SafeInstall 0.10.1 classifies a plain install as an install finding while the crafted case-fold, redirection-prefix, wrapper-flag and remote-exec commands yield no finding at all (guard fails open)",
+          "actual": "20 manager invocations classified as no_finding (shapes=['case-fold', 'install', 'redirection-prefix', 'remote-exec', 'wrapper']); 2 still detected (install controls=['baseline-plain-install', 'path-qualified-npm']); 1/1 path-qualified rewrites kept the path text; 0 entries disagree with the declared 0.10.1 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:16:23.630143+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "03-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 3,
+      "project": "avh-885f8216c63946e19cd6",
+      "layer": "mechanism",
+      "source_commit": "b19d262938a52bc799878e48a6c2f9e4bfdaa50b",
+      "image": "sha256:7a5e740d356b12812100a5ee52acd3e1793c80b5e2a1f0c99e89b7e605705e00",
+      "started_at": "2026-09-27T05:16:23.634468+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "SafeInstall 0.10.2 returns an install, runner or unanalyzable finding for every crafted command, so none of the 0.10.1 bypasses survives",
+          "actual": "0 manager invocations still classified as no_finding; 20 previously missed commands now produce a finding; 1/1 path-qualified rewrites normalized; 17/17 install findings rewritten through safeinstall; 0 entries disagree with the declared 0.10.2 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:16:32.089217+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "03-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 3,
+      "project": "avh-8f2b9b60ab3645c2b310",
+      "layer": "mechanism",
+      "source_commit": "06e8370d7cff0916169b28b61b20a826958db223",
+      "image": "sha256:32d489bf69b87ab8c95084498e35433cd0d1994e71302e0f76797e3783760733",
+      "started_at": "2026-09-27T05:16:32.095530+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The ordinary developer commands keep working in both revisions: the plain install is rewritten, the script run is left alone and an already routed command is recognised without a new finding",
+          "actual": "1 install(s) -> ['install_finding'], rewrites=[True]; 1 safeinstall-routed -> ['uses_safeinstall']; 1 script run(s) -> ['no_finding']; 0 entries disagree with the declared 0.10.1 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:16:44.491251+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T051505Z-0e7e04cbd2eb",
+      "case_id": "03-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+      "round": 3,
+      "project": "avh-e550501caee74adbba17",
+      "layer": "mechanism",
+      "source_commit": "b19d262938a52bc799878e48a6c2f9e4bfdaa50b",
+      "image": "sha256:7a5e740d356b12812100a5ee52acd3e1793c80b5e2a1f0c99e89b7e605705e00",
+      "started_at": "2026-09-27T05:16:44.495151+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "The ordinary developer commands keep working in both revisions: the plain install is rewritten, the script run is left alone and an already routed command is recognised without a new finding",
+          "actual": "1 install(s) -> ['install_finding'], rewrites=[True]; 1 safeinstall-routed -> ['uses_safeinstall']; 1 script run(s) -> ['no_finding']; 0 entries disagree with the declared 0.10.2 expectation",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "guard-analysis.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:16:50.619017+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    }
+  ],
+  "outcome": "passed",
+  "exit_code": 0,
+  "fingerprint": "7a6cf65db254eaac3f534b72eafbdf23307a129cb7d622fa6ab3e912f5e6c233",
+  "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+  "docker_version": "29.6.1",
+  "compose_version": "5.3.0",
+  "platform": "linux/amd64",
+  "host_system": "Linux",
+  "docker_operating_system": "Ubuntu 24.04.3 LTS",
+  "host_architecture": "x86_64",
+  "images": {
+    "vulnerable": "sha256:32d489bf69b87ab8c95084498e35433cd0d1994e71302e0f76797e3783760733",
+    "patched": "sha256:7a5e740d356b12812100a5ee52acd3e1793c80b5e2a1f0c99e89b7e605705e00"
+  },
+  "finished_at": "2026-09-27T05:16:50.622533+00:00"
+}

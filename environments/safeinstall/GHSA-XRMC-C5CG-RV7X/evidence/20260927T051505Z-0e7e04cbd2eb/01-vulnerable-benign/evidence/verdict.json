@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T051505Z-0e7e04cbd2eb",
+  "case_id": "01-vulnerable-benign",
+  "variant": "vulnerable",
+  "scenario": "benign",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "The ordinary developer commands keep working in both revisions: the plain install is rewritten, the script run is left alone and an already routed command is recognised without a new finding",
+      "actual": "1 install(s) -> ['install_finding'], rewrites=[True]; 1 safeinstall-routed -> ['uses_safeinstall']; 1 script run(s) -> ['no_finding']; 0 entries disagree with the declared 0.10.1 expectation",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "guard-analysis.json"
+      ]
+    }
+  ]
+}

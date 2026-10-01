@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T054236Z-91f4d746b674",
+  "case_id": "02-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack"
+}

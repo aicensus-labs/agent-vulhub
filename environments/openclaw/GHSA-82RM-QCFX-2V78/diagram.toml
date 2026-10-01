@@ -1,0 +1,172 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram openclaw/GHSA-82RM-QCFX-2V78
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# fixture 装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "openclaw / GHSA-82RM-QCFX-2V78 漏洞图解"
+summary = "出站媒体消息在发送前写入投递队列，但漏洞版本没有把群组会话上下文一起落盘。进程重启后的恢复重放因此重建出 sessionKey 为空的投递参数，主机媒体读取前的群组工具策略判定解析不到任何群组覆盖而直接放行。结果是按群组策略本应被 deny read 的媒体读取仍被授予，被群组策略保护的主机媒体被读取并投递回攻击者所在的群组。修复版本把原始会话上下文落盘并在恢复时回放，让同一判定重新命中 deny read。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（本仓库合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "attacker"
+label = "群组会话攻击者"
+kind = "actor"
+trust = "attacker_controlled"
+role = "在群组会话里构造带媒体引用的出站消息；该消息在发送前入队，进程重启后进入投递队列的恢复重放。"
+
+[[entities]]
+id = "delivery_queue"
+label = "写前投递队列"
+kind = "store"
+trust = "trusted"
+role = "发送前落盘出站投递条目；漏洞版本只落盘渠道、收件人、负载与镜像字段，没有落盘群组会话上下文。"
+
+[[entities]]
+id = "recovery"
+label = "投递队列恢复重放"
+kind = "service"
+trust = "trusted"
+role = "重启后从队列条目重建投递参数并以 skipQueue 重放；漏洞版本重建出的参数不含会话上下文。"
+
+[[entities]]
+id = "group_policy"
+label = "群组工具策略判定"
+kind = "service"
+trust = "trusted"
+role = "先由 sessionKey 解析群组覆盖，再判定 read 是否被允许；解析不到群组覆盖时守卫整段被跳过。"
+
+[[entities]]
+id = "policy_config"
+label = "群组工具策略配置"
+kind = "store"
+trust = "trusted"
+static = true
+source = "fixtures/attack.json"
+role = "为攻击者所在群组配置的 deny read 工具策略。它是漏洞前提而不是攻击动作：恢复重放丢失会话上下文后，这份配置不再被解析到，于是本应生效的拒绝被跳过。"
+
+[[entities]]
+id = "media_read"
+label = "主机媒体读取能力"
+kind = "tool"
+trust = "trusted"
+role = "只有群组工具策略判定通过后才被创建的主机媒体读取能力。"
+
+[[entities]]
+id = "host_media"
+label = "被群组策略保护的主机媒体"
+kind = "store"
+trust = "trusted"
+synthetic = true
+source = "fixtures/canary-media.txt"
+role = "该群组会话按工具策略不得读取的主机媒体，是攻击者想要但本来够不着的数据。"
+
+[[entities]]
+id = "group_channel"
+label = "攻击者所在的群组出站渠道"
+kind = "sink"
+trust = "attacker_controlled"
+role = "被策略判定放行的媒体最终经出站渠道投递回攻击者所在的群组。"
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["attacker", "group_channel"]
+note = "攻击者只能控制自己发出的群组消息和接收渠道，不能直接读写主机媒体，也不能改动群组工具策略配置。"
+
+[[boundaries]]
+id = "outbound_stack"
+label = "出站投递与授权判定"
+members = ["delivery_queue", "recovery", "group_policy", "policy_config", "media_read"]
+note = "出站媒体读取必须经过群组工具策略判定；恢复重放丢失会话上下文后，这道判定退化成无群组覆盖而放行。"
+
+[[boundaries]]
+id = "protected_host"
+label = "群组策略保护的主机数据"
+members = ["host_media"]
+note = "群组工具策略 deny read 时，该会话不应读取这里的主机媒体。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。至少一步 diverges = true 表示漏洞版与修复版
+# 的分叉点，且该步 variant 不能是 both。
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker"
+to = "delivery_queue"
+action = "群组会话的媒体消息在发送前被写前投递队列落盘"
+variant = "both"
+
+[[steps]]
+n = 2
+phase = "setup"
+from = "delivery_queue"
+to = "recovery"
+action = "进程重启后，恢复路径读回队列条目并重建投递参数"
+variant = "both"
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "recovery"
+to = "recovery"
+action = "漏洞版重建的参数不含会话上下文，sessionKey 与请求者字段全部为空"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "recovery"
+to = "recovery"
+action = "修复版从队列条目回放原始会话上下文，sessionKey 与请求者字段完整"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 5
+phase = "trigger"
+from = "recovery"
+to = "group_policy"
+action = "sessionKey 为空，解析不出任何群组覆盖，读取判定被跳过"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 6
+phase = "trigger"
+from = "recovery"
+to = "group_policy"
+action = "sessionKey 解出群组覆盖，命中 deny read，读取判定拒绝"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 7
+phase = "effect"
+from = "group_policy"
+to = "media_read"
+action = "读取判定未命中群组覆盖，主机媒体读取能力被创建"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 8
+phase = "effect"
+from = "media_read"
+to = "host_media"
+action = "读取被群组策略禁止的主机媒体"
+variant = "vulnerable_only"
+evidence = "fixtures/canary-media.txt"
+
+[[steps]]
+n = 9
+phase = "effect"
+from = "media_read"
+to = "group_channel"
+action = "媒体经出站渠道投递到攻击者所在的群组"
+variant = "vulnerable_only"

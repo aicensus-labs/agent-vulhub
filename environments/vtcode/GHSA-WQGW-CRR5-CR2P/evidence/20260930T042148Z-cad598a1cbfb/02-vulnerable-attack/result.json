@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "run_id": "20260930T042148Z-cad598a1cbfb",
+  "case_id": "02-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "environment_id": "vtcode/GHSA-WQGW-CRR5-CR2P",
+  "round": 2,
+  "project": "avh-c1a4f8fdc5d044b4b15d",
+  "layer": "mechanism",
+  "source_commit": "058ec4166eaea25bdbedb3f577c905a761cab823",
+  "image": "sha256:2c26994524fa28230557c0f95c1ae4aee00664fe941ea929f0efcdb12b6d88c1",
+  "started_at": "2026-09-30T04:50:54.523813+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "the real upstream LifecycleHookEngine runs and reports its gate state",
+      "actual": "target_ready=True",
+      "reason": "The pinned revision's own engine executed the configured session_start hook.",
+      "evidence": [
+        "observation.json",
+        "canary_proof.txt",
+        "canary_approved.txt"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": "a repository-controlled session_start hook runs with no approval step",
+      "actual": "gated=False; needed_approval=False; hook_ran=True",
+      "reason": "Before the fix the engine has no workspace gate, so the hook executes unchecked.",
+      "evidence": [
+        "observation.json",
+        "canary_proof.txt",
+        "canary_approved.txt"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-30T04:51:04.143110+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

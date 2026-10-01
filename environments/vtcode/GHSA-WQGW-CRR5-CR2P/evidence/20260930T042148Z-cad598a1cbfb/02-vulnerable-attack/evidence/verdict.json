@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "run_id": "20260930T042148Z-cad598a1cbfb",
+  "case_id": "02-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "the real upstream LifecycleHookEngine runs and reports its gate state",
+      "actual": "target_ready=True",
+      "reason": "The pinned revision's own engine executed the configured session_start hook.",
+      "evidence": [
+        "observation.json",
+        "canary_proof.txt",
+        "canary_approved.txt"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": "a repository-controlled session_start hook runs with no approval step",
+      "actual": "gated=False; needed_approval=False; hook_ran=True",
+      "reason": "Before the fix the engine has no workspace gate, so the hook executes unchecked.",
+      "evidence": [
+        "observation.json",
+        "canary_proof.txt",
+        "canary_approved.txt"
+      ]
+    }
+  ]
+}

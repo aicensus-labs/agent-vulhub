@@ -1,0 +1,48 @@
+{
+  "scenario": "attack",
+  "description": "Group session whose tool policy denies read: a queued media delivery is replayed after the process restarts.",
+  "channel": "telegram",
+  "to": "group:ops-room",
+  "accountId": "default",
+  "session": {
+    "key": "telegram:group:ops-room",
+    "agentId": "main",
+    "requesterAccountId": "default",
+    "requesterSenderId": "user-1042",
+    "requesterSenderName": "Sample Sender",
+    "requesterSenderUsername": "sample_sender",
+    "requesterSenderE164": "+15550000123"
+  },
+  "mirror": {
+    "agentId": "main",
+    "sessionKey": "telegram:group:ops-room",
+    "isGroup": true,
+    "groupId": "ops-room"
+  },
+  "gatewayClientScopes": ["gateway.chat.send"],
+  "payloads": [
+    {
+      "text": "queued group media replay",
+      "mediaUrls": ["__WORKSPACE__/canary-media.txt"]
+    }
+  ],
+  "canary": "canary-media.txt",
+  "config": {
+    "agents": {
+      "main": {
+        "workspace": "__WORKSPACE__"
+      }
+    },
+    "channels": {
+      "telegram": {
+        "groups": {
+          "ops-room": {
+            "tools": {
+              "deny": ["read"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

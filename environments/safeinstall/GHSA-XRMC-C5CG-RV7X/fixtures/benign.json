@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "scenario": "benign",
+  "purpose": "Ordinary developer commands that must keep working in both revisions: the guard still recognizes a plain install, does not flag a script run, and does not re-process an already safeinstall-routed command.",
+  "expectation_vocabulary": {
+    "install_finding": "analyzeShellCommand returns at least one installs entry",
+    "no_finding": "installs, runners and unanalyzable are all empty",
+    "uses_safeinstall": "usesSafeInstall is true and there is no finding"
+  },
+  "groups": {
+    "control": "Positive and negative controls for the guard's classification, used to show the zero-finding bypass result is specific to the crafted syntax."
+  },
+  "commands": [
+    {
+      "id": "control-plain-install",
+      "group": "control",
+      "category": "plain-install",
+      "command": "npm install lodash@4.17.21",
+      "expect_vulnerable": "install_finding",
+      "expect_patched": "install_finding"
+    },
+    {
+      "id": "control-script-run",
+      "group": "control",
+      "category": "non-install-subcommand",
+      "command": "npm run build",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "no_finding"
+    },
+    {
+      "id": "control-safeinstall-wrapper",
+      "group": "control",
+      "category": "already-routed",
+      "command": "safeinstall npm install lodash@4.17.21",
+      "expect_vulnerable": "uses_safeinstall",
+      "expect_patched": "uses_safeinstall"
+    }
+  ]
+}

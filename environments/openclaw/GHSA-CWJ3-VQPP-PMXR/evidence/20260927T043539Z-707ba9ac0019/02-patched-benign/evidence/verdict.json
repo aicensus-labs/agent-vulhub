@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T043539Z-707ba9ac0019",
+  "case_id": "02-patched-benign",
+  "variant": "patched",
+  "scenario": "benign",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "The benign config.patch is persisted with only the requested systemPromptOverride change on both revisions, while the protected control is still rejected",
+      "actual": "benign patch persisted the requested systemPromptOverride; operator endpoints, memory command and browser path unchanged; control_protected rejected",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "guard-result.json",
+        "next-config.json"
+      ]
+    }
+  ]
+}

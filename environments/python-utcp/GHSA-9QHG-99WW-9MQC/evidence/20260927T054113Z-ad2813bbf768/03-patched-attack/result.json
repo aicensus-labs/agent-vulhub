@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T054113Z-ad2813bbf768",
+  "case_id": "03-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+  "round": 3,
+  "project": "avh-1f0595db5f1a487da14a",
+  "layer": "mechanism",
+  "source_commit": "fc3268e2a62e1181f91a63faf0a9bcee7639db29",
+  "image": "sha256:9e86f2cd0de78f0c59b7609c5ee5498fe9a8180cffff4cb0e0fc543bb454a0c7",
+  "started_at": "2026-09-27T05:42:37.670841+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "patched_effect_blocked",
+      "passed": true,
+      "expected": "patched utcp-http rejects the redirect hop before contacting the internal service, so no canary reaches the caller",
+      "actual": {
+        "target_ready": true,
+        "attacker_endpoint_contacted": 1,
+        "effect_attacker_endpoint_contacted": 1,
+        "internal_service_not_contacted": 0,
+        "call_not_returned": false,
+        "effect_call_not_returned": false,
+        "rejected_with_error": {
+          "type": "ValueError",
+          "message": "Security error during tool invocation (redirect target): URL must use HTTPS or be a literal loopback address (localhost / 127.0.0.1 / ::1). Got: 'http://10.74.74.2:19090/latest/meta-data/iam/security-credentials/lab-role'. Plain HTTP to any other host is rejected to prevent MITM attacks and SSRF into internal services."
+        },
+        "error_references_redirect_target": {
+          "internal_host": "10.74.74.2",
+          "message": "Security error during tool invocation (redirect target): URL must use HTTPS or be a literal loopback address (localhost / 127.0.0.1 / ::1). Got: 'http://10.74.74.2:19090/latest/meta-data/iam/security-credentials/lab-role'. Plain HTTP to any other host is rejected to prevent MITM attacks and SSRF int"
+        },
+        "canary_marker_matches": "AVH-CANARY-9QHG-99WW-9MQC",
+        "canary_not_observed": false,
+        "canary_not_in_response_excerpt": "",
+        "canary_not_in_tool_result": "null\n",
+        "effect_internal_service_not_contacted": 0,
+        "effect_canary_not_observed": false
+      },
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "attack_result.json",
+        "tool_result.json"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-27T05:42:43.716696+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

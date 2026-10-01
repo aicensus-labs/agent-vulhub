@@ -1,0 +1,10 @@
+schema_version = 1
+
+# SHA-256 of every fixture file except manifest.toml and README.md.
+# Regenerate after any change under fixtures/.
+[files]
+"attack/injected_reply.json" = "7cdae24ff32876871e98fa04c13f288d5c0103e5ac402954b19921a5f70480b8"
+"attack/meeting-notes.mp3" = "549d0d4f4d1e6b82c2bd13b39fe1a63cfdc5180d56917bad9aabc0dd5c3d9033"
+"attack/voice-memo.mp3" = "7f3fb3cf6415a855591f97925f366616f277b89cb8d626404d7f75a31e032eac"
+"benign/greeting.mp3" = "535745e05353cf002bf6637f237665ff05ac100b25150b81f8f9da63e28fd252"
+"benign/legitimate_reply.json" = "019bead62acf3dbadddd0c26277f0aaae43cac1e8e8e7c7ea075046697d1b5dd"

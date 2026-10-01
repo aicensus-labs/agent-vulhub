@@ -1,0 +1,17 @@
+%% safeinstall / GHSA-XRMC-C5CG-RV7X 漏洞图解 — generated from diagram.toml
+sequenceDiagram
+  actor attacker as 受攻击者影响的指令文本
+  participant coding_agent as 编码 agent 的命令发起方
+  participant guard as SafeInstall agent guard 命令分类器
+  participant package_manager as 原始包管理器进程
+  participant package_code as 未经策略评估的包代码执行（包名占位）
+  Note over attacker,coding_agent: 阶段 setup
+  attacker ->> coding_agent: 1 攻击者影响的指令让 agent 生成一条包管理命令，命令用大小写、前导重定向、wrapper 取值选项或 create/init 子命令偏离最简调用形式
+  coding_agent ->> guard: 2 agent 在执行之前把命令文本交给 shell 前置钩子的分类器，等待 allow/deny/ask 结论
+  Note over guard: 阶段 trigger
+  guard -->> guard: 3 分类器只在最简小写形式下找到命令位置：命令位置的可执行名查表失败就返回空结论，既没有 install/runner 发现，也没有 unanalyzable 的失败关闭
+  Note over guard: 分歧点：漏洞版与修复版在此分叉
+  guard -x guard: 4 修复版先做 shell 分词、跳过重定向目标并按元数表扫描 wrapper 选项，同一条命令得到 install 发现（deny 并改写）、远程 runner 发现（ask）或显式失败关闭
+  Note over coding_agent,package_manager: 阶段 effect
+  coding_agent -->> package_manager: 5 空结论被当成放行，agent 按原始文本执行命令，包管理器进程没有 safeinstall 前缀
+  package_manager -->> package_code: 6 包管理器按原始形式安装依赖或拉取远程 create/init 脚手架，包代码在开发者权限下执行

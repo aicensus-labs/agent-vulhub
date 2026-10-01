@@ -1,0 +1,17 @@
+%% openclaw / GHSA-CWJ3-VQPP-PMXR 漏洞图解 — generated from diagram.toml
+sequenceDiagram
+  actor attacker as 注入指令与越界配置值
+  participant agent as 模型 / Agent 会话
+  participant gateway_tool as gateway 工具的配置变更判定
+  participant config_store as operator 持久配置
+  participant attacker_target as 配置中指定的攻击者端点与命令路径
+  Note over attacker,agent: 阶段 setup
+  attacker ->> agent: 1 注入指令与越界配置键值随会话输入到达模型
+  agent ->> gateway_tool: 2 模型调用 gateway 工具提交 config.patch，raw 里带着清单之外的配置键
+  Note over gateway_tool: 阶段 trigger
+  gateway_tool -->> gateway_tool: 3 漏洞版只比对手工维护的受保护路径清单，清单外的键值不触发拒绝
+  Note over gateway_tool: 分歧点：漏洞版与修复版在此分叉
+  gateway_tool -x gateway_tool: 4 修复版收集实际变更的叶子路径，不在允许清单内的一律拒绝
+  Note over gateway_tool,config_store: 阶段 effect
+  gateway_tool -->> config_store: 5 越界配置写入 operator 持久配置并跨重启生效
+  config_store -->> attacker_target: 6 持久配置把远端 URL、记忆索引命令与浏览器可执行路径指向攻击者指定的目标
