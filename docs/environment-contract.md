@@ -10,12 +10,15 @@
 
 Dockerfile 使用 `ARG BASE_IMAGE`、`FROM ${BASE_IMAGE}`，接收 `VARIANT`、`SOURCE_COMMIT`、`SOURCE_ARCHIVE`。首版配方使用同一固定基础镜像，拒绝 ADD 和匿名 VOLUME；依赖是否完整、安装是否忠于上游仍由维护者审阅。构建器写入 revision 和实验输入指纹 label，运行前核对。
 
-GHCR 正式镜像用 `image@sha256:...`；本地源码构建用 Docker 返回的不可变 image ID `sha256:...`，保存在 build.json。这细化 ADR-0004：本地实验无需先上传，image ID 不冒充仓库摘要，相同输入也不承诺逐字节相同产物。ready 元数据仍要求提供固定的可分发镜像 digest。
+GHCR 正式镜像用 `image@sha256:...`；本地源码构建用 Docker 返回的不可变 image ID `sha256:...`，保存在 build.json。未发布镜像的环境可以留空 `image`，其复现性由固定源码、构建输入哈希、基础镜像 digest 和验收证据保证。若发布镜像，漏洞版和修复版都必须填写固定的可分发镜像 digest。这与 ADR-0004 一致；本地 image ID 不冒充仓库摘要，相同输入也不承诺逐字节相同产物。
 
 ## 标准入口
 
 ```sh
 python3 -m runner new <product> <identifier>
+python3 -m runner harvest --db <agentsec.sqlite3> --out <staging> [--scaffold]
+python3 -m runner factory brief|gate|status <product>/<CVE-ID> [--stage <stage>] [--execute]
+python3 -m runner batch queue|run|progress --batch-id <wave> [--stage <stage>] [--limit <n>] [--execute]
 python3 -m runner check
 python3 -m runner lint
 python3 -m runner diagram <product>/<CVE-ID>
@@ -36,6 +39,8 @@ python3 -m runner refresh
 默认 reproduce 使用元数据镜像，`--build` 选择完整源码构建；两条路径均受支持。`--scenario vulnerable|patched|benign` 用于局部调试，局部通过不满足晋升。`--timeout` 为单测试执行总期限（秒），构建、拉取另有命令超时，清理独立限时。下载设 socket 超时和 2 GiB 单文件上限，无自动重试。
 
 check 纯文件静态校验，不调用 Docker；lint 使用 Compose CLI 的 JSON 解析，不拉取、不构建、不运行环境。draft 模板可保留占位字段，不得宣称通过。
+
+除字段与文件校验外，`check` 还会核对 `verification.mechanism.status = "passed"` 的环境所引用的证据：每条 evidence 必须存在、必须属于本环境，且其 `fingerprint` 必须与当前工作树一致，否则报 `stale for the current inputs`。这是纯 JSON 比对（不启动容器、不执行 PoC），目的是让失效证据在 `check` 阶段就暴露，而不是等到 `promote` 才被拒绝——此前 `ready_check` 只检查已经是 `ready` 的环境，draft 可以长期携带过期证据继续声称通过。注意 evidence 路径记录为**相对仓库根**，与 fixtures、Dockerfile 的相对环境目录不同。
 
 ## 漏洞图解
 
@@ -93,11 +98,27 @@ publish 仅在显式调用时上传 GHCR，要求维护者事先 docker login；
 
 目标服务固定命名 vulnerable、patched，各自同名 profile 和对应镜像变量。Compose 本身不保证 profile 互斥，由运行器选择；禁止依赖启动另一个变体。每轮四个独立测试：漏洞版 attack、修复版 attack、漏洞版 benign、修复版 benign。每个测试都创建唯一 project、网络、volume。
 
+**两个变体必须运行在完全相同的环境里，只有被钉死的制品不同。** 四场景闸门只回答"两个变体的表现是否不同"，不回答"这个不同是谁造成的"；如果差异由 harness 造出来而不是由被钉死的修复造出来，四场景全绿也不构成复现证据。因此 `reproduce.py` / `verify.py` / `end_to_end.py` **不得**在 variant 守卫下给目标环境赋值——包括 `lines.append("VAR=value")`、`env["VAR"] = ...`、`os.environ`/`os.putenv`/`os.setenv`，以及条件表达式形式 `os.putenv(k, v) if variant == "patched" else None`。这类赋值让被钉死的修订从未参与决策，`generate` 闸门会静态拒绝。
+
+按变体**选择制品**是允许的，因为这正是变体的定义：选 `/src/patched` 而非 `/src/vulnerable`、按变体取不同的模块名或关键字、给 fail-closed 的 patched 侧传入它运行所必需的非空配置。判据是"这个值是否进入了目标进程的环境或配置"。少数情况确实需要给某个修订不同配置才能跑同一场景时，在 `[runtime].variant_env_exceptions` 逐条声明变量名与理由，`generate` 闸门会放行并在 README 里解释范围。
+
 `runtime.mode = "oneshot"` 时，运行器创建保活进程后分别执行 PoC、验证器。`runtime.harness` 只能是 `python3` 或 `node`，并决定两脚本的解释器；镜像必须提供对应程序。`mode = "service"` 时先启动真实服务并等待 healthy，再通过独立 docker exec 进程执行两脚本。辅助数据库/队列/接收器必须固定镜像并声明 healthcheck。
 
 入口为 /lab/reproduce.py、/lab/verify.py，fixtures 放在 /lab/fixtures，/lab/results 使用本项目命名 volume。默认内部网络、无端口/宿主目录/特权/额外 capability，必须 ALL cap_drop、no-new-privileges、正数 CPU/内存/PID 限制。拒绝外部 volume、固定资源名、自动 restart、env_file、secrets/configs 和未支持字段，避免静默绕过检查。
 
 例外在 runtime.exceptions 逐条写明 `{rule = "network.lab.internal", reason = "具体理由"}`，使用校验错误给出的精确规则名，README 解释范围；执行需 --allow-exceptions，晋升需两位审阅者。未知配置依然拒绝。宿主逃逸相关实验必须使用独立可销毁 VM；不能满足无害效果要求的案例保持 draft。
+
+宿主 Docker 默认地址池（`172.17.0.0/16` 起 16 个 `/16`，以及 `192.168.0.0/16` 的 16 个 `/20`）是有限的，忙碌的宿主会把它们耗尽，此后 compose 无法创建实验网络、每个 case 都在 `compose_up` 失败。**这是宿主的属性而不是环境的需求**，所以由工具层自动处理：运行器在 `10.0.0.0/8` 中为每个 project 选一个空闲 `/16`，再从中固定一个不与宿主既有网络重叠的 `/24`，写进规范化配置。环境无需声明任何东西，因此"宿主没网段了"不会再变成每个 recipe 都要携带的宿主细节。
+
+只有当环境确实需要**指定**网段时才用 `runtime.network_pool` 声明一个不小于 `/16` 的 IPv4 私有网段；那种情况仍受 `network.<名称>.subnet` 例外约束，必须写明理由并传 `--allow-exceptions`。**工具层自己分配的网段不算隔离例外**（网络仍是 `internal = true`），不需要例外，也不需要第二位审阅者。声明 `network_pool` 会改变 `runtime` 材料因而改变指纹、使既有证据失效；依赖自动分配则不会——这正是把该逻辑下沉到工具层的原因。
+
+候选的扫描顺序由 project id 派生的偏移量旋转，所以并发 project 不会都从同一个 `/24` 开始探测。偏移量取池大小模数，而 project id 是每个 case 唯一的随机 UUID，因此不同 project 在池耗尽前得到不同偏移；`/16` 恰好含 256 个 `/24`，旋转必须在该尺寸下同样生效（早期实现以 `> 256` 为条件，导致该池下所有 project 都固定选中第一个 `/24`）。仍存在的限制：`host_subnets()` 只能看到**已经创建**的 Docker 网络，两个运行若都在对方建网之前完成分配，仍可能选中同一 `/24`；要彻底消除需跨进程串行化分配。规模化并发验收时应为不同环境声明互不重叠的网段，同一环境的并发运行不要依赖池内自动去重。
+
+`severity` 记录**公告来源**给出的严重级别，取值只能是 `CRITICAL`、`HIGH`、`MEDIUM`、`LOW`、`NONE`、`UNKNOWN`，`runner check` 会拒绝其他写法（包括小写和 CVSS 数字）。该字段描述的是上游公告的评级，不是本仓库对复现效果的判断，也不参与输入指纹。`UNKNOWN` 是一个已声明的取值而非占位符：它表示没有任何权威来源发布过该标识符的评级，因此不得用推测值填充；`NONE` 表示来源明确评为无影响，与 `UNKNOWN` 含义不同。`UNKNOWN` 不阻碍晋升——评级缺失是上游事实，不是本仓库能修复的缺陷，该字段只校验取值合法。评级应与 `runner harvest` 写入候选 provenance 的 `severity` 保持一致。harvest 读取的是 AgentSec 数据库的同一列，但该列不能原样采信：它混用大小写，并且把 KEV 标记（`known_exploited`）与评级放在同一列。因此 `runner harvest` 通过 `normalize_severity()` 归一后才写入候选记录和 scaffold 出的 metadata——`moderate`→`MEDIUM`、`known_exploited`→`HIGH`、空值与无法识别的值→`UNKNOWN`（不猜测）。注意归一化只保证取值合法，不保证评级权威：数据库的评级可能与公告页不一致，声明 `ready` 前应回到公告来源核对。
+
+核对时的两个实测注意点：OSV 的 `database_specific.severity` 使用 GitHub 的 `MODERATE` 写法，须按上面的别名归一后再比较，否则会把 MEDIUM 误判为不一致；**OSV 的 GHSA 查询区分大小写**，`GHSA-AbCd-...` 与 `GHSA-ABCD-...` 只有前者能命中，按公告原文大小写查询才可靠。同一标识符在不同 CVSS 版本下可能得到不同等级（如 NVD 对某 CVE 同时给出 CVSS v4 `MEDIUM` 与 v3.1 `HIGH`），因此该字段的取值应固定参照公告来源自身声明的等级，不要跨版本自行换算。
+
+**仓库级 GHSA 的核对途径**：并非所有 GHSA 都进入 OSV 或 GitHub 全局公告库，仓库私有公告在其中查不到。此时用 `gh api repos/<owner>/<repo>/security-advisories/<GHSA> --jq .severity` 取权威评级，`<owner>/<repo>` 必须按 `source_url` 的准确大小写书写。该端点返回小写值（`medium`/`high`），与 `normalize_severity()` 的归一结果一致，可直接比较。
 
 ## 证据协议
 
@@ -158,6 +179,13 @@ finally 清理仅限本次 Compose project 的容器、网络、volume。--keep-
 --reviewer/--reviewed 是维护者本地审阅声明，身份授权依赖 Git 分支保护，不是密码学签名。涉及隔离例外要两位不同审阅者。先人工审阅来源、安全效果与脱敏，再执行晋升。永久证据放在环境 evidence/<run-id>/，错误/撤回降级并追加历史。CI artifact 保留 90 天，永久证据包不得依赖过期日志才能复核。
 
 输入指纹覆盖材料性 metadata、执行文件、fixture、runner Python 文件和本规范。变化后 check 拒绝旧 ready；refresh 或下一次执行命令自动降 draft、重置 not_run，保留旧证据。check 本身保持只读。一般说明文档、review、验证状态不参与指纹；fixture 内容和本协议例外。metadata 序列化会移除注释，首次修改留 .before-update 备份。
+
+指纹分两层，因为"决定镜像内容"和"决定结果含义"是两件不同的事：
+
+- **构建输入指纹**（`input_binding`）只覆盖决定镜像字节的输入：构建上下文里的环境文件（Dockerfile、`reproduce.py`/`verify.py`/`end_to_end.py`、`fixtures/`）、`build.inputs` 指向的源码与依赖、`build.base_image`、影响构建的 metadata，以及 `runner/lab_support.py`（它被 `runner build` 复制进镜像）。它写入镜像的 `org.agent-vulhub.inputs` label，并在运行前核对。
+- **证据指纹**（报告里的 `fingerprint`）是构建输入指纹的**超集**：额外覆盖 `runner/*.py` 与本规范，即宿主机侧的验证工具链。它把验收报告绑定到"哪套工具链得出了这个结论"。
+
+因此改动宿主侧验证器（`runner/*.py`、本规范）会使既有证据 stale，但**不会**使已发布的镜像 digest 失效——那两件事本来就不该耦合。反之改动 Dockerfile、`lab_support.py`、源码或依赖会同时使两者失效。工具链绑定另有 `runner_fingerprint` 字段独立记录并在晋升时校验。
 
 报告记录 Docker、Compose、daemon 平台、宿主架构和 runner 指纹。Docker/Compose 发生影响语义的更新时需重新验收；首版无法仅凭版本号自动判断语义变化。
 

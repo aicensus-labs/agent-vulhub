@@ -1,6 +1,6 @@
 # CyberGym 论文核查记录
 
-核查对象：`/home/hejunjie/cybergym/cybergym.pdf`，论文标题为 *CyberGym: Evaluating AI Agents' Real-World Cybersecurity Capabilities at Scale*，发表于 ICLR 2026。页码以下均指 PDF 正文印刷页码。
+核查对象：CyberGym checkout 中的 `cybergym.pdf`，论文标题为 *CyberGym: Evaluating AI Agents' Real-World Cybersecurity Capabilities at Scale*，发表于 ICLR 2026。页码以下均指 PDF 正文印刷页码。代码定位均相对于 CyberGym checkout 根目录；需要本地文件路径时使用 `CYBERGYM_ROOT` 环境变量。
 
 ## 结论
 
@@ -76,9 +76,9 @@ CyberGym 的实际答案是：
 
 ## 与当前 CyberGym 代码的对照
 
-- [arvo_task.py](/home/hejunjie/cybergym/src/cybergym/task/arvo_task.py:18) 将 `repo-vul.tar.gz` 描述为 vulnerable program source code，将 `repo-fix.tar.gz` 描述为 patched program source code；Level 1 实际复制 `repo-vul.tar.gz` 和 `description.txt`（第 29-32 行）。
-- [gen_task.py](/home/hejunjie/cybergym/src/cybergym/task/gen_task.py:65) 将默认 difficulty 设置为 `level1`。
-- [server_utils.py](/home/hejunjie/cybergym/src/cybergym/server/server_utils.py:70) 在隔离容器中分别运行 `vul` 和 `fix` 版本，并保存 exit code 与输出；[server_utils.py](/home/hejunjie/cybergym/src/cybergym/server/server_utils.py:289) 的 `run_poc_id` 负责分别执行两种版本。
-- [pocdb.py](/home/hejunjie/cybergym/src/cybergym/server/pocdb.py:16) 保存的是 `vul_exit_code` 和 `fix_exit_code` 等执行记录，没有保存调用栈、sanitizer 结构化报告或根因归因字段。
+- `src/cybergym/task/arvo_task.py:18` 将 `repo-vul.tar.gz` 描述为 vulnerable program source code，将 `repo-fix.tar.gz` 描述为 patched program source code；Level 1 实际复制 `repo-vul.tar.gz` 和 `description.txt`（第 29-32 行）。
+- `src/cybergym/task/gen_task.py:65` 将默认 difficulty 设置为 `level1`。
+- `src/cybergym/server/server_utils.py:70` 在隔离容器中分别运行 `vul` 和 `fix` 版本，并保存 exit code 与输出；`src/cybergym/server/server_utils.py:289` 的 `run_poc_id` 负责分别执行两种版本。
+- `src/cybergym/server/pocdb.py:16` 保存的是 `vul_exit_code` 和 `fix_exit_code` 等执行记录，没有保存调用栈、sanitizer 结构化报告或根因归因字段。
 
 因此，论文设计口径与当前实现的核心方向一致：完整源码快照加 pre/post 执行差分；但论文对“严格命中指定漏洞”的表述应理解为评测定义，而不是可独立验证的根因级保证。

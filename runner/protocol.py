@@ -13,6 +13,15 @@ HASH = re.compile(r"[0-9a-f]{64}")
 IMAGE = re.compile(r"[^\s]+@sha256:[0-9a-f]{64}")
 IMAGE_ID = re.compile(r"sha256:[0-9a-f]{64}")
 
+# The verifier modules that execute while a result is produced. ``reproduce`` lazily
+# imports runtime, build and lifecycle; runtime pulls in compose and protocol.
+# ``lab_support.py`` is never imported on the host but is copied into the image by
+# ``build`` and runs there. Everything else under runner/ (cli.py, prune.py, ...)
+# dispatches or talks to the registry and must not stale evidence when edited.
+# tests/test_registry.py pins this list against the real import closure.
+EXECUTION_PATH = ("build.py", "compose.py", "lab_support.py", "lifecycle.py",
+                  "protocol.py", "runtime.py")
+
 
 def digest(path):
     with Path(path).open("rb") as stream:
@@ -72,7 +81,29 @@ def write_metadata(path, data):
     temporary.replace(path)
 
 
-def fingerprint(root, directory, metadata):
+def _tooling_root(root):
+    """Runner code and the execution contract live in the checkout.
+
+    A staging registry reached through ``AVH_ROOT`` has no ``runner/`` of its
+    own, so tooling files resolve back to the checkout. For the real root the
+    two are the same directory and behaviour is unchanged.
+    """
+    root = Path(root)
+    return root if (root / "runner").is_dir() else Path(__file__).resolve().parents[1]
+
+
+def _material(metadata):
+    """Metadata that describes the experiment rather than its bookkeeping."""
+    return {k: v for k, v in metadata.items()
+            if k not in {"lifecycle", "verification", "review", "title", "description", "advisories"}}
+
+
+def _context_files(directory):
+    """Environment files that the build context carries into the image.
+
+    Mirrors ``runner.build``'s context assembly: everything under the
+    environment directory except evidence, results, caches and metadata.
+    """
     inputs = {}
     for path in sorted(directory.rglob("*")):
         relative = path.relative_to(directory)
@@ -91,23 +122,62 @@ def fingerprint(root, directory, metadata):
             raise ValueError(f"Symlink build input: {relative}")
         if path.is_file():
             inputs[str(relative)] = digest(path)
-    for path in sorted((root / "runner").glob("*.py")):
-        inputs[f"@runner/{path.name}"] = digest(path)
-    contract = root / "docs/environment-contract.md"
-    if contract.exists():
-        inputs["@contract"] = digest(contract)
-    material = {k: v for k, v in metadata.items()
-                if k not in {"lifecycle", "verification", "review", "title", "description", "advisories"}}
-    payload = json.dumps({"files": inputs, "metadata": material}, sort_keys=True).encode()
+    return inputs
+
+
+def input_binding(root, directory, metadata):
+    """Hash only what determines the built image.
+
+    ``runner/*.py`` and ``docs/environment-contract.md`` run on the host and are
+    never copied into the image, so changing the verifier must not invalidate
+    published image digests. ``lab_support.py`` *is* copied into the image by
+    ``runner.build``, so it stays a build input. The verification toolchain is
+    bound to evidence separately through ``runner_fingerprint``.
+    """
+    inputs = _context_files(directory)
+    support = Path(__file__).resolve().parent / "lab_support.py"
+    if support.exists():
+        inputs["@lab_support"] = digest(support)
+    payload = json.dumps({"files": inputs, "metadata": _material(metadata)}, sort_keys=True).encode()
+    return hashlib.sha256(payload).hexdigest()
+
+
+def fingerprint(root, directory, metadata):
+    """Hash everything that determines the recorded result.
+
+    Superset of ``input_binding``: adds the verifier code that actually executes
+    during ``reproduce``, so a verifier change stales evidence without touching
+    image digests.
+
+    Only ``EXECUTION_PATH`` is hashed. Editing a module that merely dispatches
+    (``cli.py``) or talks to the registry (``prune.py``) must not invalidate
+    every report in the registry.
+
+    ``docs/environment-contract.md`` is deliberately NOT hashed. It is prose for
+    recipe authors, not code that runs; hashing it meant that fixing a sentence in
+    the documentation invalidated every report in the registry and forced a
+    re-stamp of the whole staging tree.
+    """
+    inputs = _context_files(directory)
+    support = Path(__file__).resolve().parent / "lab_support.py"
+    if support.exists():
+        inputs["@lab_support"] = digest(support)
+    tooling = _tooling_root(root)
+    for name in EXECUTION_PATH:
+        path = tooling / "runner" / name
+        if path.exists():
+            inputs[f"@runner/{name}"] = digest(path)
+    payload = json.dumps({"files": inputs, "metadata": _material(metadata)}, sort_keys=True).encode()
     return hashlib.sha256(payload).hexdigest()
 
 
 def runner_fingerprint(root):
     """Return a digest for the runner implementation and its execution contract."""
     files = {}
-    for path in sorted((root / "runner").glob("*.py")):
+    tooling = _tooling_root(root)
+    for path in sorted((tooling / "runner").glob("*.py")):
         files[path.name] = digest(path)
-    contract = root / "docs/environment-contract.md"
+    contract = tooling / "docs/environment-contract.md"
     if contract.exists():
         files["@contract"] = digest(contract)
     return hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
@@ -127,7 +197,16 @@ def check_fixtures(directory):
         if path.is_file() and path.name not in {"manifest.toml", "README.md"}:
             actual.add(path.relative_to(directory / "fixtures").as_posix())
     if set(entries) != actual:
-        raise ValueError("Fixture manifest does not cover exactly the fixture files")
+        listed = set(entries)
+        missing = sorted(actual - listed)
+        stale = sorted(listed - actual)
+        parts = []
+        if missing:
+            parts.append(f"not listed: {', '.join(missing)}")
+        if stale:
+            parts.append(f"listed but absent: {', '.join(stale)}")
+        raise ValueError("Fixture manifest does not cover exactly the fixture files (" +
+                         "; ".join(parts) + ")")
     for name, sha in entries.items():
         if not isinstance(sha, str) or not HASH.fullmatch(sha) or digest(contained(directory / "fixtures", name)) != sha:
             raise ValueError(f"Fixture hash mismatch: {name}")

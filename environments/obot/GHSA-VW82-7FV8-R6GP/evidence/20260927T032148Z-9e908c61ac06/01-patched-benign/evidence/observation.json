@@ -1,0 +1,51 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "variant": "patched",
+  "scenario": "benign",
+  "mechanism": "pkg/api/authz Authorize(/mcp-connect/{mcp_id})",
+  "cases": [
+    {
+      "id": "owner_reaches_own_server_instance",
+      "path": "/mcp-connect/msi1direct",
+      "method": "GET",
+      "uid": "owner-uid",
+      "expected_allowed": true,
+      "allowed": true,
+      "matches_expectation": true,
+      "subtest": "PASS"
+    },
+    {
+      "id": "owner_reaches_own_single_user_server",
+      "path": "/mcp-connect/ms1direct",
+      "method": "GET",
+      "uid": "owner-uid",
+      "expected_allowed": true,
+      "allowed": true,
+      "matches_expectation": true,
+      "subtest": "PASS"
+    },
+    {
+      "id": "granted_user_reaches_shared_catalog_server",
+      "path": "/mcp-connect/ms1shared",
+      "method": "GET",
+      "uid": "granted-uid",
+      "expected_allowed": true,
+      "allowed": true,
+      "matches_expectation": true,
+      "subtest": "PASS"
+    }
+  ],
+  "all_match": true,
+  "source": "/lab/src/patched",
+  "commit": "",
+  "harness_exit_code": 0,
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T032148Z-9e908c61ac06",
+    "case_id": "01-patched-benign",
+    "variant": "patched",
+    "scenario": "benign"
+  }
+}

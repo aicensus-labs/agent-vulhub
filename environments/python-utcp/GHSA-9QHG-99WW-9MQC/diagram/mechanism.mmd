@@ -1,0 +1,21 @@
+%% utcp-http 重定向 SSRF：工具调用跟随未校验的 Location — generated from diagram.toml
+sequenceDiagram
+  actor attacker as 攻击者可控的工具端点
+  participant caller as UTCP 调用方
+  participant utcp_http as utcp-http 协议插件
+  participant internal_service as 内网 HTTP 服务
+  participant protected_data as 内网受保护数据（IAM 凭证）
+  Note over attacker,caller: 阶段 setup
+  attacker ->> caller: 1 攻击者提供一个通过初始校验的工具端点 URL（任意 HTTPS 主机，或 loopback 的 http）
+  caller ->> utcp_http: 2 调用方用该 URL 构造工具调用并调用 call_tool
+  Note over utcp_http: 阶段 trigger
+  utcp_http ->> utcp_http: 3 call_tool 仅对初始 URL 调用 ensure_secure_url，loopback 的 http 与任意 https 都被放行
+  utcp_http ->> attacker: 4 utcp-http 按工具调用请求攻击者端点
+  attacker ->> utcp_http: 5 端点返回 3xx 与指向内网非 loopback 地址的 Location
+  utcp_http -->> utcp_http: 6 漏洞版由 aiohttp 默认跟随重定向，不再校验 Location 落点
+  Note over utcp_http: 分歧点：漏洞版与修复版在此分叉
+  utcp_http -x utcp_http: 7 修复版对每一跳 Location 重新执行 ensure_secure_url，校验失败就抛 ValueError 中止链路
+  Note over utcp_http,internal_service: 阶段 effect
+  utcp_http -->> internal_service: 8 漏洞版实际请求 Location 指向的内网服务
+  internal_service -->> utcp_http: 9 内网服务对未认证请求返回受保护数据
+  utcp_http -->> caller: 10 内网响应体原样交回调用方，受保护数据外泄到攻击者一侧

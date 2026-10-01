@@ -1,0 +1,157 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram gitlab-mcp/GHSA-5648-RGJ9-V224
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# fixture 装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "gitlab-mcp / GHSA-5648-rgj9-v224 漏洞图解"
+summary = """gitlab-mcp 的 execute_graphql 在只读模式下用 graphqlQueryContainsWriteOperation() 判定请求文档是不是写操作，而 2.1.28 的判定器是一条正则：它只在文档开头、} 或 ; 之后识别操作类型，却不认识 GraphQL 里同样被忽略的逗号。攻击者把 mutation 前的分隔符写成逗号，或以注释加逗号开头，判定器就返回“只读”，只读闸门因此不拦截，原始 GraphQL 文档经服务器持有的操作员令牌发往 /api/graphql，以写操作执行。同一工具分支也不检查 GITLAB_PROJECT_ID / GITLAB_ALLOWED_PROJECT_IDS，所以该令牌能触及的任意项目都可以被这条 mutation 修改，越过项目允许清单。2.1.30 换成按花括号深度扫描、只在文档期望位置接受操作类型的状态机，并对项目受限部署直接拒绝 execute_graphql，两类请求都在到达上游前被阻断。"""
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（本仓库合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "attacker"
+label = "攻击者 / 攻击材料"
+kind = "actor"
+trust = "attacker_controlled"
+role = "构造这次 execute_graphql 工具调用的 GraphQL 文档，把写操作伪装成只读查询。"
+
+[[entities]]
+id = "tool_arguments"
+label = "工具调用参数"
+kind = "client"
+trust = "untrusted_input"
+source = "fixtures/cases.json"
+role = "攻击者提交的 MCP 工具调用参数，其中 query 字段是攻击者完全可控的 GraphQL 文档；它同时携带指向允许清单之外项目的写操作。"
+
+[[entities]]
+id = "mcp_server"
+label = "gitlab-mcp 工具分发与 MCP 服务"
+kind = "service"
+trust = "trusted"
+role = "按 params.name 分发工具调用；execute_graphql 分支负责取出 query、调用只读判定器，并把通过检查的文档 POST 到上游 GraphQL 端点。"
+
+[[entities]]
+id = "graphql_parser"
+label = "graphqlQueryContainsWriteOperation() 只读判定器"
+kind = "tool"
+trust = "trusted"
+role = "utils/graphql-query.ts 中的写操作判定器：2.1.28 用正则匹配 normalized 文档中的 mutation/subscription；2.1.30 改为按 { } 深度扫描的状态机。它返回的布尔值就是只读闸门的全部依据。"
+
+[[entities]]
+id = "read_only_guard"
+label = "GITLAB_READ_ONLY_MODE 写操作闸门"
+kind = "tool"
+trust = "trusted"
+role = "execute_graphql 分支里唯一的写操作防护：GITLAB_READ_ONLY_MODE 为真且判定器报告写操作时抛错；判定器误报只读时该闸门静默放行。"
+
+[[entities]]
+id = "graphql_endpoint"
+label = "上游 GraphQL 端点 /api/graphql"
+kind = "sink"
+trust = "trusted"
+synthetic = true
+role = "接收经服务器凭据认证的原始 GraphQL 文档并执行其中的 mutation；本环境用它承载受控的删除效果，不代表真实外部实例。"
+
+[[entities]]
+id = "server_token"
+label = "服务器持有的操作员令牌"
+kind = "store"
+trust = "trusted"
+static = true
+role = "gitlab-mcp 进程用来访问 GitLab 的凭据，权限覆盖该令牌可见的全部项目；受影响的部署把它当作部署级信任，而不是调用者身份。"
+
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["attacker", "tool_arguments"]
+note = "攻击者能控制的只有这次工具调用的参数文本：GraphQL 文档内容与其中的项目标识；它既拿不到服务器令牌，也不能直接调用上游 API。"
+
+[[boundaries]]
+id = "product"
+label = "gitlab-mcp 受信侧与它信任的部署凭据"
+members = ["mcp_server", "graphql_parser", "read_only_guard", "graphql_endpoint", "server_token"]
+note = "这道边界要求工具调用只能读到调用者被允许的项目、且只读模式不得产生写操作；漏洞让攻击者文本以只读查询的名义穿过闸门，再由部署凭据执行写操作。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。至少一步 diverges = true 表示漏洞版与修复版
+# 的分叉点，且该步 variant 不能是 both。
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker"
+to = "tool_arguments"
+action = "构造以逗号或注释加逗号开头的 mutation 文档，作为 execute_graphql 的 query 参数"
+variant = "both"
+evidence = "fixtures/cases.json"
+
+[[steps]]
+n = 2
+phase = "setup"
+from = "tool_arguments"
+to = "mcp_server"
+action = "工具调用到达 /mcp，参数中的 query 被交给 execute_graphql 分支"
+variant = "both"
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "mcp_server"
+to = "graphql_parser"
+action = "用 graphqlQueryContainsWriteOperation() 判定该文档是否包含写操作"
+variant = "both"
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "graphql_parser"
+to = "graphql_parser"
+action = "2.1.28 的正则只承认文档开头、右花括号或分号之后的操作类型，逗号开头的 mutation 被判为只读查询，返回 false"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 5
+phase = "trigger"
+from = "graphql_parser"
+to = "graphql_parser"
+action = "2.1.30 的状态机在文档期望位置读出 mutation 操作类型，返回 true"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 6
+phase = "trigger"
+from = "read_only_guard"
+to = "read_only_guard"
+action = "2.1.30 对项目受限部署在解析参数前就抛错，拒绝执行 execute_graphql"
+variant = "patched_only"
+
+[[steps]]
+n = 7
+phase = "trigger"
+from = "read_only_guard"
+to = "mcp_server"
+action = "2.1.28 的只读闸门依据判定器的 false 放行该文档，写操作检查未触发"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 8
+phase = "effect"
+from = "mcp_server"
+to = "graphql_endpoint"
+action = "原始 GraphQL 文档带服务器操作员令牌发往 /api/graphql，未做任何项目允许清单校验"
+variant = "vulnerable_only"
+evidence = "fixtures/allowlist-scope.json"
+
+[[steps]]
+n = 9
+phase = "effect"
+from = "graphql_endpoint"
+to = "graphql_endpoint"
+action = "令牌权限范围内、允许清单之外的项目被执行 deleteProject mutation 删除"
+variant = "vulnerable_only"

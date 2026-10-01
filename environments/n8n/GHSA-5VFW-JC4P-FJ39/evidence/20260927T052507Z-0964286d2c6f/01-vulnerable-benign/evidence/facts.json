@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T052507Z-0964286d2c6f",
+  "case_id": "01-vulnerable-benign",
+  "variant": "vulnerable",
+  "scenario": "benign",
+  "execution_status": "completed",
+  "evidence": [
+    {
+      "path": "observation.json",
+      "sha256": "700365bcb0362b5168e1779443e2190eb42c3032eb2fb8f625a42a50c24b2d35"
+    },
+    {
+      "path": "effects.json",
+      "sha256": "82bbafba4375743ae592eb777edf721e6dd0f9d06558fb82f86885f1468eb41c"
+    }
+  ]
+}

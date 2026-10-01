@@ -1,0 +1,841 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T043058Z-d574d83ea3d2",
+  "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+  "layer": "mechanism",
+  "rounds": 3,
+  "started_at": "2026-09-27T04:30:58.725364+00:00",
+  "cases": [
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "01-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 1,
+      "project": "avh-1833de1f0847467f9d79",
+      "layer": "mechanism",
+      "source_commit": "323493fa1b6adc1e10b9954a68d5eaa5a6ef1170",
+      "image": "sha256:29adf08be0b933bf3af1f80303616daa038d2749f19897124fb53b0df674cb1c",
+      "started_at": "2026-09-27T04:31:07.272510+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "vulnerable attack embeds the bytes of every out-of-root audio target (2 blocks, markers ['AVH-SYNTHETIC-AUDIO-MARKER voice-memo', 'AVH-SYNTHETIC-AUDIO-MARKER meeting-notes']) and denies nothing",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 2, \"denied_local_audio_access\": [], \"evidence_block_count\": 2, \"evidence_is_exact_fixture_bytes\": true, \"evidence_markers\": [\"AVH-SYNTHETIC-AUDIO-MARKER meeting-notes\", \"AVH-SYNTHETIC-AUDIO-MARKER voice-memo\"], \"evidence_payload_count\": 2, \"expected_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"materialized_paths\": [\"/tmp/openclaw-outside-root/voice-memo.mp3\", \"/tmp/openclaw-outside-root/meeting-notes.mp3\"], \"media_types\": [\"audio/mpeg\", \"audio/mpeg\"], \"scenario\": \"attack\", \"upstream_calls_containment_check\": false, \"upstream_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"variant\": \"vulnerable\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:31:12.379733+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "01-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 1,
+      "project": "avh-ee03a3072cce410a937c",
+      "layer": "mechanism",
+      "source_commit": "041266a6699cac3baef8ef39db41fa26f29f9db3",
+      "image": "sha256:75c7841074acaea48c547f0163b9851fbd097ba11005907ee4dff6f320823d10",
+      "started_at": "2026-09-27T04:31:12.382465+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "patched attack returns no audio block, embeds no out-of-root bytes and reports one denial per rejected target (2)",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 0, \"denied_local_audio_access\": [\"path-not-allowed\", \"path-not-allowed\"], \"evidence_block_count\": 0, \"evidence_is_exact_fixture_bytes\": false, \"evidence_markers\": [], \"evidence_payload_count\": 0, \"expected_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"materialized_paths\": [\"/tmp/openclaw-outside-root/voice-memo.mp3\", \"/tmp/openclaw-outside-root/meeting-notes.mp3\"], \"media_types\": [], \"scenario\": \"attack\", \"upstream_calls_containment_check\": true, \"upstream_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"variant\": \"patched\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:31:18.282913+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "01-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 1,
+      "project": "avh-66edc7c1527c4d42acf8",
+      "layer": "mechanism",
+      "source_commit": "323493fa1b6adc1e10b9954a68d5eaa5a6ef1170",
+      "image": "sha256:29adf08be0b933bf3af1f80303616daa038d2749f19897124fb53b0df674cb1c",
+      "started_at": "2026-09-27T04:31:18.286092+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "benign reply still embeds the single in-root audio file (marker 'AVH-SYNTHETIC-AUDIO-MARKER greeting') with no denial",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 1, \"denied_local_audio_access\": [], \"evidence_block_count\": 1, \"evidence_is_exact_fixture_bytes\": true, \"evidence_markers\": [], \"evidence_payload_count\": 1, \"expected_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"materialized_paths\": [\"/tmp/openclaw-media-root/greeting.mp3\"], \"media_types\": [\"audio/mpeg\"], \"scenario\": \"benign\", \"upstream_calls_containment_check\": false, \"upstream_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"variant\": \"vulnerable\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:31:23.329491+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "01-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 1,
+      "project": "avh-6c1ecaa5cc4f4624ba09",
+      "layer": "mechanism",
+      "source_commit": "041266a6699cac3baef8ef39db41fa26f29f9db3",
+      "image": "sha256:75c7841074acaea48c547f0163b9851fbd097ba11005907ee4dff6f320823d10",
+      "started_at": "2026-09-27T04:31:23.333220+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "benign reply still embeds the single in-root audio file (marker 'AVH-SYNTHETIC-AUDIO-MARKER greeting') with no denial",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 1, \"denied_local_audio_access\": [], \"evidence_block_count\": 1, \"evidence_is_exact_fixture_bytes\": true, \"evidence_markers\": [], \"evidence_payload_count\": 1, \"expected_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"materialized_paths\": [\"/tmp/openclaw-media-root/greeting.mp3\"], \"media_types\": [\"audio/mpeg\"], \"scenario\": \"benign\", \"upstream_calls_containment_check\": true, \"upstream_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"variant\": \"patched\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:31:31.252661+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "02-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 2,
+      "project": "avh-028ec4a86b6e42cdb927",
+      "layer": "mechanism",
+      "source_commit": "323493fa1b6adc1e10b9954a68d5eaa5a6ef1170",
+      "image": "sha256:29adf08be0b933bf3af1f80303616daa038d2749f19897124fb53b0df674cb1c",
+      "started_at": "2026-09-27T04:31:31.255712+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "vulnerable attack embeds the bytes of every out-of-root audio target (2 blocks, markers ['AVH-SYNTHETIC-AUDIO-MARKER voice-memo', 'AVH-SYNTHETIC-AUDIO-MARKER meeting-notes']) and denies nothing",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 2, \"denied_local_audio_access\": [], \"evidence_block_count\": 2, \"evidence_is_exact_fixture_bytes\": true, \"evidence_markers\": [\"AVH-SYNTHETIC-AUDIO-MARKER meeting-notes\", \"AVH-SYNTHETIC-AUDIO-MARKER voice-memo\"], \"evidence_payload_count\": 2, \"expected_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"materialized_paths\": [\"/tmp/openclaw-outside-root/voice-memo.mp3\", \"/tmp/openclaw-outside-root/meeting-notes.mp3\"], \"media_types\": [\"audio/mpeg\", \"audio/mpeg\"], \"scenario\": \"attack\", \"upstream_calls_containment_check\": false, \"upstream_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"variant\": \"vulnerable\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:31:39.228752+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "02-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 2,
+      "project": "avh-bb98ae33700848ca91a1",
+      "layer": "mechanism",
+      "source_commit": "041266a6699cac3baef8ef39db41fa26f29f9db3",
+      "image": "sha256:75c7841074acaea48c547f0163b9851fbd097ba11005907ee4dff6f320823d10",
+      "started_at": "2026-09-27T04:31:39.232012+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "patched attack returns no audio block, embeds no out-of-root bytes and reports one denial per rejected target (2)",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 0, \"denied_local_audio_access\": [\"path-not-allowed\", \"path-not-allowed\"], \"evidence_block_count\": 0, \"evidence_is_exact_fixture_bytes\": false, \"evidence_markers\": [], \"evidence_payload_count\": 0, \"expected_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"materialized_paths\": [\"/tmp/openclaw-outside-root/voice-memo.mp3\", \"/tmp/openclaw-outside-root/meeting-notes.mp3\"], \"media_types\": [], \"scenario\": \"attack\", \"upstream_calls_containment_check\": true, \"upstream_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"variant\": \"patched\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:31:44.351115+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "02-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 2,
+      "project": "avh-3750fdf999864dd3908f",
+      "layer": "mechanism",
+      "source_commit": "323493fa1b6adc1e10b9954a68d5eaa5a6ef1170",
+      "image": "sha256:29adf08be0b933bf3af1f80303616daa038d2749f19897124fb53b0df674cb1c",
+      "started_at": "2026-09-27T04:31:44.355107+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "benign reply still embeds the single in-root audio file (marker 'AVH-SYNTHETIC-AUDIO-MARKER greeting') with no denial",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 1, \"denied_local_audio_access\": [], \"evidence_block_count\": 1, \"evidence_is_exact_fixture_bytes\": true, \"evidence_markers\": [], \"evidence_payload_count\": 1, \"expected_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"materialized_paths\": [\"/tmp/openclaw-media-root/greeting.mp3\"], \"media_types\": [\"audio/mpeg\"], \"scenario\": \"benign\", \"upstream_calls_containment_check\": false, \"upstream_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"variant\": \"vulnerable\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:31:53.869391+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "02-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 2,
+      "project": "avh-0f61bfda853f4933a1c9",
+      "layer": "mechanism",
+      "source_commit": "041266a6699cac3baef8ef39db41fa26f29f9db3",
+      "image": "sha256:75c7841074acaea48c547f0163b9851fbd097ba11005907ee4dff6f320823d10",
+      "started_at": "2026-09-27T04:31:53.872763+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "benign reply still embeds the single in-root audio file (marker 'AVH-SYNTHETIC-AUDIO-MARKER greeting') with no denial",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 1, \"denied_local_audio_access\": [], \"evidence_block_count\": 1, \"evidence_is_exact_fixture_bytes\": true, \"evidence_markers\": [], \"evidence_payload_count\": 1, \"expected_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"materialized_paths\": [\"/tmp/openclaw-media-root/greeting.mp3\"], \"media_types\": [\"audio/mpeg\"], \"scenario\": \"benign\", \"upstream_calls_containment_check\": true, \"upstream_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"variant\": \"patched\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:31:58.623283+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "03-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 3,
+      "project": "avh-f8e399e700a2464eb45b",
+      "layer": "mechanism",
+      "source_commit": "323493fa1b6adc1e10b9954a68d5eaa5a6ef1170",
+      "image": "sha256:29adf08be0b933bf3af1f80303616daa038d2749f19897124fb53b0df674cb1c",
+      "started_at": "2026-09-27T04:31:58.626333+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "vulnerable attack embeds the bytes of every out-of-root audio target (2 blocks, markers ['AVH-SYNTHETIC-AUDIO-MARKER voice-memo', 'AVH-SYNTHETIC-AUDIO-MARKER meeting-notes']) and denies nothing",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 2, \"denied_local_audio_access\": [], \"evidence_block_count\": 2, \"evidence_is_exact_fixture_bytes\": true, \"evidence_markers\": [\"AVH-SYNTHETIC-AUDIO-MARKER meeting-notes\", \"AVH-SYNTHETIC-AUDIO-MARKER voice-memo\"], \"evidence_payload_count\": 2, \"expected_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"materialized_paths\": [\"/tmp/openclaw-outside-root/voice-memo.mp3\", \"/tmp/openclaw-outside-root/meeting-notes.mp3\"], \"media_types\": [\"audio/mpeg\", \"audio/mpeg\"], \"scenario\": \"attack\", \"upstream_calls_containment_check\": false, \"upstream_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"variant\": \"vulnerable\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:32:04.047830+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "03-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 3,
+      "project": "avh-fb795da004764b6f82e6",
+      "layer": "mechanism",
+      "source_commit": "041266a6699cac3baef8ef39db41fa26f29f9db3",
+      "image": "sha256:75c7841074acaea48c547f0163b9851fbd097ba11005907ee4dff6f320823d10",
+      "started_at": "2026-09-27T04:32:04.051331+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "patched attack returns no audio block, embeds no out-of-root bytes and reports one denial per rejected target (2)",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 0, \"denied_local_audio_access\": [\"path-not-allowed\", \"path-not-allowed\"], \"evidence_block_count\": 0, \"evidence_is_exact_fixture_bytes\": false, \"evidence_markers\": [], \"evidence_payload_count\": 0, \"expected_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"materialized_paths\": [\"/tmp/openclaw-outside-root/voice-memo.mp3\", \"/tmp/openclaw-outside-root/meeting-notes.mp3\"], \"media_types\": [], \"scenario\": \"attack\", \"upstream_calls_containment_check\": true, \"upstream_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"variant\": \"patched\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:32:10.152432+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "03-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 3,
+      "project": "avh-7a230824ef8847689319",
+      "layer": "mechanism",
+      "source_commit": "323493fa1b6adc1e10b9954a68d5eaa5a6ef1170",
+      "image": "sha256:29adf08be0b933bf3af1f80303616daa038d2749f19897124fb53b0df674cb1c",
+      "started_at": "2026-09-27T04:32:10.155816+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "benign reply still embeds the single in-root audio file (marker 'AVH-SYNTHETIC-AUDIO-MARKER greeting') with no denial",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 1, \"denied_local_audio_access\": [], \"evidence_block_count\": 1, \"evidence_is_exact_fixture_bytes\": true, \"evidence_markers\": [], \"evidence_payload_count\": 1, \"expected_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"materialized_paths\": [\"/tmp/openclaw-media-root/greeting.mp3\"], \"media_types\": [\"audio/mpeg\"], \"scenario\": \"benign\", \"upstream_calls_containment_check\": false, \"upstream_module_sha256\": \"c917223f6541607c25d608fe0aa9f956c1b6028ec2c49a6258125141fa922e29\", \"variant\": \"vulnerable\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:32:14.957186+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T043058Z-d574d83ea3d2",
+      "case_id": "03-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-GFG9-5357-HV4C",
+      "round": 3,
+      "project": "avh-2588ce65badf442e99d1",
+      "layer": "mechanism",
+      "source_commit": "041266a6699cac3baef8ef39db41fa26f29f9db3",
+      "image": "sha256:75c7841074acaea48c547f0163b9851fbd097ba11005907ee4dff6f320823d10",
+      "started_at": "2026-09-27T04:32:14.961733+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "benign reply still embeds the single in-root audio file (marker 'AVH-SYNTHETIC-AUDIO-MARKER greeting') with no denial",
+          "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 1, \"denied_local_audio_access\": [], \"evidence_block_count\": 1, \"evidence_is_exact_fixture_bytes\": true, \"evidence_markers\": [], \"evidence_payload_count\": 1, \"expected_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"materialized_paths\": [\"/tmp/openclaw-media-root/greeting.mp3\"], \"media_types\": [\"audio/mpeg\"], \"scenario\": \"benign\", \"upstream_calls_containment_check\": true, \"upstream_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"variant\": \"patched\"}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "media_blocks.json",
+            "embedded_audio_base64.txt"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T04:32:21.205237+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    }
+  ],
+  "outcome": "passed",
+  "exit_code": 0,
+  "fingerprint": "6d69ccbd95e600fb2db9786b0bb6470d4fecb2b0a2b85113ed4934be93e8373f",
+  "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+  "docker_version": "29.6.1",
+  "compose_version": "5.3.0",
+  "platform": "linux/amd64",
+  "host_system": "Linux",
+  "docker_operating_system": "Ubuntu 24.04.3 LTS",
+  "host_architecture": "x86_64",
+  "images": {
+    "vulnerable": "sha256:29adf08be0b933bf3af1f80303616daa038d2749f19897124fb53b0df674cb1c",
+    "patched": "sha256:75c7841074acaea48c547f0163b9851fbd097ba11005907ee4dff6f320823d10"
+  },
+  "finished_at": "2026-09-27T04:32:21.360551+00:00"
+}

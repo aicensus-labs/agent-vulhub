@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "run_id": "20260930T042148Z-cad598a1cbfb",
+  "case_id": "01-patched-benign",
+  "variant": "patched",
+  "scenario": "benign",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "the real upstream LifecycleHookEngine runs and reports its gate state",
+      "actual": "target_ready=True",
+      "reason": "The pinned revision's own engine executed the configured session_start hook.",
+      "evidence": [
+        "observation.json",
+        "canary_proof.txt",
+        "canary_approved.txt"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "a user-level lifecycle hook is ungated and still runs after the fix",
+      "actual": "gated=False; needed_approval=False; hook_ran=True",
+      "reason": "The approval gate applies to workspace-controlled hook content, not to the user's own configuration.",
+      "evidence": [
+        "observation.json",
+        "canary_proof.txt",
+        "canary_approved.txt"
+      ]
+    }
+  ]
+}

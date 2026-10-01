@@ -1,0 +1,10 @@
+schema_version = 1
+
+# Keys are paths relative to fixtures/. Include attack AND benign inputs.
+[files]
+"attack-patched.json" = "956592014b7faeb08195636cc04bfddc620e532e90be9be57c493a3a4ea37c50"
+"attack-vulnerable.json" = "8b737246a8209af3d24de8a31d03193585be4ca2633b8d3f5bda87c89243f0e6"
+"benign.json" = "e0203a251a9bd8dd610953ea80efe59c4976f20e4042e207bafb58b3c6d4767e"
+"n8n_doubles.mjs" = "aa165e3a9c99be1bf96869d655f5816e7d624a2a6bd249c8576f8bae3734023d"
+"n8n_harness.mjs" = "5ce5e9976ba33c8e5182eb58fe4aec157a88213e7fea2a0beb76a358d5fc31de"
+"n8n_loader.mjs" = "9546ec1b65e42dd2a03d97d258e964b91b1165c2a2a925b41a48845a12de34b5"

@@ -1,0 +1,44 @@
+{
+  "scenario": "attack",
+  "variant": "vulnerable",
+  "mechanism_loaded": true,
+  "filter_tools_for_user_present": false,
+  "filter_tools_for_user_kept": null,
+  "resolved_tools": [
+    {
+      "name": "run_shell",
+      "kind": "node"
+    }
+  ],
+  "executor_calls": [
+    {
+      "nodeType": "n8n-nodes-base.executeCommandTool",
+      "projectId": "project-viewer-canary",
+      "credentialDetails": {
+        "httpBasicAuth": {
+          "id": "cred-exec",
+          "name": "Server Admin Credential"
+        }
+      },
+      "nodeParameters": {
+        "command": "id > /lab/results/marker.txt"
+      }
+    }
+  ],
+  "node_tool_invocations": [
+    {
+      "tool": "run_shell",
+      "result": {
+        "status": "success",
+        "data": [
+          {
+            "json": {
+              "marker": "AVH-N8N-W46P-EXEC"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "harness_exit_code": 0
+}

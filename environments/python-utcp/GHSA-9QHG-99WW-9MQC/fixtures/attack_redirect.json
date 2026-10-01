@@ -1,0 +1,10 @@
+{
+  "case": "redirect_ssrf",
+  "tool_name": "internal_metadata_reader",
+  "http_method": "GET",
+  "tool_args": {},
+  "attacker_path": "/utcp/http-tool",
+  "redirect_status": 302,
+  "location_template": "{internal_base}/latest/meta-data/iam/security-credentials/lab-role",
+  "note": "The registered tool URL is an attacker-controlled loopback HTTP endpoint, so the initial ensure_secure_url check passes. The endpoint answers the tool call with a 3xx whose Location points at a non-loopback internal address; {internal_base} is resolved to the internal service address inside the isolated network."
+}

@@ -1,0 +1,1063 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T054113Z-ad2813bbf768",
+  "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+  "layer": "mechanism",
+  "rounds": 3,
+  "started_at": "2026-09-27T05:41:13.330248+00:00",
+  "cases": [
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "01-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 1,
+      "project": "avh-9856a06e31624bae93cf",
+      "layer": "mechanism",
+      "source_commit": "4ed0a48b84a452338bd3e996efb0d169e8d75ac2",
+      "image": "sha256:8c9283eeec1470d9bf4cbd15565d3d8856ce7b877d1a4d271518da5045450408",
+      "started_at": "2026-09-27T05:41:23.295986+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "vulnerable utcp-http follows the attacker redirect to the non-loopback internal service and returns its protected canary body",
+          "actual": {
+            "target_ready": true,
+            "attacker_endpoint_contacted": 1,
+            "effect_attacker_endpoint_contacted": 1,
+            "internal_service_contacted": 1,
+            "redirect_location_recorded": "http://10.207.208.2:19090/latest/meta-data/iam/security-credentials/lab-role",
+            "effect_redirect_location_recorded": "http://10.207.208.2:19090/latest/meta-data/iam/security-credentials/lab-role",
+            "redirect_crosses_host": {
+              "tool_host": "127.0.0.1",
+              "internal_host": "10.207.208.2"
+            },
+            "internal_target_is_non_loopback": "10.207.208.2",
+            "redirect_location_targets_internal": {
+              "location_host": "10.207.208.2",
+              "internal_host": "10.207.208.2"
+            },
+            "effect_redirect_location_targets_internal": {
+              "location_host": "10.207.208.2",
+              "internal_host": "10.207.208.2"
+            },
+            "call_returned": true,
+            "effect_call_returned": true,
+            "no_call_error": null,
+            "canary_marker_matches": "AVH-CANARY-9QHG-99WW-9MQC",
+            "canary_observed": true,
+            "canary_in_response_excerpt": "{\"AccessKeyId\": \"AKIAVHNOTAREALKEY9QHG\", \"Code\": \"Success\", \"Expiration\": \"2030-01-01T00:00:00Z\", \"SecretAccessKey\": \"no",
+            "canary_in_tool_result": "{\n  \"Code\": \"Success\",\n  \"Type\": \"AWS-HMAC\",\n  \"AccessKeyId\": \"AKIAVHNOTAREALKEY9QHG\",\n  \"SecretAccessKey\": \"not-a-real-secret-9qhg-99ww-9mqc\",\n  \"Token\": \"AVH-CANARY-9QHG-99WW-9MQC\",\n  \"Expiration\": ",
+            "effect_internal_service_contacted": 1,
+            "effect_canary_observed": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "attack_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:41:29.874209+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "01-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 1,
+      "project": "avh-e183f3b3c2954f25b8b4",
+      "layer": "mechanism",
+      "source_commit": "fc3268e2a62e1181f91a63faf0a9bcee7639db29",
+      "image": "sha256:9e86f2cd0de78f0c59b7609c5ee5498fe9a8180cffff4cb0e0fc543bb454a0c7",
+      "started_at": "2026-09-27T05:41:29.876227+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "patched utcp-http rejects the redirect hop before contacting the internal service, so no canary reaches the caller",
+          "actual": {
+            "target_ready": true,
+            "attacker_endpoint_contacted": 1,
+            "effect_attacker_endpoint_contacted": 1,
+            "internal_service_not_contacted": 0,
+            "call_not_returned": false,
+            "effect_call_not_returned": false,
+            "rejected_with_error": {
+              "type": "ValueError",
+              "message": "Security error during tool invocation (redirect target): URL must use HTTPS or be a literal loopback address (localhost / 127.0.0.1 / ::1). Got: 'http://10.180.180.2:19090/latest/meta-data/iam/security-credentials/lab-role'. Plain HTTP to any other host is rejected to prevent MITM attacks and SSRF into internal services."
+            },
+            "error_references_redirect_target": {
+              "internal_host": "10.180.180.2",
+              "message": "Security error during tool invocation (redirect target): URL must use HTTPS or be a literal loopback address (localhost / 127.0.0.1 / ::1). Got: 'http://10.180.180.2:19090/latest/meta-data/iam/security-credentials/lab-role'. Plain HTTP to any other host is rejected to prevent MITM attacks and SSRF i"
+            },
+            "canary_marker_matches": "AVH-CANARY-9QHG-99WW-9MQC",
+            "canary_not_observed": false,
+            "canary_not_in_response_excerpt": "",
+            "canary_not_in_tool_result": "null\n",
+            "effect_internal_service_not_contacted": 0,
+            "effect_canary_not_observed": false
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "attack_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:41:37.704527+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "01-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 1,
+      "project": "avh-d1857624de07458184ce",
+      "layer": "mechanism",
+      "source_commit": "4ed0a48b84a452338bd3e996efb0d169e8d75ac2",
+      "image": "sha256:8c9283eeec1470d9bf4cbd15565d3d8856ce7b877d1a4d271518da5045450408",
+      "started_at": "2026-09-27T05:41:37.708781+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the benign loopback tool call still returns its benign marker",
+          "actual": {
+            "target_ready": true,
+            "endpoint_contacted": 1,
+            "call_returned": true,
+            "effect_call_returned": true,
+            "no_call_error": null,
+            "benign_marker_matches": "AVH-BENIGN-OK-9QHG-99WW-9MQC",
+            "benign_marker_observed": true,
+            "benign_marker_in_response_excerpt": "{\"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\", \"service\": \"local-health\", \"status\": \"ok\"}",
+            "benign_marker_in_tool_result": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "tool_result_not_empty": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "effect_benign_marker_observed": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "benign_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:41:53.487709+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "01-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 1,
+      "project": "avh-3f5be49997ff468aa160",
+      "layer": "mechanism",
+      "source_commit": "fc3268e2a62e1181f91a63faf0a9bcee7639db29",
+      "image": "sha256:9e86f2cd0de78f0c59b7609c5ee5498fe9a8180cffff4cb0e0fc543bb454a0c7",
+      "started_at": "2026-09-27T05:41:53.489815+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the benign loopback tool call still returns its benign marker",
+          "actual": {
+            "target_ready": true,
+            "endpoint_contacted": 1,
+            "call_returned": true,
+            "effect_call_returned": true,
+            "no_call_error": null,
+            "benign_marker_matches": "AVH-BENIGN-OK-9QHG-99WW-9MQC",
+            "benign_marker_observed": true,
+            "benign_marker_in_response_excerpt": "{\"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\", \"service\": \"local-health\", \"status\": \"ok\"}",
+            "benign_marker_in_tool_result": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "tool_result_not_empty": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "effect_benign_marker_observed": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "benign_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:42:00.180463+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "02-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 2,
+      "project": "avh-72119fd824f5480e822a",
+      "layer": "mechanism",
+      "source_commit": "4ed0a48b84a452338bd3e996efb0d169e8d75ac2",
+      "image": "sha256:8c9283eeec1470d9bf4cbd15565d3d8856ce7b877d1a4d271518da5045450408",
+      "started_at": "2026-09-27T05:42:00.184718+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "vulnerable utcp-http follows the attacker redirect to the non-loopback internal service and returns its protected canary body",
+          "actual": {
+            "target_ready": true,
+            "attacker_endpoint_contacted": 1,
+            "effect_attacker_endpoint_contacted": 1,
+            "internal_service_contacted": 1,
+            "redirect_location_recorded": "http://10.42.42.2:19090/latest/meta-data/iam/security-credentials/lab-role",
+            "effect_redirect_location_recorded": "http://10.42.42.2:19090/latest/meta-data/iam/security-credentials/lab-role",
+            "redirect_crosses_host": {
+              "tool_host": "127.0.0.1",
+              "internal_host": "10.42.42.2"
+            },
+            "internal_target_is_non_loopback": "10.42.42.2",
+            "redirect_location_targets_internal": {
+              "location_host": "10.42.42.2",
+              "internal_host": "10.42.42.2"
+            },
+            "effect_redirect_location_targets_internal": {
+              "location_host": "10.42.42.2",
+              "internal_host": "10.42.42.2"
+            },
+            "call_returned": true,
+            "effect_call_returned": true,
+            "no_call_error": null,
+            "canary_marker_matches": "AVH-CANARY-9QHG-99WW-9MQC",
+            "canary_observed": true,
+            "canary_in_response_excerpt": "{\"AccessKeyId\": \"AKIAVHNOTAREALKEY9QHG\", \"Code\": \"Success\", \"Expiration\": \"2030-01-01T00:00:00Z\", \"SecretAccessKey\": \"no",
+            "canary_in_tool_result": "{\n  \"Code\": \"Success\",\n  \"Type\": \"AWS-HMAC\",\n  \"AccessKeyId\": \"AKIAVHNOTAREALKEY9QHG\",\n  \"SecretAccessKey\": \"not-a-real-secret-9qhg-99ww-9mqc\",\n  \"Token\": \"AVH-CANARY-9QHG-99WW-9MQC\",\n  \"Expiration\": ",
+            "effect_internal_service_contacted": 1,
+            "effect_canary_observed": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "attack_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:42:07.644060+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "02-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 2,
+      "project": "avh-59dbfd7f6cce440b9b8f",
+      "layer": "mechanism",
+      "source_commit": "fc3268e2a62e1181f91a63faf0a9bcee7639db29",
+      "image": "sha256:9e86f2cd0de78f0c59b7609c5ee5498fe9a8180cffff4cb0e0fc543bb454a0c7",
+      "started_at": "2026-09-27T05:42:07.646969+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "patched utcp-http rejects the redirect hop before contacting the internal service, so no canary reaches the caller",
+          "actual": {
+            "target_ready": true,
+            "attacker_endpoint_contacted": 1,
+            "effect_attacker_endpoint_contacted": 1,
+            "internal_service_not_contacted": 0,
+            "call_not_returned": false,
+            "effect_call_not_returned": false,
+            "rejected_with_error": {
+              "type": "ValueError",
+              "message": "Security error during tool invocation (redirect target): URL must use HTTPS or be a literal loopback address (localhost / 127.0.0.1 / ::1). Got: 'http://10.143.143.2:19090/latest/meta-data/iam/security-credentials/lab-role'. Plain HTTP to any other host is rejected to prevent MITM attacks and SSRF into internal services."
+            },
+            "error_references_redirect_target": {
+              "internal_host": "10.143.143.2",
+              "message": "Security error during tool invocation (redirect target): URL must use HTTPS or be a literal loopback address (localhost / 127.0.0.1 / ::1). Got: 'http://10.143.143.2:19090/latest/meta-data/iam/security-credentials/lab-role'. Plain HTTP to any other host is rejected to prevent MITM attacks and SSRF i"
+            },
+            "canary_marker_matches": "AVH-CANARY-9QHG-99WW-9MQC",
+            "canary_not_observed": false,
+            "canary_not_in_response_excerpt": "",
+            "canary_not_in_tool_result": "null\n",
+            "effect_internal_service_not_contacted": 0,
+            "effect_canary_not_observed": false
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "attack_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:42:14.717286+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "02-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 2,
+      "project": "avh-007b6de9d46745f8b58e",
+      "layer": "mechanism",
+      "source_commit": "4ed0a48b84a452338bd3e996efb0d169e8d75ac2",
+      "image": "sha256:8c9283eeec1470d9bf4cbd15565d3d8856ce7b877d1a4d271518da5045450408",
+      "started_at": "2026-09-27T05:42:14.720272+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the benign loopback tool call still returns its benign marker",
+          "actual": {
+            "target_ready": true,
+            "endpoint_contacted": 1,
+            "call_returned": true,
+            "effect_call_returned": true,
+            "no_call_error": null,
+            "benign_marker_matches": "AVH-BENIGN-OK-9QHG-99WW-9MQC",
+            "benign_marker_observed": true,
+            "benign_marker_in_response_excerpt": "{\"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\", \"service\": \"local-health\", \"status\": \"ok\"}",
+            "benign_marker_in_tool_result": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "tool_result_not_empty": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "effect_benign_marker_observed": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "benign_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:42:22.727573+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "02-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 2,
+      "project": "avh-c4cea28359c94ce9acc9",
+      "layer": "mechanism",
+      "source_commit": "fc3268e2a62e1181f91a63faf0a9bcee7639db29",
+      "image": "sha256:9e86f2cd0de78f0c59b7609c5ee5498fe9a8180cffff4cb0e0fc543bb454a0c7",
+      "started_at": "2026-09-27T05:42:22.730541+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the benign loopback tool call still returns its benign marker",
+          "actual": {
+            "target_ready": true,
+            "endpoint_contacted": 1,
+            "call_returned": true,
+            "effect_call_returned": true,
+            "no_call_error": null,
+            "benign_marker_matches": "AVH-BENIGN-OK-9QHG-99WW-9MQC",
+            "benign_marker_observed": true,
+            "benign_marker_in_response_excerpt": "{\"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\", \"service\": \"local-health\", \"status\": \"ok\"}",
+            "benign_marker_in_tool_result": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "tool_result_not_empty": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "effect_benign_marker_observed": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "benign_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:42:31.043968+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "03-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 3,
+      "project": "avh-6f11314e5c464380858b",
+      "layer": "mechanism",
+      "source_commit": "4ed0a48b84a452338bd3e996efb0d169e8d75ac2",
+      "image": "sha256:8c9283eeec1470d9bf4cbd15565d3d8856ce7b877d1a4d271518da5045450408",
+      "started_at": "2026-09-27T05:42:31.047748+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "vulnerable utcp-http follows the attacker redirect to the non-loopback internal service and returns its protected canary body",
+          "actual": {
+            "target_ready": true,
+            "attacker_endpoint_contacted": 1,
+            "effect_attacker_endpoint_contacted": 1,
+            "internal_service_contacted": 1,
+            "redirect_location_recorded": "http://10.139.139.2:19090/latest/meta-data/iam/security-credentials/lab-role",
+            "effect_redirect_location_recorded": "http://10.139.139.2:19090/latest/meta-data/iam/security-credentials/lab-role",
+            "redirect_crosses_host": {
+              "tool_host": "127.0.0.1",
+              "internal_host": "10.139.139.2"
+            },
+            "internal_target_is_non_loopback": "10.139.139.2",
+            "redirect_location_targets_internal": {
+              "location_host": "10.139.139.2",
+              "internal_host": "10.139.139.2"
+            },
+            "effect_redirect_location_targets_internal": {
+              "location_host": "10.139.139.2",
+              "internal_host": "10.139.139.2"
+            },
+            "call_returned": true,
+            "effect_call_returned": true,
+            "no_call_error": null,
+            "canary_marker_matches": "AVH-CANARY-9QHG-99WW-9MQC",
+            "canary_observed": true,
+            "canary_in_response_excerpt": "{\"AccessKeyId\": \"AKIAVHNOTAREALKEY9QHG\", \"Code\": \"Success\", \"Expiration\": \"2030-01-01T00:00:00Z\", \"SecretAccessKey\": \"no",
+            "canary_in_tool_result": "{\n  \"Code\": \"Success\",\n  \"Type\": \"AWS-HMAC\",\n  \"AccessKeyId\": \"AKIAVHNOTAREALKEY9QHG\",\n  \"SecretAccessKey\": \"not-a-real-secret-9qhg-99ww-9mqc\",\n  \"Token\": \"AVH-CANARY-9QHG-99WW-9MQC\",\n  \"Expiration\": ",
+            "effect_internal_service_contacted": 1,
+            "effect_canary_observed": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "attack_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:42:37.666297+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "03-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 3,
+      "project": "avh-1f0595db5f1a487da14a",
+      "layer": "mechanism",
+      "source_commit": "fc3268e2a62e1181f91a63faf0a9bcee7639db29",
+      "image": "sha256:9e86f2cd0de78f0c59b7609c5ee5498fe9a8180cffff4cb0e0fc543bb454a0c7",
+      "started_at": "2026-09-27T05:42:37.670841+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "patched utcp-http rejects the redirect hop before contacting the internal service, so no canary reaches the caller",
+          "actual": {
+            "target_ready": true,
+            "attacker_endpoint_contacted": 1,
+            "effect_attacker_endpoint_contacted": 1,
+            "internal_service_not_contacted": 0,
+            "call_not_returned": false,
+            "effect_call_not_returned": false,
+            "rejected_with_error": {
+              "type": "ValueError",
+              "message": "Security error during tool invocation (redirect target): URL must use HTTPS or be a literal loopback address (localhost / 127.0.0.1 / ::1). Got: 'http://10.74.74.2:19090/latest/meta-data/iam/security-credentials/lab-role'. Plain HTTP to any other host is rejected to prevent MITM attacks and SSRF into internal services."
+            },
+            "error_references_redirect_target": {
+              "internal_host": "10.74.74.2",
+              "message": "Security error during tool invocation (redirect target): URL must use HTTPS or be a literal loopback address (localhost / 127.0.0.1 / ::1). Got: 'http://10.74.74.2:19090/latest/meta-data/iam/security-credentials/lab-role'. Plain HTTP to any other host is rejected to prevent MITM attacks and SSRF int"
+            },
+            "canary_marker_matches": "AVH-CANARY-9QHG-99WW-9MQC",
+            "canary_not_observed": false,
+            "canary_not_in_response_excerpt": "",
+            "canary_not_in_tool_result": "null\n",
+            "effect_internal_service_not_contacted": 0,
+            "effect_canary_not_observed": false
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "attack_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:42:43.716696+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "03-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 3,
+      "project": "avh-630eaa87fa174c9880c0",
+      "layer": "mechanism",
+      "source_commit": "4ed0a48b84a452338bd3e996efb0d169e8d75ac2",
+      "image": "sha256:8c9283eeec1470d9bf4cbd15565d3d8856ce7b877d1a4d271518da5045450408",
+      "started_at": "2026-09-27T05:42:43.719539+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the benign loopback tool call still returns its benign marker",
+          "actual": {
+            "target_ready": true,
+            "endpoint_contacted": 1,
+            "call_returned": true,
+            "effect_call_returned": true,
+            "no_call_error": null,
+            "benign_marker_matches": "AVH-BENIGN-OK-9QHG-99WW-9MQC",
+            "benign_marker_observed": true,
+            "benign_marker_in_response_excerpt": "{\"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\", \"service\": \"local-health\", \"status\": \"ok\"}",
+            "benign_marker_in_tool_result": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "tool_result_not_empty": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "effect_benign_marker_observed": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "benign_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:42:50.277901+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T054113Z-ad2813bbf768",
+      "case_id": "03-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "python-utcp/GHSA-9QHG-99WW-9MQC",
+      "round": 3,
+      "project": "avh-9a0d49e7845c43139222",
+      "layer": "mechanism",
+      "source_commit": "fc3268e2a62e1181f91a63faf0a9bcee7639db29",
+      "image": "sha256:9e86f2cd0de78f0c59b7609c5ee5498fe9a8180cffff4cb0e0fc543bb454a0c7",
+      "started_at": "2026-09-27T05:42:50.282922+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the benign loopback tool call still returns its benign marker",
+          "actual": {
+            "target_ready": true,
+            "endpoint_contacted": 1,
+            "call_returned": true,
+            "effect_call_returned": true,
+            "no_call_error": null,
+            "benign_marker_matches": "AVH-BENIGN-OK-9QHG-99WW-9MQC",
+            "benign_marker_observed": true,
+            "benign_marker_in_response_excerpt": "{\"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\", \"service\": \"local-health\", \"status\": \"ok\"}",
+            "benign_marker_in_tool_result": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "tool_result_not_empty": "{\n  \"status\": \"ok\",\n  \"service\": \"local-health\",\n  \"marker\": \"AVH-BENIGN-OK-9QHG-99WW-9MQC\"\n}\n",
+            "effect_benign_marker_observed": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "benign_result.json",
+            "tool_result.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:42:55.520037+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    }
+  ],
+  "outcome": "passed",
+  "exit_code": 0,
+  "fingerprint": "92c3d65465a009cc538b1466a42cf3774e323341e5eb64abef46c4030dd86310",
+  "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+  "docker_version": "29.6.1",
+  "compose_version": "5.3.0",
+  "platform": "linux/amd64",
+  "host_system": "Linux",
+  "docker_operating_system": "Ubuntu 24.04.3 LTS",
+  "host_architecture": "x86_64",
+  "images": {
+    "vulnerable": "sha256:8c9283eeec1470d9bf4cbd15565d3d8856ce7b877d1a4d271518da5045450408",
+    "patched": "sha256:9e86f2cd0de78f0c59b7609c5ee5498fe9a8180cffff4cb0e0fc543bb454a0c7"
+  },
+  "finished_at": "2026-09-27T05:42:55.527946+00:00"
+}

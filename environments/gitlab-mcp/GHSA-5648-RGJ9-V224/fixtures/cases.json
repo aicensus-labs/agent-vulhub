@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "description": "Fixed tool-call inputs for GHSA-5648-rgj9-v224 (F1: execute_graphql read-only + allow-list bypass). Queries are GraphQL request documents only; no credentials are present.",
+  "allowlist_scope_marker": "424242",
+  "attack_queries": [
+    {
+      "id": "leading_comma_mutation",
+      "path": "read_only_bypass",
+      "note": "Comma is an ignored GraphQL token, so the document is a valid mutation, but the pre-fix guard regex accepts the operation type only after ^, } or ;.",
+      "query": ",mutation DeleteProject { deleteProject(input: {project: \"424242\"}) { errors } }"
+    },
+    {
+      "id": "comment_then_comma_mutation",
+      "path": "read_only_bypass",
+      "note": "A leading comment is collapsed into a single space, so the normalized document starts with the comma and escapes the same regex.",
+      "query": "# queue the maintenance mutation\n,mutation DeleteProject { deleteProject(input: {project: \"424242\"}) { errors } }"
+    },
+    {
+      "id": "trailing_comma_subscription",
+      "path": "read_only_bypass",
+      "note": "Same separator defect on a second operation: a comma in front of the operation type is not recognised as a document boundary.",
+      "query": "query CurrentUser { currentUser { username } },subscription { projectUpdated { id } }"
+    },
+    {
+      "id": "plain_mutation",
+      "path": "read_only_bypass",
+      "note": "Control case that the pre-fix guard already rejects; both revisions must classify it as a write operation.",
+      "query": "mutation DeleteProject { deleteProject(input: {project: \"424242\"}) { errors } }"
+    }
+  ],
+  "benign_queries": [
+    {
+      "id": "read_current_user",
+      "note": "Ordinary read-only query that must stay allowed in read-only mode.",
+      "query": "query CurrentUser { currentUser { username } }"
+    },
+    {
+      "id": "read_project_metadata",
+      "note": "Read-only query with an argument and nested selection set.",
+      "query": "query ProjectMeta { project(fullPath: \"group/allowed\") { id name description } }"
+    },
+    {
+      "id": "read_subscription_field_name",
+      "note": "Field name containing the literal token 'subscription'; a conservative parser must not treat it as an operation type.",
+      "query": "query NotificationSettings { subscription { id plan } }"
+    },
+    {
+      "id": "read_alias_mutation_word",
+      "note": "Alias whose name contains 'mutation'; selection sets and argument names must not be mistaken for operation types.",
+      "query": "query Audit { mutationEvents: auditEvents(first: 5) { id action } }"
+    }
+  ]
+}

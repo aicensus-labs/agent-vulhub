@@ -1,0 +1,8 @@
+schema_version = 1
+
+# Keys are paths relative to fixtures/. Include attack AND benign inputs.
+[files]
+"attack_config.json" = "6c2d82e4e176882942042cf6d973e2676f3003387343bbca19417fba7b038a2b"
+"benign_config.json" = "3edc322ceaaa57e7ef8a53bea5d997b12794ea98d648a8695e84ea4b37f63f8d"
+"mcp_payload.js" = "0b4e92a7040047354cd9eff4650f138cd61a76ecf5f97c4662990a13138de2cb"
+"mcp_server.js" = "03d70a4351a187869ff02fa4d71563d6a28d0138b9cf40417de632645e3f0482"

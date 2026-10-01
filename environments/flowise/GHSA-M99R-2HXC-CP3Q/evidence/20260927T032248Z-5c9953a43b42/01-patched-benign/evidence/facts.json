@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T032248Z-5c9953a43b42",
+  "case_id": "01-patched-benign",
+  "variant": "patched",
+  "scenario": "benign",
+  "execution_status": "completed",
+  "evidence": [
+    {
+      "path": "observation.json",
+      "sha256": "23eac2a6c3f23972a58ba25634f6fb8d37945b03a7ae57ddf60a67e03f7379d9"
+    },
+    {
+      "path": "resolved_mcp_config.json",
+      "sha256": "b45d2fca3f99c62ecedc394c9aba688be4acce1744b95b064a9e6f6a2bf1ac95"
+    },
+    {
+      "path": "harness_result.json",
+      "sha256": "ea6c925689d0c358ec74af3a47671ed690f7bb0d2c02cea757419a921429fbdd"
+    },
+    {
+      "path": "harness_stdout.txt",
+      "sha256": "4c99632538b5b2f9544e0807c021a2eb06dd288be7642fe2523b682010fdf438"
+    },
+    {
+      "path": "benign_mcp_server.js",
+      "sha256": "03d70a4351a187869ff02fa4d71563d6a28d0138b9cf40417de632645e3f0482"
+    }
+  ]
+}

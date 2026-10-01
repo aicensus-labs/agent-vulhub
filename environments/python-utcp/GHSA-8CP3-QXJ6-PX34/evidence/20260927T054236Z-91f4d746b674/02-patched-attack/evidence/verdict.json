@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T054236Z-91f4d746b674",
+  "case_id": "02-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "patched_effect_blocked",
+      "passed": true,
+      "expected": "1.1.4 fetches the same malicious spec from the first-party origin, rejects the insecure non-loopback plaintext tokenUrl with an upstream security error and never sends any request to the attacker endpoint",
+      "actual": "the conversion-time guard rejected the non-loopback plaintext tokenUrl; 0 requests reached the attacker endpoint",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "effect.json"
+      ]
+    }
+  ]
+}

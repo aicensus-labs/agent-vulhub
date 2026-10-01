@@ -1,0 +1,23 @@
+%% gitlab-mcp / GHSA-5648-rgj9-v224 漏洞图解 — generated from diagram.toml
+sequenceDiagram
+  actor attacker as 攻击者 / 攻击材料
+  participant tool_arguments as 工具调用参数
+  participant mcp_server as gitlab-mcp 工具分发与 MCP 服务
+  participant graphql_parser as graphqlQueryContainsWriteOperation() 只读判定器
+  participant read_only_guard as GITLAB_READ_ONLY_MODE 写操作闸门
+  participant graphql_endpoint as 上游 GraphQL 端点 /api/graphql
+  participant server_token as 服务器持有的操作员令牌
+  Note over attacker,tool_arguments: 阶段 setup
+  attacker ->> tool_arguments: 1 构造以逗号或注释加逗号开头的 mutation 文档，作为 execute_graphql 的 query 参数
+  tool_arguments ->> mcp_server: 2 工具调用到达 /mcp，参数中的 query 被交给 execute_graphql 分支
+  Note over mcp_server,graphql_parser: 阶段 trigger
+  mcp_server ->> graphql_parser: 3 用 graphqlQueryContainsWriteOperation() 判定该文档是否包含写操作
+  graphql_parser -->> graphql_parser: 4 2.1.28 的正则只承认文档开头、右花括号或分号之后的操作类型，逗号开头的 mutation 被判为只读查询，返回 false
+  Note over graphql_parser: 分歧点：漏洞版与修复版在此分叉
+  graphql_parser -x graphql_parser: 5 2.1.30 的状态机在文档期望位置读出 mutation 操作类型，返回 true
+  read_only_guard -x read_only_guard: 6 2.1.30 对项目受限部署在解析参数前就抛错，拒绝执行 execute_graphql
+  read_only_guard -->> mcp_server: 7 2.1.28 的只读闸门依据判定器的 false 放行该文档，写操作检查未触发
+  Note over read_only_guard,mcp_server: 分歧点：漏洞版与修复版在此分叉
+  Note over mcp_server,graphql_endpoint: 阶段 effect
+  mcp_server -->> graphql_endpoint: 8 原始 GraphQL 文档带服务器操作员令牌发往 /api/graphql，未做任何项目允许清单校验
+  graphql_endpoint -->> graphql_endpoint: 9 令牌权限范围内、允许清单之外的项目被执行 deleteProject mutation 删除

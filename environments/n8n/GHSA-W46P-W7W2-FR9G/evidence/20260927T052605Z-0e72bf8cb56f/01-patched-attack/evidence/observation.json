@@ -1,0 +1,24 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "attack",
+  "variant": "patched",
+  "source_revision_root": "/lab/app",
+  "mechanism_loaded": true,
+  "filter_tools_for_user_present": true,
+  "resolved_tool_names": [],
+  "resolved_tool_kinds": [],
+  "executor_node_types": [],
+  "executor_credential_ids": [],
+  "executor_node_parameters": [],
+  "node_tool_invoked": false,
+  "node_tool_results": [],
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T052605Z-0e72bf8cb56f",
+    "case_id": "01-patched-attack",
+    "variant": "patched",
+    "scenario": "attack"
+  }
+}

@@ -5,6 +5,9 @@ product = "{{PRODUCT}}"
 title = "TODO: verified vulnerability title"
 lifecycle = "draft"
 agent_specificity = "unclassified"
+# Advisory severity from the authoritative source, normalized to
+# CRITICAL/HIGH/MEDIUM/LOW/NONE. Use "UNKNOWN" when no source publishes one.
+severity = "UNKNOWN"
 advisories = []
 description = "TODO: root cause and trust boundary"
 prerequisites = []

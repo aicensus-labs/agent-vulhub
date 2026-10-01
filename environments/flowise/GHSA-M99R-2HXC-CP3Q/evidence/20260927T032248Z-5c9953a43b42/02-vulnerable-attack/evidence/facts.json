@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T032248Z-5c9953a43b42",
+  "case_id": "02-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "execution_status": "completed",
+  "evidence": [
+    {
+      "path": "observation.json",
+      "sha256": "bb34973b48647ab289f195ad49f2bb447a5f45d8d4242a06460fc0ac91ee4d56"
+    },
+    {
+      "path": "resolved_mcp_config.json",
+      "sha256": "d10bb9fa5c3e9241fce2c70c0bc34304ec78be025c7856371dc449ae760f6ce9"
+    },
+    {
+      "path": "harness_result.json",
+      "sha256": "605622193a1139c201391607db257a4cc2be6611239062531764a3cad6860721"
+    },
+    {
+      "path": "harness_stdout.txt",
+      "sha256": "c615eccc338c35d9c9c6a745166847e079547cd3de12dd1bcc68151e4e53eed5"
+    },
+    {
+      "path": ".ghsa-mcp-child-effect.txt",
+      "sha256": "8a4ff3a4210bf2acdf2998ee6274e658a15750242307de72657a285df63f4fe1"
+    }
+  ]
+}

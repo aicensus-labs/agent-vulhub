@@ -1,0 +1,33 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "benign",
+  "package_version": "2026.4.10",
+  "package_root": "/lab/openclaw",
+  "queue_chunk": "delivery-queue-wYNXw79t.js",
+  "recovery_chunk": "delivery-queue-CI0H9BEM.js",
+  "media_chunk": "deliver-BA26RCnu.js",
+  "load_chunk": "delivery-queue-wYNXw79t.js",
+  "policy_chunk": "deliver-BA26RCnu.js",
+  "queued_id": "45b6ff09-78ea-4d0f-acc9-6de58f156b43",
+  "recovered_deliver_calls": 1,
+  "stored_entry_available": true,
+  "stored_entry_has_session": false,
+  "stored_entry_session_keys": [],
+  "recovered_params_has_session": false,
+  "recovered_params_session_keys": [],
+  "recovered_params_skip_queue": true,
+  "group_policy_present": false,
+  "group_policy_resolved": null,
+  "media_read_file_granted": true,
+  "media_read_bytes_sha256": "00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43",
+  "media_read_error": null,
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T031721Z-4db246bc72d9",
+    "case_id": "02-vulnerable-benign",
+    "variant": "vulnerable",
+    "scenario": "benign"
+  }
+}

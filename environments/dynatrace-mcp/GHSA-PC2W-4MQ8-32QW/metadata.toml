@@ -1,0 +1,118 @@
+schema_version = 1
+id = "dynatrace-mcp/GHSA-PC2W-4MQ8-32QW"
+ghsa = "GHSA-PC2W-4MQ8-32QW"
+product = "dynatrace-mcp"
+title = "@dynatrace-oss/dynatrace-mcp-server's create_dynatrace_notebook missing the human-approval gate"
+lifecycle = "draft"
+agent_specificity = "agent_unique"
+# Advisory severity from the authoritative source, normalized to
+# CRITICAL/HIGH/MEDIUM/LOW/NONE. Use "UNKNOWN" when no source publishes one.
+severity = "LOW"
+advisories = ["https://github.com/advisories/GHSA-pc2w-4mq8-32qw"]
+description = """
+The create_dynatrace_notebook write tool is registered in the MCP server without
+the human-approval gate that every other write-capable tool in the same file
+calls. In v1.8.6 its callback goes straight to createAuthenticatedHttpClient and
+issues POST /platform/document/v1/documents, so a tool call reaches the Dynatrace
+tenant and persists attacker-influenced notebook content without ever asking the
+operator. The trust boundary crossed is the tool argument (name/content) supplied
+by the MCP client/model (which untrusted repository or page content can steer)
+into a write the operator is supposed to authorize. The fix commit
+2851d3ce29d834c93b67f0db903c10e0b488e7ac adds requestHumanApproval() as the first
+statement of the callback plus destructiveHint/idempotentHint, and is released in
+v1.8.7.
+"""
+prerequisites = []
+
+[vulnerable]
+# Tag v1.8.6. The published npm tarball is a single-file CommonJS bundle; its
+# package/index.js registers create_dynatrace_notebook as { readOnlyHint: false }
+# with no approval markers.
+version = "1.8.6"
+source_url = "https://github.com/dynatrace-oss/dynatrace-mcp/releases/tag/v1.8.6"
+commit = "c8e0220b0694fbe246091102061fba57bf058577"
+image = ""
+archive = "dynatrace-mcp-server-1.8.6.tgz"
+
+[patched]
+# Tag v1.8.7, whose src/index.ts is byte-identical to the fix commit
+# 2851d3ce29d834c93b67f0db903c10e0b488e7ac. The npm bundle now contains the
+# requestHumanApproval call and the destructiveHint/idempotentHint annotations.
+version = "1.8.7"
+source_url = "https://github.com/dynatrace-oss/dynatrace-mcp/releases/tag/v1.8.7"
+commit = "3e5bef72603845ba6fde837b3c97347efc347927"
+image = ""
+archive = "dynatrace-mcp-server-1.8.7.tgz"
+
+[build]
+# node:22-bookworm pinned by digest and already present in the local image store
+# (`docker image inspect <ref>` by this exact reference succeeds). Node 22
+# satisfies package.json engines (>= 22.10.0) and the bookworm userland carries
+# python3 for the /lab harness.
+base_image = "node:22-bookworm@sha256:363e1587494626837fa7f9a23bdb453d13b0ff3c67c705c2805cfc69c2d2fad7"
+dockerfile = "Dockerfile"
+# Every artifact a --network none build needs:
+#   * the two pinned upstream npm releases (one per variant), each a self-contained
+#     single-file esbuild bundle: package/index.js carries the whole MCP SDK, the
+#     Dynatrace client and ajv, so no build toolchain is installed;
+#   * the complete locked runtime dependency closure shared by both variants.
+#     package.json declares exactly one runtime dependency, open@^8.4.2; resolved
+#     to open@8.4.2 -> define-lazy-prop@2.0.0, is-docker@2.2.1, is-wsl@2.2.0, and
+#     is-wsl@2.2.0 -> is-docker@^2.0.0 (already satisfied by the hoisted 2.2.1).
+#     Scanning both emitted bundles for non-builtin require() calls finds only
+#     require("open") (the codegen string require("ajv-formats/dist/formats") is
+#     inert template text and ajv itself is inlined), so the closure is four
+#     tarballs.
+# No package manager runs during the build: tarballs are extracted directly to the
+# exact node_modules paths, so no registry access and no lifecycle script can run.
+inputs = [
+  { name = "dynatrace-mcp-server-1.8.6.tgz", url = "https://registry.npmjs.org/@dynatrace-oss/dynatrace-mcp-server/-/dynatrace-mcp-server-1.8.6.tgz", sha256 = "295ae38cc23489ac75f6af48bf74c6197453a277d1928ac1aade5a8dd073b311" },
+  { name = "dynatrace-mcp-server-1.8.7.tgz", url = "https://registry.npmjs.org/@dynatrace-oss/dynatrace-mcp-server/-/dynatrace-mcp-server-1.8.7.tgz", sha256 = "748865895b466538e804a0cea9c52492190dcacb8d19481898c219fef6a1049e" },
+  { name = "open-8.4.2.tgz", url = "https://registry.npmjs.org/open/-/open-8.4.2.tgz", sha256 = "14ae8e9252a9cb799c256aad98ac696f5cb81c2bf023e1a0437f7f8887164c9a" },
+  { name = "define-lazy-prop-2.0.0.tgz", url = "https://registry.npmjs.org/define-lazy-prop/-/define-lazy-prop-2.0.0.tgz", sha256 = "d53db1b311f0dede029a0877231cdbc5abcc8221feb9e95bbd14ed1060dccee6" },
+  { name = "is-docker-2.2.1.tgz", url = "https://registry.npmjs.org/is-docker/-/is-docker-2.2.1.tgz", sha256 = "4816d000f42fb8bbe0eba6ba9a233174e1c8b806e1863ae4121e9bc536eb41ac" },
+  { name = "is-wsl-2.2.0.tgz", url = "https://registry.npmjs.org/is-wsl/-/is-wsl-2.2.0.tgz", sha256 = "8c79cc7a7f393fbdc802a52f9c2cfea9e2d5630584c570e5c10028c252657438" },
+]
+
+[runtime]
+isolation = "container"
+platforms = ["linux/amd64"]
+mode = "oneshot"
+harness = "python3"
+# This host runs several agent-vulhub projects concurrently. Without a declared
+# pool the tool layer derives both the project's /16 block and the /24 inside it
+# from the same project-derived offset, so every project lands on the "diagonal"
+# 10.<N>.<N>.0/24: only 256 distinct subnets exist across all of 10.0.0.0/8, and
+# two case-unique project ids that share a low byte allocate exactly the same
+# subnet. When both are alive at once the second `docker compose up` dies with
+# "invalid pool request: Pool overlaps with other one on this address space".
+# That was observed on run 20260927T062212Z-b35073805993, case 01-patched-benign
+# (project avh-d94db764a4964062bdd1 -> 10.209.209.0/24) while concurrent
+# avh-*_lab networks were being created. Declaring a private /16 off that
+# diagonal makes the selected /24 depend on a second octet, so it no longer
+# coincides with a concurrent fallback project's diagonal subnet.
+network_pool = "10.209.0.0/16"
+exceptions = [
+  { rule = "network.lab.subnet", reason = "The shared host runs concurrent agent-vulhub cases and the tool-layer fallback collapses every project onto one of 256 diagonal 10.<N>.<N>.0/24 subnets, which intermittently makes compose_up fail with an overlapping pool; the environment declares a private network_pool so the runner pins a non-overlapping /24 from it (docs/environment-contract.md)." },
+]
+requires_model = false
+network_requirements = "No network at build time (docker build --network none). At runtime the upstream server is pointed at an in-container loopback mock (DT_ENVIRONMENT https://abc12345... resolved to 127.0.0.1) and an HTTPS_PROXY sink; no external Dynatrace tenant is contacted."
+
+[verification.mechanism]
+status = "passed"
+verified_at = "2026-09-27T06:30:14.233103+00:00"
+evidence = ["evidence/20260927T062841Z-084abbec6a65/report.json"]
+notes = "四场景三轮（12/12）已通过；归档报告 run_id=20260927T062841Z-084abbec6a65，由 staging 验证结果迁移并按当前输入指纹复核。"
+
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
+
+[verification.agent_poc]
+status = "not_run"
+adapter_status = "not_run"
+verified_at = ""
+evidence = []
+notes = "An independently reviewed Agent-PoC Adapter is required before candidate evaluation."

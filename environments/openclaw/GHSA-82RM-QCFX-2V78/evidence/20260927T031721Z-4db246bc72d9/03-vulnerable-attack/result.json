@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T031721Z-4db246bc72d9",
+  "case_id": "03-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+  "round": 3,
+  "project": "avh-e5713a2323754daa9b84",
+  "layer": "mechanism",
+  "source_commit": "44e5b62c27e088128e32e209c146de346c3ea7e6",
+  "image": "sha256:d25ff6bfc4d8e5161943236992a2eb8e4358a687346632273d66dfd2597758dc",
+  "started_at": "2026-09-27T03:18:44.814737+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": "denied group media replay loses the session context and the media read capability actually returns the canary bytes",
+      "actual": "denied group media replay loses the session context, resolves no group policy and the media read capability actually returns the 28-byte canary (sha256=00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43)",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "driver-report.json",
+        "queued-entry.json",
+        "media-read.bin"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-27T03:18:51.263610+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

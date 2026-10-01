@@ -1,0 +1,140 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram grackle/GHSA-F9FF-5X35-7GFW
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# fixture 装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "grackle MCP 工具层 fail-open 授权（跨任务/跨会话 IDOR）"
+summary = "MCP 工具层是 scoped agent 唯一的授权边界：后端 gRPC 处理器只接收请求消息、不校验调用者身份，因此工具层必须自己按父链判定调用者是不是目标任务或会话的祖先。漏洞版 dispatcher 只对 task_start、task_complete、session_attach、session_send_input 做了内联祖先检查，而 task_update、task_delete、task_resume、session_kill 既没有声明式 scope 描述符也没有检查，授权于是 fail open。攻击者只需出示自己那份有效 scoped token 并把 taskId/sessionId 指向自己不是祖先的任务或他人会话，就能永久删除、改写他人任务或终止他人会话；修复版在 dispatcher 中于 handler 之前统一执行 enforceToolScope，非祖先一律抛 PermissionDenied。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（本仓库合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "scoped_agent"
+label = "scoped agent 调用方"
+kind = "actor"
+trust = "attacker_controlled"
+role = "持有一份由平台签发、绑定自己 task/workspace/persona 的 scoped token。它实际能控制的只有这次 MCP 工具调用的工具名与 taskId/sessionId 参数，以及是否出示这份 token；签名密钥不在它手里。"
+
+[[entities]]
+id = "mcp_tool_layer"
+label = "MCP 工具层"
+kind = "service"
+trust = "trusted"
+role = "dispatcher 用服务器 API key 校验 scoped token，解析出调用者的 taskId、workspaceId、personaId，再按 persona 预设决定这次工具调用是否可见。后端 handler 不接收调用者身份，所以父链祖先断言是保护他人任务与会话的唯一检查；漏洞版只把它写在 task_start、task_complete、session_attach、session_send_input 里，task_update、task_delete、task_resume、session_kill 没有。"
+
+[[entities]]
+id = "grpc_backend"
+label = "gRPC 后端处理器"
+kind = "service"
+trust = "trusted"
+synthetic = true
+role = "只接收请求消息、没有 AuthContext，直接执行 deleteTask、updateTask、killAgent 等变更。本环境用内存替身扮演它，替身只按参数改写内存里的任务与会话记录并逐条记录收到的 RPC，不参与任何授权判断，也不替换被验证的工具层代码。"
+
+[[entities]]
+id = "victim_task"
+label = "他人任务记录"
+kind = "store"
+trust = "trusted"
+role = "调用者不是其祖先的任务：同级任务、人类父任务以及跨 workspace 的任务。它们会被永久删除，或被改写状态、依赖与预算。"
+
+[[entities]]
+id = "victim_session"
+label = "他人会话"
+kind = "store"
+trust = "trusted"
+role = "他人 agent 的会话记录。拿到会话 ID 后可以被跨会话 SIGKILL，或对陌生会话执行 resume。"
+
+[[entities]]
+id = "mutation_effect"
+label = "越权变更落地"
+kind = "sink"
+trust = "trusted"
+synthetic = true
+role = "漏洞触发后效果最终落到的地方：他人任务消失或状态被改写、他人会话被终止，调用者收到成功响应。这里承载的是受控的无害效果，不针对真实外部目标。"
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["scoped_agent"]
+note = "攻击者只有自己那份有效 scoped 身份和这次调用的参数；它不能伪造 token 签名，也不能直接读写后端的任务与会话存储。"
+
+[[boundaries]]
+id = "product_side"
+label = "受影响的工具层与它保护的存储"
+members = ["mcp_tool_layer", "grpc_backend", "victim_task", "victim_session", "mutation_effect"]
+note = "正常情况下 MCP 工具层要按父链判定调用者是不是目标的祖先，后端不做二次鉴权，所以这道检查是保护他人任务与会话的唯一屏障。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。至少一步 diverges = true 表示漏洞版与修复版
+# 的分叉点，且该步 variant 不能是 both。
+[[steps]]
+n = 1
+phase = "setup"
+from = "scoped_agent"
+to = "mcp_tool_layer"
+action = "攻击者用自己那份有效 scoped token 发起 MCP 工具调用，把 task_delete、task_update、session_kill 的目标 ID 指向自己不是祖先的任务或他人会话"
+variant = "both"
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 2
+phase = "setup"
+from = "mcp_tool_layer"
+to = "mcp_tool_layer"
+action = "dispatcher 校验 token 签名与有效期，解析出调用者的 taskId、workspaceId、personaId，并按 persona 预设放行这个工具"
+variant = "both"
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "mcp_tool_layer"
+to = "mcp_tool_layer"
+action = "漏洞版 dispatcher 只对 task_show 做 workspace 门、只对 task_start/task_complete/session_attach/session_send_input 做内联祖先检查；该工具既没有声明式 scope 描述符也没有检查，授权被跳过后 handler 直接执行"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "mcp_tool_layer"
+to = "mcp_tool_layer"
+action = "修复版 dispatcher 在 Zod 校验与 handler 之前执行 enforceToolScope：读取工具声明式 scope，沿 getTask 父链断言调用者是目标任务或会话所属任务的祖先，否则抛 PermissionDenied"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 5
+phase = "effect"
+from = "mcp_tool_layer"
+to = "grpc_backend"
+action = "handler 把调用者给的 taskId/sessionId 原样转发给后端 RPC"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 6
+phase = "effect"
+from = "grpc_backend"
+to = "victim_task"
+action = "deleteTask 永久删除该任务记录，task_update 改写它的标题、状态、依赖或预算"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 7
+phase = "effect"
+from = "grpc_backend"
+to = "victim_session"
+action = "killAgent 终止他人的 agent 会话"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 8
+phase = "effect"
+from = "grpc_backend"
+to = "mutation_effect"
+action = "越权变更落地：他人任务消失或被改写、他人会话被终止，调用者收到成功响应"
+variant = "vulnerable_only"

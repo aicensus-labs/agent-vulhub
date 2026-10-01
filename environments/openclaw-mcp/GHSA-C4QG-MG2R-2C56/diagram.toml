@@ -1,0 +1,144 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram openclaw-mcp/GHSA-C4QG-MG2R-2C56
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# fixture 装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "openclaw-mcp / GHSA-C4QG-MG2R-2C56 跨连接异步任务泄露"
+summary = "HTTP 模式下同一个 openclaw-mcp 进程同时服务多条 MCP 连接，异步任务表却是进程级单例，任务工具只按 task_id 取值，从不校验任务属于哪条连接。于是连接 B 可以在自己的会话里枚举并读取连接 A 的任务，拿到 A 的输入所产生的回复内容，甚至可以取消 A 尚未开始的任务。1.7.0 为每条连接生成 ownerId，get/list/cancel/stats 全部按归属过滤，他人的任务与不存在的 ID 返回同一个结果，B 再也观察不到 A 的任务。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "client_a"
+label = "客户端 A（异步任务拥有者）"
+kind = "client"
+trust = "semi_trusted"
+role = "在自己的 MCP 连接上调用 openclaw_chat_async 排队一个异步聊天任务；它的任务输入与结果只应属于这条连接，是攻击者想要却拿不到的数据。"
+source = "fixtures/benign.json"
+
+[[entities]]
+id = "client_b"
+label = "客户端 B（攻击者控制的连接）"
+kind = "client"
+trust = "attacker_controlled"
+role = "合法但不同的另一条 MCP 连接；只能选择自己连接上的工具名与参数（task_id、列表过滤条件），用 openclaw_task_list 枚举任务、用 openclaw_task_status 读取他人的任务。"
+source = "fixtures/attack.json"
+
+[[entities]]
+id = "mcp_server"
+label = "openclaw-mcp HTTP 服务进程"
+kind = "service"
+trust = "trusted"
+role = "HTTP 模式下为每条连接调用一次 createMcpServer() 并注册同一套异步任务工具；任务表的归属校验本该在这一层把连接隔开。"
+source = "https://github.com/freema/openclaw-mcp/blob/1.6.0/src/server/tools-registration.ts"
+
+[[entities]]
+id = "task_tools"
+label = "异步任务工具处理器"
+kind = "tool"
+trust = "trusted"
+role = "openclaw_chat_async / openclaw_task_status / openclaw_task_list / openclaw_task_cancel 的处理器；漏洞版只把 task_id 交给任务表，既不传也不比对该连接的身份。"
+source = "https://github.com/freema/openclaw-mcp/blob/1.6.0/src/mcp/tools/tasks.ts"
+
+[[entities]]
+id = "task_store"
+label = "进程级异步任务表"
+kind = "store"
+trust = "trusted"
+role = "进程共享的 Map，保存每个任务的输入、状态与结果；漏洞版按 task_id 直接取值，修复版按创建该任务的 ownerId 作用域。"
+source = "https://github.com/freema/openclaw-mcp/blob/1.6.0/src/mcp/tasks/manager.ts"
+
+[[entities]]
+id = "gateway"
+label = "OpenClaw 实例接口"
+kind = "service"
+trust = "semi_trusted"
+role = "环境前提：异步聊天任务的后台处理器向它发请求取回回复，回复被写进任务表，是泄露内容的最初来源。图中它是受控替身，不是真实外部目标。"
+static = true
+synthetic = true
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "victim_connection"
+label = "受害连接 A"
+members = ["client_a"]
+note = "A 的任务输入与结果属于 A 自己。B 通过自己的连接不应看到或改动它们。"
+
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["client_b"]
+note = "B 只能控制自己连接上的工具名与参数，不能直接读写服务进程的内存，因此必须借道异步任务工具。"
+
+[[boundaries]]
+id = "server_process"
+label = "受影响的 openclaw-mcp 服务进程"
+members = ["mcp_server", "task_tools", "task_store"]
+note = "HTTP 模式下这一个进程同时服务多条连接，任务表是进程级单例；连接之间的隔离必须由工具处理器的归属校验提供，漏洞版没有提供。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。至少一步 diverges = true 表示漏洞版与修复版
+# 的分叉点，且该步 variant 不能是 both。
+[[steps]]
+n = 1
+phase = "setup"
+from = "client_a"
+to = "mcp_server"
+action = "连接 A 调用 openclaw_chat_async 排队一个异步聊天任务"
+variant = "both"
+
+[[steps]]
+n = 2
+phase = "setup"
+from = "mcp_server"
+to = "task_store"
+action = "后台处理器把 A 的输入和它取回的回复写进进程级任务表"
+variant = "both"
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "client_b"
+to = "mcp_server"
+action = "连接 B 调用 openclaw_task_list 枚举任务，再用 A 的 task_id 调用 openclaw_task_status"
+variant = "both"
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "mcp_server"
+to = "task_tools"
+action = "服务把这次调用分发给异步任务工具处理器"
+variant = "both"
+
+[[steps]]
+n = 5
+phase = "trigger"
+from = "task_tools"
+to = "task_store"
+action = "漏洞版只按 task_id 取值，不校验任务属于哪条连接"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 6
+phase = "trigger"
+from = "task_tools"
+to = "task_store"
+action = "修复版带上本连接的 ownerId 查找，他人的任务与不存在的 ID 同样落空"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 7
+phase = "effect"
+from = "task_tools"
+to = "client_b"
+action = "连接 B 收到 A 的任务结果，跨连接数据泄露"
+variant = "vulnerable_only"
+evidence = "fixtures/attack.json"

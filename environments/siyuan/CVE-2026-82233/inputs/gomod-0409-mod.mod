@@ -1,0 +1,25 @@
+module github.com/gopherjs/gopherjs
+
+go 1.21
+
+require (
+	github.com/evanw/esbuild v0.25.4
+	github.com/fsnotify/fsnotify v1.5.1
+	github.com/google/go-cmp v0.6.0
+	github.com/msvitok77/goembed v0.3.5
+	github.com/neelance/astrewrite v0.0.0-20160511093645-99348263ae86
+	github.com/neelance/sourcemap v0.0.0-20200213170602-2833bce08e4c
+	github.com/shurcooL/go v0.0.0-20200502201357-93f07166e636
+	github.com/sirupsen/logrus v1.8.3
+	github.com/spf13/cobra v1.9.1
+	github.com/spf13/pflag v1.0.6
+	golang.org/x/sync v0.8.0
+	golang.org/x/sys v0.23.0
+	golang.org/x/term v0.0.0-20220411215600-e5f449aeb171
+	golang.org/x/tools v0.24.0
+)
+
+require (
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	golang.org/x/mod v0.20.0 // indirect
+)

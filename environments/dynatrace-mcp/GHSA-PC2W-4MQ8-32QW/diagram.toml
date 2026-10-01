@@ -1,0 +1,119 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram dynatrace-mcp/GHSA-PC2W-4MQ8-32QW
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+schema_version = 1
+title = "dynatrace-mcp / GHSA-PC2W-4MQ8-32QW 漏洞图解"
+summary = "create_dynatrace_notebook 是六个写类工具里唯一没有调用 requestHumanApproval 的一个：vulnerable 版的 callback 第一行就用最宽写作用域建立 HTTP 客户端并写入文档，绕过了人工批准这道边界。修复版在 callback 开头先调用批准门，未获明确同意就 fail-closed 返回取消，不再发出文档写入请求。漏洞本身的效果是：调用方无需任何人工同意即可把攻击者可控的 content（含 DQL 段）持久化为租户文档，该 DQL 之后会以打开 notebook 的用户身份执行。"
+
+[[entities]]
+id = "attacker"
+label = "攻击者 / 攻击材料"
+kind = "actor"
+trust = "attacker_controlled"
+source = "fixtures/attack_tool_call.json"
+role = "构造并发出 tools/call 请求的调用方。它只能控制 create_dynatrace_notebook 的 name、description 和 content，没有租户凭据，也无法替操作者给出人工批准。"
+
+[[entities]]
+id = "mcp_server"
+label = "MCP server"
+kind = "service"
+trust = "trusted"
+source = "https://raw.githubusercontent.com/dynatrace-oss/dynatrace-mcp/v1.8.6/src/index.ts"
+role = "受影响的上游组件：启动时不做鉴权，把六个写类工具注册给任意调用方，而 create_dynatrace_notebook 的注册处漏接了其余五个写工具都有的人工批准调用。"
+
+[[entities]]
+id = "notebook_tool"
+label = "create_dynatrace_notebook 写工具"
+kind = "tool"
+trust = "trusted"
+source = "https://raw.githubusercontent.com/dynatrace-oss/dynatrace-mcp/v1.8.6/src/index.ts"
+role = "被调用的工具 callback。vulnerable 版只声明 readOnlyHint，第一行就建立最宽写作用域的客户端并创建文档；patched 版在建立客户端之前先请求人工批准。"
+
+[[entities]]
+id = "approval_gate"
+label = "requestHumanApproval 人工批准门"
+kind = "tool"
+trust = "trusted"
+source = "https://raw.githubusercontent.com/dynatrace-oss/dynatrace-mcp/2851d3ce29d834c93b67f0db903c10e0b488e7ac/src/index.ts"
+role = "通过 MCP elicitation 向操作者征求同意的批准门。只有 accept 且 approval 为 true 才放行；拒绝、取消或 elicitation 出错时一律返回 false。"
+
+[[entities]]
+id = "operator"
+label = "操作者的 MCP 客户端"
+kind = "client"
+trust = "trusted"
+role = "操作者一侧的调用方。批准门把待批准的操作发给它，只有它明确同意，写工具的持久化副作用才被允许。"
+
+[[entities]]
+id = "document_api"
+label = "文档写入端点"
+kind = "sink"
+trust = "trusted"
+synthetic = true
+source = "fixtures/mock_document_response.json"
+role = "租户的文档写入端点 POST /platform/document/v1/documents。notebook 内容在这里被持久化，之后对打开它的租户用户可见；嵌入的 DQL 段会以打开者的身份执行。"
+
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["attacker"]
+note = "攻击者只能控制这一次 tools/call 的参数，既拿不到租户凭据，也无法代替操作者批准。"
+
+[[boundaries]]
+id = "tenant_side"
+label = "租户侧写工具与人工批准边界"
+members = ["mcp_server", "notebook_tool", "approval_gate", "operator", "document_api"]
+note = "写类工具本应在产生持久化副作用之前取得操作者的明确同意，人工批准门就是这道边界；vulnerable 版的 notebook 工具没有经过它。"
+
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker"
+to = "mcp_server"
+action = "一次 tools/call 把攻击者可控的 name、description 和 content 交给 create_dynatrace_notebook，content 里带 DQL 段"
+variant = "both"
+evidence = "fixtures/attack_tool_call.json"
+
+[[steps]]
+n = 2
+phase = "trigger"
+from = "mcp_server"
+to = "notebook_tool"
+action = "漏洞版把请求直接交给 callback，callback 第一行就用最宽写作用域建立文档客户端"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "notebook_tool"
+to = "approval_gate"
+action = "修复版在产生任何副作用之前先调用人工批准门"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "approval_gate"
+to = "operator"
+action = "批准门通过 MCP elicitation 询问操作者，没有明确同意就返回拒绝"
+variant = "patched_only"
+
+[[steps]]
+n = 5
+phase = "effect"
+from = "notebook_tool"
+to = "document_api"
+action = "漏洞版发出 multipart 文档写入请求，把攻击者内容持久化为 notebook"
+variant = "vulnerable_only"
+evidence = "fixtures/attack_tool_call.json"
+
+[[steps]]
+n = 6
+phase = "effect"
+from = "notebook_tool"
+to = "attacker"
+action = "修复版返回 Operation cancelled，未获批准时不发出任何文档写入请求"
+variant = "patched_only"

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "description": "Attacker-controlled registration of one catalog MCP server plus an access-control rule that grants it only to a different user. A basic-group authenticated user who is not a subject of that rule then connects to the server.",
+  "opens": "The gateway endpoint /mcp-connect/{mcp_id} is routed to the MCP gateway proxy, and the MCP server is registered in catalog-a.",
+  "users": {
+    "attacker": {
+      "name": "attacker",
+      "uid": "attacker-uid",
+      "groups": ["basic", "authenticated"]
+    },
+    "authorized": {
+      "name": "authorized-user",
+      "uid": "authorized-uid",
+      "groups": ["basic", "authenticated"]
+    }
+  },
+  "mcp_servers": [
+    {
+      "name": "ms1catalog",
+      "namespace": "default",
+      "mcp_catalog_id": "catalog-a",
+      "user_id": "owner-uid"
+    }
+  ],
+  "access_control_rules": [
+    {
+      "name": "acr1catalog",
+      "namespace": "default",
+      "mcp_catalog_id": "catalog-a",
+      "subjects": [{"type": "user", "id": "authorized-uid"}],
+      "resources": [{"type": "mcpServer", "id": "ms1catalog"}]
+    }
+  ],
+  "cases": [
+    {
+      "id": "authorized_user_reaches_catalog_server",
+      "path": "/mcp-connect/ms1catalog",
+      "method": "GET",
+      "user": "authorized",
+      "expected_allowed": true
+    },
+    {
+      "id": "unprivileged_user_reaches_catalog_server",
+      "path": "/mcp-connect/ms1catalog",
+      "method": "GET",
+      "user": "attacker",
+      "expected_allowed": false
+    }
+  ]
+}

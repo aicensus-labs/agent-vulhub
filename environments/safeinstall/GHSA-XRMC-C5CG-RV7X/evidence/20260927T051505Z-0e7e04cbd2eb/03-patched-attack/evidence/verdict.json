@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T051505Z-0e7e04cbd2eb",
+  "case_id": "03-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "patched_effect_blocked",
+      "passed": true,
+      "expected": "SafeInstall 0.10.2 returns an install, runner or unanalyzable finding for every crafted command, so none of the 0.10.1 bypasses survives",
+      "actual": "0 manager invocations still classified as no_finding; 20 previously missed commands now produce a finding; 1/1 path-qualified rewrites normalized; 17/17 install findings rewritten through safeinstall; 0 entries disagree with the declared 0.10.2 expectation",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "guard-analysis.json"
+      ]
+    }
+  ]
+}

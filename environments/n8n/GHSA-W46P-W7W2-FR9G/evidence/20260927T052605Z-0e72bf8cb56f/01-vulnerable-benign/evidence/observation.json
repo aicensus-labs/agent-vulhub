@@ -1,0 +1,47 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "benign",
+  "variant": "vulnerable",
+  "source_revision_root": "/lab/app",
+  "mechanism_loaded": true,
+  "filter_tools_for_user_present": false,
+  "resolved_tool_names": [
+    "fetch_status"
+  ],
+  "resolved_tool_kinds": [
+    "node"
+  ],
+  "executor_node_types": [
+    "n8n-nodes-base.httpRequestTool"
+  ],
+  "executor_credential_ids": [
+    "cred-api"
+  ],
+  "executor_node_parameters": [
+    {
+      "url": "http://127.0.0.1:5678/healthz"
+    }
+  ],
+  "node_tool_invoked": true,
+  "node_tool_results": [
+    {
+      "status": "success",
+      "data": [
+        {
+          "json": {
+            "marker": "AVH-N8N-W46P-BENIGN"
+          }
+        }
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T052605Z-0e72bf8cb56f",
+    "case_id": "01-vulnerable-benign",
+    "variant": "vulnerable",
+    "scenario": "benign"
+  }
+}

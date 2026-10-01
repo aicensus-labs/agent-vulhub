@@ -1,0 +1,41 @@
+%% utcp-http 重定向 SSRF：工具调用跟随未校验的 Location — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["攻击者侧"]
+    attacker["攻击者可控的工具端点<br/>actor · attacker_controlled"]
+  end
+  subgraph utcp_host["运行 UTCP 的调用方进程"]
+    caller["UTCP 调用方<br/>client · semi_trusted"]
+    utcp_http["utcp-http 协议插件<br/>service · trusted"]
+  end
+  subgraph internal_net["内网受保护服务"]
+    internal_service["内网 HTTP 服务<br/>⚠ service · trusted"]
+    protected_data["内网受保护数据（IAM 凭证）<br/>store · trusted"]
+  end
+  attacker -->|"1"| caller
+  caller -->|"2"| utcp_http
+  utcp_http -->|"3"| utcp_http
+  utcp_http -->|"4"| attacker
+  attacker -->|"5"| utcp_http
+  utcp_http -.->|"6"| utcp_http
+  utcp_http -.->|"7"| utcp_http
+  utcp_http -.->|"8"| internal_service
+  internal_service -.->|"9"| utcp_http
+  utcp_http -.->|"10"| caller
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class attacker actor
+  class caller client
+  class utcp_http service
+  class internal_service service
+  class internal_service synthetic
+  class protected_data store
+  style attacker_side fill:transparent
+  style utcp_host fill:transparent
+  style internal_net fill:transparent
+  linkStyle 5 stroke:#c0392b,stroke-width:2px
+  linkStyle 6 stroke:#2e7d32,stroke-width:2px

@@ -1,0 +1,21 @@
+{
+  "blocks": [
+    {
+      "type": "audio",
+      "source": {
+        "type": "base64",
+        "media_type": "audio/mpeg",
+        "data": "QVZILVNZTlRIRVRJQy1BVURJTy1NQVJLRVIgdm9pY2UtbWVtbwpHSFNBLUdGRzktNTM1Ny1IVjRDIGxvY2FsIGF1ZGlvIGZpbGUgdGhhdCBsaXZlcyBPVVRTSURFIHRoZSBhbGxvd2VkIG1lZGlhIHJvb3QKVGhlIHZ1bG5lcmFibGUgd2ViY2hhdCBhdWRpbyBlbWJlZGRpbmcgcGF0aCBlbWJlZHMgdGhlc2UgYnl0ZXMgYXMgYmFzZTY0Lgo="
+      }
+    },
+    {
+      "type": "audio",
+      "source": {
+        "type": "base64",
+        "media_type": "audio/mpeg",
+        "data": "QVZILVNZTlRIRVRJQy1BVURJTy1NQVJLRVIgbWVldGluZy1ub3RlcwpHSFNBLUdGRzktNTM1Ny1IVjRDIHNlY29uZCBvdXQtb2Ytcm9vdCB0YXJnZXQsIHJlZmVyZW5jZWQgdGhyb3VnaCBhIGZpbGU6IFVSTAppbnN0ZWFkIG9mIGEgcGxhaW4gYWJzb2x1dGUgcGF0aC4K"
+      }
+    }
+  ],
+  "denied_local_audio_access": []
+}

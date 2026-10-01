@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T052605Z-0e72bf8cb56f",
+  "case_id": "01-vulnerable-benign",
+  "variant": "vulnerable",
+  "scenario": "benign",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "a user holding workflow:execute and credential:read still runs Fetch Status as n8n-nodes-base.httpRequestTool with cred-api and gets the AVH-N8N-W46P-BENIGN canary",
+      "actual": {
+        "executor_node_types": [
+          "n8n-nodes-base.httpRequestTool"
+        ],
+        "executor_credential_ids": [
+          "cred-api"
+        ],
+        "resolved_tool_names": [
+          "fetch_status"
+        ],
+        "filter_tools_for_user_present": false,
+        "filter_tools_for_user_kept": null,
+        "tool_invocations": [
+          "fetch_status"
+        ],
+        "result_markers": [
+          "AVH-N8N-W46P-BENIGN"
+        ],
+        "summary_matches_raw": true,
+        "summary_executor_node_types": [
+          "n8n-nodes-base.httpRequestTool"
+        ],
+        "raw_executor_node_types": [
+          "n8n-nodes-base.httpRequestTool"
+        ],
+        "summary_resolved_tool_names": [
+          "fetch_status"
+        ],
+        "raw_resolved_tool_names": [
+          "fetch_status"
+        ],
+        "summary_credential_ids": [
+          "cred-api"
+        ],
+        "raw_credential_ids": [
+          "cred-api"
+        ]
+      },
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "effect.json",
+        "harness-observation.json"
+      ]
+    }
+  ]
+}

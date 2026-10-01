@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260930T033228Z-1e7771c16fc5",
+    "case_id": "01-vulnerable-attack",
+    "variant": "vulnerable",
+    "scenario": "attack"
+  },
+  "target_ready": true,
+  "configured_project": true,
+  "daemon_base_url": "http://127.0.0.1:44089/agent-device",
+  "return_code": 0,
+  "stdout_tail": "{\n  \"success\": true,\n  \"data\": {\n    \"devices\": []\n  }\n}\n",
+  "stderr_tail": "",
+  "observations": [
+    {
+      "method": "GET",
+      "url": "/agent-device/health",
+      "authorization": "Bearer poc-secret-token",
+      "x_agent_device_token": "poc-secret-token",
+      "body": ""
+    },
+    {
+      "method": "POST",
+      "url": "/agent-device/rpc",
+      "authorization": "Bearer poc-secret-token",
+      "x_agent_device_token": "poc-secret-token",
+      "body": "{\"jsonrpc\":\"2.0\",\"id\":\"32811c37dae40d4f\",\"method\":\"agent_device.command\",\"params\":{\"session\":\"default\",\"command\":\"devices\",\"positionals\":[],\"flags\":{\"stateDir\":\"/lab/results/state\",\"daemonBaseUrl\":\"http://127.0.0.1:44089/agent-device\",\"daemonAuthToken\":\"poc-secret-token\",\"verbose\":false},\"meta\":{\"requestId\":\"32811c37dae40d4f\",\"cwd\":\"/lab/results/project\",\"sessionExplicit\":false,\"debug\":false},\"token\":\"poc-secret-token\"}}"
+    }
+  ]
+}

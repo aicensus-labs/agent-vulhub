@@ -1,0 +1,14 @@
+%% openclaw / GHSA-GFG9-5357-HV4C 漏洞图解 — generated from diagram.toml
+sequenceDiagram
+  actor attacker as 提示注入攻击者
+  participant gateway as OpenClaw gateway webchat 音频嵌入路径
+  participant local_audio as 允许根目录之外的本地音频文件
+  participant webchat_response as webchat 媒体响应
+  Note over attacker,gateway: 阶段 setup
+  attacker ->> gateway: 1 被注入的工具回复把 mediaUrl 设为允许的本地媒体根之外的绝对音频路径
+  Note over gateway,local_audio: 阶段 trigger
+  gateway -->> local_audio: 2 漏洞版只校验扩展名和文件大小，直接读取允许根目录之外的本地音频文件
+  Note over gateway,local_audio: 分歧点：漏洞版与修复版在此分叉
+  gateway -x gateway: 3 修复版在读取之前调用 assertLocalMediaAllowed，判定路径不在允许根目录内并拒绝
+  Note over gateway,webchat_response: 阶段 effect
+  gateway -->> webchat_response: 4 文件内容被 base64 编码成音频块写进 webchat 媒体响应

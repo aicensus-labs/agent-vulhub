@@ -6,7 +6,7 @@
 - Keep changes inside the selected environment unless the task explicitly concerns shared tooling.
 - Do not execute repository-provided PoCs or start containers merely to inspect or index an environment.
 - Do not read real host credentials into fixtures or evidence. Use synthetic markers and locally controlled receivers.
-- Pin source revisions and record image digests before declaring an environment ready.
+- Pin source revisions and every build input (URL + SHA256, base image digest) before declaring an environment ready. Publishing images is optional per ADR-0004; when published, both variants must pin an image digest.
 - Keep mechanism and end-to-end results separate. A simulated model is not proof of prompt injection success.
 - Do not claim a successful reproduction from process exit status alone. Check vulnerable, patched and benign controls.
 - Default CI is static and must not run vulnerable services, install vulnerable dependencies, or call model APIs.

@@ -1,0 +1,51 @@
+{
+  "scenario": "benign",
+  "description": "The owner of the workflow completes the same OAuth 2.1 consent and token flow against their own protected MCP Server Trigger resource.",
+  "users": [
+    {
+      "id": "user-owner-9f21",
+      "name": "Workflow Owner",
+      "role": "global:owner"
+    },
+    {
+      "id": "user-member-4c77",
+      "name": "Member Caller",
+      "role": "global:member"
+    }
+  ],
+  "resource": {
+    "workflow_id": "wf-victim-7b3d",
+    "workflow_name": "Billing MCP Server",
+    "workflow_owner": "user-owner-9f21",
+    "url": "http://127.0.0.1:5678/mcp/victim-mcp-path",
+    "webhook_path": "victim-mcp-path",
+    "node_name": "MCP Server Trigger",
+    "authentication": "n8nOAuth2"
+  },
+  "access": [
+    {
+      "user": "user-owner-9f21",
+      "workflow": "wf-victim-7b3d",
+      "scope": "workflow:execute",
+      "granted": true,
+      "source": "project ownership"
+    },
+    {
+      "user": "user-member-4c77",
+      "workflow": "wf-victim-7b3d",
+      "scope": "workflow:execute",
+      "granted": false,
+      "source": "no project or workflow role"
+    }
+  ],
+  "subject": {
+    "id": "user-owner-9f21"
+  },
+  "attacker": {
+    "id": "user-owner-9f21"
+  },
+  "expected": {
+    "vulnerable_effect": "owner token accepted for the owner's own resource",
+    "patched_effect": "owner token still accepted, proving the fix is not a blanket denial"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "decode_error": "",
+  "decoded_groups": [
+    "owner",
+    "admin",
+    "power-user-plus",
+    "power-user",
+    "basic",
+    "authenticated"
+  ],
+  "persistent_source_sha256": "84f8f7fc68deba99cd0a8716b671d65e5ddbeb2e566e37febf173a95d7ad3da7",
+  "raw_user_groups_claim": "owner,admin,power-user-plus,power-user,basic,authenticated",
+  "requested_audience": "https://obot.example.com",
+  "scenario": "benign",
+  "server_url": "https://obot.example.com",
+  "source_revision": "patched",
+  "token_issued": true,
+  "variant": "patched"
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T043058Z-d574d83ea3d2",
+  "case_id": "03-patched-benign",
+  "variant": "patched",
+  "scenario": "benign",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "benign reply still embeds the single in-root audio file (marker 'AVH-SYNTHETIC-AUDIO-MARKER greeting') with no denial",
+      "actual": "{\"allowed_local_roots\": [\"/tmp/openclaw-media-root\"], \"audio_content_blocks\": 1, \"denied_local_audio_access\": [], \"evidence_block_count\": 1, \"evidence_is_exact_fixture_bytes\": true, \"evidence_markers\": [], \"evidence_payload_count\": 1, \"expected_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"materialized_paths\": [\"/tmp/openclaw-media-root/greeting.mp3\"], \"media_types\": [\"audio/mpeg\"], \"scenario\": \"benign\", \"upstream_calls_containment_check\": true, \"upstream_module_sha256\": \"051b717f91b8976ff4f1da062ce0c4970fcaab734378fc519da47318b996b1e1\", \"variant\": \"patched\"}",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "media_blocks.json",
+        "embedded_audio_base64.txt"
+      ]
+    }
+  ]
+}

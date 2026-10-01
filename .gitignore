@@ -6,6 +6,9 @@ __pycache__/
 !.env.example
 results/
 artifacts/
+staging/
+/.buildx-cfg/
+/StartupProfileData-NonInteractive
 *.log
 .DS_Store
 .cache/

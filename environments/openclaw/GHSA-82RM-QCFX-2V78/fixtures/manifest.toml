@@ -1,0 +1,7 @@
+schema_version = 1
+
+# Keys are paths relative to fixtures/. Include attack AND benign inputs.
+[files]
+"attack.json" = "b15799479ff74527b83411ecfeb6ecb9280689248f42cd8f489651cd79bb3ee9"
+"benign.json" = "0db02d948e17dfb6fccf53dd04f29173ddb1ad05dd71b49699dfae99e6e4ee3b"
+"canary-media.txt" = "00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43"

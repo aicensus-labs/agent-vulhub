@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "variant": "vulnerable",
+  "complete": true,
+  "module": {
+    "path": "/lab/upstream/vulnerable/utils/graphql-query.ts",
+    "sha256": "0ee49475446ca2eb4add393eca0014ad04e526281bd3d3171c538f04729e47e7",
+    "export": "graphqlQueryContainsWriteOperation"
+  },
+  "results": {
+    "queries": {
+      "leading_comma_mutation": false,
+      "comment_then_comma_mutation": false,
+      "trailing_comma_subscription": false,
+      "plain_mutation": true
+    },
+    "structure": {
+      "execute_graphql_branch_sha256": "f7f1ba951ae5e1bbd83fc3a802c02aee791fe8914dfdf9edbc82b99073963959",
+      "read_only_guard_present": true,
+      "project_scope_guard_present": false,
+      "scope_guard_definition_sha256": "0a70ef44c63f73cd705d8a9124b6c34ee15fe6b625ddf8ce395bef93529ba9f8"
+    }
+  }
+}

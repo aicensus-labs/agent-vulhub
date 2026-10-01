@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T054236Z-91f4d746b674",
+  "case_id": "01-patched-benign",
+  "variant": "patched",
+  "scenario": "benign",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "the first-party loopback token endpoint completes the OAuth2 flow and the tool call returns its payload without touching the attacker endpoint",
+      "actual": "loopback token endpoint served 1 credential POST(s) and the tool call returned {\"report_id\": \"avh-synthetic-report-0001\", \"status\": \"ok\"}",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "effect.json"
+      ]
+    }
+  ]
+}

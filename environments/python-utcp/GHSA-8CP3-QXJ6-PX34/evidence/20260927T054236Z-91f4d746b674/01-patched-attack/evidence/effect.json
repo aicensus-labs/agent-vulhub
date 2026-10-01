@@ -1,0 +1,46 @@
+{
+  "attacker_authority": "10.61.61.2:44477",
+  "attacker_token_requests": [],
+  "benign_task_completed": false,
+  "credentials_exfiltrated": false,
+  "expected_benign_payload": {
+    "report_id": "avh-synthetic-report-0001",
+    "status": "ok"
+  },
+  "expected_credentials": {
+    "client_id": "avh-synthetic-client-id",
+    "client_secret": "avh-synthetic-client-secret"
+  },
+  "listener_requests": [
+    {
+      "body": {},
+      "host": "127.0.0.1:44477",
+      "method": "GET",
+      "path": "/openapi.json"
+    }
+  ],
+  "outcome": {
+    "conversion_error": "Unexpected error discovering tools from HTTP provider 'partner_api': Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/http_communication_protocol.py\", line 202, in register_manual\n    utcp_manual = converter.convert()\n                  ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/openapi_converter.py\", line 189, in convert\n    tool = self._create_tool(path, method, operation, base_url)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/openapi_converter.py\", line 427, in _create_tool\n    auth = self._extract_auth(operation)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/openapi_converter.py\", line 221, in _extract_auth\n    openapi_auth = self._create_auth_from_scheme(scheme, scheme_name)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/openapi_converter.py\", line 379, in _create_auth_from_scheme\n    ensure_secure_url(\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/_security.py\", line 108, in ensure_secure_url\n    raise ValueError(\nValueError: Security error during OAuth2 tokenUrl in OpenAPI spec: URL must use HTTPS or be a literal loopback address (localhost / 127.0.0.1 / ::1). Got: 'http://10.61.61.2:44477/token'. Plain HTTP to any other host is rejected to prevent MITM attacks and SSRF into internal services.\n",
+    "manual_token_url": null,
+    "registration_errors": [
+      "Unexpected error discovering tools from HTTP provider 'partner_api': Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/http_communication_protocol.py\", line 202, in register_manual\n    utcp_manual = converter.convert()\n                  ^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/openapi_converter.py\", line 189, in convert\n    tool = self._create_tool(path, method, operation, base_url)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/openapi_converter.py\", line 427, in _create_tool\n    auth = self._extract_auth(operation)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/openapi_converter.py\", line 221, in _extract_auth\n    openapi_auth = self._create_auth_from_scheme(scheme, scheme_name)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/openapi_converter.py\", line 379, in _create_auth_from_scheme\n    ensure_secure_url(\n  File \"/usr/local/lib/python3.11/site-packages/utcp_http/_security.py\", line 108, in ensure_secure_url\n    raise ValueError(\nValueError: Security error during OAuth2 tokenUrl in OpenAPI spec: URL must use HTTPS or be a literal loopback address (localhost / 127.0.0.1 / ::1). Got: 'http://10.61.61.2:44477/token'. Plain HTTP to any other host is rejected to prevent MITM attacks and SSRF into internal services.\n"
+    ],
+    "registration_succeeded": false,
+    "runtime_token_check": {
+      "blocked": true,
+      "error": "ValueError: Security error during OAuth2 token URL: URL must use HTTPS or be a literal loopback address (localhost / 127.0.0.1 / ::1). Got: 'http://10.61.61.2:44477/token'. Plain HTTP to any other host is rejected to prevent MITM attacks and SSRF into internal services.",
+      "performed": true
+    },
+    "security_error_observed": true,
+    "tool_call": {
+      "called": false,
+      "error": null,
+      "result": null
+    },
+    "tool_name": null
+  },
+  "scenario": "attack",
+  "spec_url": "http://127.0.0.1:44477/openapi.json",
+  "token_url": "http://10.61.61.2:44477/token",
+  "variant": "patched"
+}

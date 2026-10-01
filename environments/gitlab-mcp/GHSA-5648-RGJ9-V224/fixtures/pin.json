@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "description": "Pin for the two upstream revisions of zereight/gitlab-mcp exercised by the mechanism PoC. The source archive hashes are the GitHub tag tarballs; the module hashes are the utils/graphql-query.ts blob inside each archive.",
+  "upstream_repository": "https://github.com/zereight/gitlab-mcp",
+  "vulnerable": {
+    "package_version": "2.1.28",
+    "tag": "v2.1.28",
+    "commit": "139a479147a52f65d47e8fee142214c4d5392468",
+    "advisory_reviewed_commit": "60adcc0de5b0e96c4c2029f7a25d2775946421d8",
+    "repo_dir": "/lab/upstream/vulnerable",
+    "source_url": "https://codeload.github.com/zereight/gitlab-mcp/tar.gz/refs/tags/v2.1.28",
+    "archive_sha256": "36448687dde8d9356c9cbf0c286e9bb56b635e0d740ea03ff292d4ed9b121753",
+    "graphql_query_module": "utils/graphql-query.ts",
+    "graphql_query_sha256": "0ee49475446ca2eb4add393eca0014ad04e526281bd3d3171c538f04729e47e7",
+    "execute_graphql_branch_sha256": "f7f1ba951ae5e1bbd83fc3a802c02aee791fe8914dfdf9edbc82b99073963959",
+    "read_only_guard_present": true,
+    "project_scope_guard_present": false,
+    "scope_guard_definition_sha256": "0a70ef44c63f73cd705d8a9124b6c34ee15fe6b625ddf8ce395bef93529ba9f8"
+  },
+  "patched": {
+    "package_version": "2.1.30",
+    "tag": "v2.1.30",
+    "commit": "cff3ebeec272d7cc609d9b3cab57f52cb15fae96",
+    "repo_dir": "/lab/upstream/patched",
+    "source_url": "https://codeload.github.com/zereight/gitlab-mcp/tar.gz/refs/tags/v2.1.30",
+    "archive_sha256": "4e24c056b736897732ea151a90fa4520701bdffc327e8b9960bdfdd33b3c148a",
+    "graphql_query_module": "utils/graphql-query.ts",
+    "graphql_query_sha256": "4fc7128c866cf4fb24fb3a723853a25c2582f4437bb4c3ae3533a9a191a7b6e5",
+    "execute_graphql_branch_sha256": "30288628fe2aaebe76590ee66ac2e1a9001e3300504a4ac4e08c47372d5bb286",
+    "read_only_guard_present": true,
+    "project_scope_guard_present": true,
+    "scope_guard_definition_sha256": "0a70ef44c63f73cd705d8a9124b6c34ee15fe6b625ddf8ce395bef93529ba9f8"
+  }
+}

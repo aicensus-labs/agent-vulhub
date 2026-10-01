@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "marker": "BENIGN-NOTEBOOK-MARKER-3a77e1",
+  "tool": "create_dynatrace_notebook",
+  "arguments": {
+    "name": "Weekly Service Health",
+    "description": "Routine weekly service health summary.",
+    "content": [
+      {
+        "type": "markdown",
+        "text": "## Weekly service health\n\nLatency and error rates stayed inside the normal band for the whole week."
+      },
+      {
+        "type": "dql",
+        "text": "fetch events, from: now()-7d\n| filter contains(content, \"BENIGN-NOTEBOOK-MARKER-3a77e1\")\n| summarize events = count(), by: {event.kind}\n| sort events desc"
+      }
+    ]
+  }
+}

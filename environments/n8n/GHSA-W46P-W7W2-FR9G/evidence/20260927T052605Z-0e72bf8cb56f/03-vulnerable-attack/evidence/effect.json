@@ -1,0 +1,35 @@
+{
+  "mechanism_loaded": true,
+  "scenario": "attack",
+  "filter_tools_for_user_present": false,
+  "resolved_tool_names": [
+    "run_shell"
+  ],
+  "resolved_tool_kinds": [
+    "node"
+  ],
+  "executor_node_types": [
+    "n8n-nodes-base.executeCommandTool"
+  ],
+  "executor_credential_ids": [
+    "cred-exec"
+  ],
+  "executor_node_parameters": [
+    {
+      "command": "id > /lab/results/marker.txt"
+    }
+  ],
+  "node_tool_invoked": true,
+  "node_tool_results": [
+    {
+      "status": "success",
+      "data": [
+        {
+          "json": {
+            "marker": "AVH-N8N-W46P-EXEC"
+          }
+        }
+      ]
+    }
+  ]
+}

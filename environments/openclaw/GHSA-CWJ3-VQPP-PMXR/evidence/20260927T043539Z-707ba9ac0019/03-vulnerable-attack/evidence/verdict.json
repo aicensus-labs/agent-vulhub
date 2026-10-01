@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T043539Z-707ba9ac0019",
+  "case_id": "03-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": "The 2026.4.22 denylist guard allows the model-driven config.patch and config.apply documents, and the persisted config carries gateway.remote.url, memory.qmd.command, browser.executablePath, tools.allow and tools.elevated.enabled",
+      "actual": "guard allowed config.patch and config.apply; the persisted config carries all five attacker-chosen operator keys; control_protected was rejected",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "guard-result.json",
+        "next-config.json"
+      ]
+    }
+  ]
+}

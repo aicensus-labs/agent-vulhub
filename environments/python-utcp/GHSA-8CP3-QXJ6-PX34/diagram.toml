@@ -1,0 +1,120 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram python-utcp/GHSA-8CP3-QXJ6-PX34
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# fixture 装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "python-utcp / GHSA-8CP3-QXJ6-PX34 漏洞图解"
+summary = "utcp-http 从不受信任的 OpenAPI 规范生成工具时，把 clientCredentials.tokenUrl 原样写入 OAuth2Auth，转换期不校验，发送凭据前也不校验。发现 URL 与工具调用 URL 都会经过 HTTPS/回环检查，唯独这个由规范决定的 token 端点绕过了同一道信任边界。于是工具一被调用，受害者的 client_id 与 client_secret 就被 POST 到攻击者指定的明文 HTTP 端点：攻击者可以据此冒充受害者调用下游 API，也可以把凭据投递到内网或云元数据地址形成 SSRF。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（本仓库合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "attacker_spec"
+label = "攻击者提供的 OpenAPI 规范"
+kind = "actor"
+trust = "attacker_controlled"
+role = "规范内容完全由攻击者决定；攻击者在 clientCredentials.tokenUrl 里指定自己的接收端，或指定一个从外部不可达的内网地址。"
+source = "fixtures/attack_openapi.json"
+
+[[entities]]
+id = "converter"
+label = "utcp-http 的 OpenAPI 转换器"
+kind = "service"
+trust = "trusted"
+role = "OpenApiConverter 把规范里的 tokenUrl 原样存进 OAuth2Auth。同一份文件对发现 URL 与工具调用 URL 都会调用 ensure_secure_url，这一处却没有，tokenUrl 因此成了唯一没有设防的出站地址。"
+source = "fixtures/attack_openapi.json"
+
+[[entities]]
+id = "call_template"
+label = "注册后的工具调用模板"
+kind = "store"
+trust = "trusted"
+role = "由规范生成的调用模板被当作可信配置保存；调用工具时按其中的 OAuth2Auth 去取令牌。"
+
+[[entities]]
+id = "credentials"
+label = "受害者的 OAuth2 客户端凭据"
+kind = "store"
+trust = "trusted"
+static = true
+role = "受害者配置的 client_id 与 client_secret，本应只发往受信任的令牌端点。攻击者拿不到它，所以要用恶意规范把它骗出来。"
+source = "fixtures/credentials.json"
+
+[[entities]]
+id = "http_protocol"
+label = "utcp-http 的 OAuth2 令牌获取流程"
+kind = "service"
+trust = "trusted"
+role = "HttpCommunicationProtocol._handle_oauth2 直接对 auth_details.token_url 发 POST；缺陷正是这里在凭据出站前没有任何校验。"
+
+[[entities]]
+id = "token_endpoint"
+label = "攻击者指定的 token 端点"
+kind = "sink"
+trust = "attacker_controlled"
+synthetic = true
+role = "凭据的落点。真实攻击里它是攻击者托管的接收端，或一个可从受害者网络触达的内网/云元数据地址；这里由受控监听端代替，只做无害记录，不使用任何真实凭据。"
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["attacker_spec", "token_endpoint"]
+note = "攻击者控制规范内容与自己指定的 token 端点，但读不到受害者配置的客户端凭据。"
+
+[[boundaries]]
+id = "victim_runtime"
+label = "受害者的 UTCP 运行时"
+members = ["converter", "call_template", "credentials", "http_protocol"]
+note = "界内信任由远端规范转换出的调用模板。发现 URL 与工具调用 URL 有 HTTPS/回环校验，tokenUrl 没有，凭据因此被送出。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。至少一步 diverges = true 表示漏洞版与修复版
+# 的分叉点，且该步 variant 不能是 both。
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker_spec"
+to = "converter"
+action = "带攻击者指定 tokenUrl 的 OpenAPI 规范进入转换流程"
+variant = "both"
+
+[[steps]]
+n = 2
+phase = "trigger"
+from = "converter"
+to = "call_template"
+action = "不可信的 tokenUrl 被原样写入 OAuth2Auth，没有 HTTPS/回环校验"
+variant = "vulnerable_only"
+diverges = true
+evidence = "fixtures/attack_openapi.json"
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "converter"
+to = "converter"
+action = "同一 tokenUrl 因是非回环明文 HTTP 而被拒绝，工具注册失败"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "call_template"
+to = "http_protocol"
+action = "工具被调用，按模板里固化的 tokenUrl 获取 OAuth2 令牌"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 5
+phase = "effect"
+from = "http_protocol"
+to = "token_endpoint"
+action = "client_id 与 client_secret 被 POST 到攻击者指定的 token 端点"
+variant = "vulnerable_only"
+evidence = "fixtures/credentials.json"

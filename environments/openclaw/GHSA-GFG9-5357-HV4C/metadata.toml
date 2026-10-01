@@ -1,0 +1,94 @@
+schema_version = 1
+id = "openclaw/GHSA-GFG9-5357-HV4C"
+ghsa = "GHSA-GFG9-5357-HV4C"
+product = "openclaw"
+title = "OpenClaw: Webchat audio embedding could read local files without local-root containment"
+lifecycle = "draft"
+agent_specificity = "agent_unique"
+# Advisory severity from the authoritative source, normalized to
+# CRITICAL/HIGH/MEDIUM/LOW/NONE. Use "UNKNOWN" when no source publishes one.
+severity = "MEDIUM"
+advisories = ["https://github.com/advisories/GHSA-gfg9-5357-hv4c"]
+description = "buildWebchatAudioContentBlocksFromReplyPayloads() in src/gateway/server-methods/chat-webchat-media.ts resolved every mediaUrl of a reply payload to an absolute local path and read it with fs.readFileSync, base64-embedding the bytes into the chat WebSocket as an audio block. resolveLocalMediaPathForEmbedding() accepted any absolute path and any file: URL and never compared the resolved path against the allowed local media roots, so a tool/agent reply whose mediaUrl was chosen by an attacker through prompt injection (CWE-22 path traversal / CWE-200 exposure) exfiltrated arbitrary host files readable by the gateway process that carry an audio extension. The fix (041266a6699cac3baef8ef39db41fa26f29f9db3, v2026.4.15) routes resolution through assertLocalMediaAllowed() with the caller-supplied localRoots and reports the denial via onLocalAudioAccessDenied."
+prerequisites = [
+  "A local webchat/Control-UI reply payload whose mediaUrl (or mediaUrls[]) points at an absolute path or file: URL outside the configured allowed local media roots.",
+  "The attacker can steer that mediaUrl field through prompt injection or a compromised tool result.",
+  "The referenced file is a regular file with an audio extension and at most 15 MiB.",
+]
+
+[vulnerable]
+# 323493fa1b6adc1e10b9954a68d5eaa5a6ef1170 = refs/tags/v2026.4.14
+version = "2026.4.14"
+source_url = "https://github.com/openclaw/openclaw/tree/323493fa1b6adc1e10b9954a68d5eaa5a6ef1170"
+commit = "323493fa1b6adc1e10b9954a68d5eaa5a6ef1170"
+image = ""
+archive = "vulnerable-source.tar.gz"
+
+[patched]
+# 041266a6699cac3baef8ef39db41fa26f29f9db3 = refs/tags/v2026.4.15; contains the fix.
+version = "2026.4.15"
+source_url = "https://github.com/openclaw/openclaw/tree/041266a6699cac3baef8ef39db41fa26f29f9db3"
+commit = "041266a6699cac3baef8ef39db41fa26f29f9db3"
+image = ""
+archive = "patched-source.tar.gz"
+
+[build]
+# python:3.12-slim-bookworm pinned by digest (docker.io/library/python, linux/amd64), already
+# present locally. It supplies the python3 runtime.harness; the Node.js 22 runtime that bundles
+# and runs the pinned TypeScript module is unpacked from the vendored official tarball below, so
+# the image needs no package manager and no network.
+base_image = "python:3.12-slim-bookworm@sha256:392307d22300de8b5986851a12d9176dfc0fc073e65bf6523ebd7dcbeb23564e"
+dockerfile = "Dockerfile"
+# Every artifact the offline build needs, each hash computed from the downloaded file:
+# the two pinned upstream source archives, Node.js 22.23.3, the pinned esbuild 0.27.7 linux-x64
+# binary, and the complete npm closure the upstream module graph resolves at the pinned revision
+# (esbuild bundling plus the runtime packages it keeps). Versions are the pnpm-lock.yaml pins of
+# openclaw v2026.4.14: chalk 5.6.2, tslog 4.10.2, file-type 22.0.1 and file-type's transitive
+# closure (strtok3 10.3.5, token-types 6.1.2, uint8array-extras 1.5.0, @tokenizer/inflate 0.4.1,
+# @tokenizer/token 0.3.0, @borewit/text-codec 0.2.2, debug 4.4.3, ms 2.1.3, ieee754 1.2.1).
+inputs = [
+  { name = "vulnerable-source.tar.gz", url = "https://github.com/openclaw/openclaw/archive/323493fa1b6adc1e10b9954a68d5eaa5a6ef1170.tar.gz", sha256 = "78ff3cc224d4fb9599f8efc2393fd30bac20a569cc7c346bb66a136ec926f3c3" },
+  { name = "patched-source.tar.gz", url = "https://github.com/openclaw/openclaw/archive/041266a6699cac3baef8ef39db41fa26f29f9db3.tar.gz", sha256 = "4bd162acded57cc616cc76931d1e2f42bef0d4c8ebd198f138cd94be8196d106" },
+  { name = "node-v22.23.3-linux-x64.tar.gz", url = "https://nodejs.org/dist/v22.23.3/node-v22.23.3-linux-x64.tar.gz", sha256 = "1084aa36196bba4c3a5e69a1ee388a6e4ff729dad09445fbcd434b28fe3c24af" },
+  { name = "esbuild-linux-x64-0.27.7.tgz", url = "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.27.7.tgz", sha256 = "2c3eb61a67f174520d3c586ef026430480fa92cfb5f285c82a9040fff41355de" },
+  { name = "chalk-5.6.2.tgz", url = "https://registry.npmjs.org/chalk/-/chalk-5.6.2.tgz", sha256 = "94957715a483aa3b9db60c8f22d5498227d8025c407f982eef81e34f37574ffd" },
+  { name = "tslog-4.10.2.tgz", url = "https://registry.npmjs.org/tslog/-/tslog-4.10.2.tgz", sha256 = "99ae790389d35dde7d6c9235ab5e71e5adb7bb93d49a4620cd49d70f578f336b" },
+  { name = "file-type-22.0.1.tgz", url = "https://registry.npmjs.org/file-type/-/file-type-22.0.1.tgz", sha256 = "87fdc6557e71ec47373edfbde774165e976c760845d02733f81fbfe1ad232780" },
+  { name = "strtok3-10.3.5.tgz", url = "https://registry.npmjs.org/strtok3/-/strtok3-10.3.5.tgz", sha256 = "58595fe65b2340514ea1c74dbae2bc4d8e5049c4d060cc38eed745da48fa7c96" },
+  { name = "token-types-6.1.2.tgz", url = "https://registry.npmjs.org/token-types/-/token-types-6.1.2.tgz", sha256 = "eb4820714d28f6dad949d392e7b74ec919ae3b120421240a032027bf2bd25f41" },
+  { name = "uint8array-extras-1.5.0.tgz", url = "https://registry.npmjs.org/uint8array-extras/-/uint8array-extras-1.5.0.tgz", sha256 = "65834dc9ce7ecceff4334a14796c85960cbf665d09364698bf3196ceed04d677" },
+  { name = "tokenizer-inflate-0.4.1.tgz", url = "https://registry.npmjs.org/@tokenizer/inflate/-/inflate-0.4.1.tgz", sha256 = "41f6a60b13cf29eebdd06723223dc68ff1d47721d56e4fef93d2d450167d9dc0" },
+  { name = "tokenizer-token-0.3.0.tgz", url = "https://registry.npmjs.org/@tokenizer/token/-/token-0.3.0.tgz", sha256 = "911758ceca239c8e5372700eedfbbd514f16d3c117b5af0a648f6e720487c209" },
+  { name = "borewit-text-codec-0.2.2.tgz", url = "https://registry.npmjs.org/@borewit/text-codec/-/text-codec-0.2.2.tgz", sha256 = "991d87763add805a12d5b3e67b201476681a5b738d8dcb9229bed1df755acba0" },
+  { name = "debug-4.4.3.tgz", url = "https://registry.npmjs.org/debug/-/debug-4.4.3.tgz", sha256 = "89c1ac9c946ee8905a875837114528e97eeae35e03be3190584b2216af43e4a7" },
+  { name = "ms-2.1.3.tgz", url = "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz", sha256 = "f6616e15e530ed552f9daa2d3ce71963947c6bc7c98c9b64fd3e673fd02622c6" },
+  { name = "ieee754-1.2.1.tgz", url = "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz", sha256 = "8ef14b9b397e339db89db97881fb714f49319d8f0eb1275901f45567b28f9dac" },
+]
+
+[runtime]
+isolation = "container"
+platforms = ["linux/amd64"]
+mode = "oneshot"
+harness = "python3"
+exceptions = []
+requires_model = false
+network_requirements = "none: every build input is a hash-pinned vendored archive and the mechanism driver (esbuild bundle + node) runs fully offline"
+
+[verification.mechanism]
+status = "passed"
+verified_at = "2026-09-27T04:32:21.360551+00:00"
+evidence = ["evidence/20260927T043058Z-d574d83ea3d2/report.json"]
+notes = "四场景三轮（12/12）已通过；归档报告 run_id=20260927T043058Z-d574d83ea3d2，由 staging 验证结果迁移并按当前输入指纹复核。"
+
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
+
+[verification.agent_poc]
+status = "not_run"
+adapter_status = "not_run"
+verified_at = ""
+evidence = []
+notes = "An independently reviewed Agent-PoC Adapter is required before candidate evaluation."

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T051505Z-0e7e04cbd2eb",
+  "case_id": "02-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "environment_id": "safeinstall/GHSA-XRMC-C5CG-RV7X",
+  "round": 2,
+  "project": "avh-44346a33624c4357a045",
+  "layer": "mechanism",
+  "source_commit": "06e8370d7cff0916169b28b61b20a826958db223",
+  "image": "sha256:32d489bf69b87ab8c95084498e35433cd0d1994e71302e0f76797e3783760733",
+  "started_at": "2026-09-27T05:15:47.063816+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": "SafeInstall 0.10.1 classifies a plain install as an install finding while the crafted case-fold, redirection-prefix, wrapper-flag and remote-exec commands yield no finding at all (guard fails open)",
+      "actual": "20 manager invocations classified as no_finding (shapes=['case-fold', 'install', 'redirection-prefix', 'remote-exec', 'wrapper']); 2 still detected (install controls=['baseline-plain-install', 'path-qualified-npm']); 1/1 path-qualified rewrites kept the path text; 0 entries disagree with the declared 0.10.1 expectation",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "guard-analysis.json"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-27T05:15:51.861141+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

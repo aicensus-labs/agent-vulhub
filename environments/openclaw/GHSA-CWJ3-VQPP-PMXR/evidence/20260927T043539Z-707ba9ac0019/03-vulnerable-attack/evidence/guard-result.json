@@ -1,0 +1,33 @@
+{
+  "driver_status": "completed",
+  "hook": "assertGatewayConfigMutationAllowedForTest",
+  "pinned_version": "2026.4.22",
+  "pinned_commit": "02a8c135016665f0ef58122cf67bdeade507f645",
+  "guard_module": "/lab/src/src/agents/tools/gateway-tool.ts",
+  "guard_module_sha256": "374c50794112c72a1237427cb4c193468e74d6b96d6c103ffab40f0b7b608e16",
+  "source_root": "/lab/src",
+  "runner_command": "/lab/src/node_modules/.bin/tsx /tmp/avh-guard-8j_5e1el/guard-driver.mjs /tmp/avh-guard-8j_5e1el/request.json /tmp/avh-guard-8j_5e1el/response.json",
+  "cases": [
+    {
+      "name": "primary",
+      "action": "config.patch",
+      "raw_sha256": "f4be2abefe7e1e6a5126dc82a0826442c8a02e76a35a26e909ee4538f4916b0f",
+      "guard_outcome": "allowed",
+      "guard_error": null
+    },
+    {
+      "name": "apply",
+      "action": "config.apply",
+      "raw_sha256": "c1f5dca3e7a9e6de6f2fb38055f802760c9016b86cb9a72614a3c5273db8a1ac",
+      "guard_outcome": "allowed",
+      "guard_error": null
+    },
+    {
+      "name": "control_protected",
+      "action": "config.patch",
+      "raw_sha256": "411d9f51fabac776e17fa2506027ef1c1bd4643b1533ed0d971e934469e2e925",
+      "guard_outcome": "rejected",
+      "guard_error": "gateway config.patch cannot change protected config paths: tools.exec.ask"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+schema_version = 1
+id = "n8n/GHSA-W46P-W7W2-FR9G"
+ghsa = "GHSA-W46P-W7W2-FR9G"
+product = "n8n"
+title = "CVE-2026-65015: n8n versions before 2.30.1 contain a privilege escalation vulnerability in the AI Agents feature where the node-execution tool lacks proper"
+lifecycle = "draft"
+agent_specificity = "agent_unique"
+# Advisory severity from the authoritative source, normalized to
+# CRITICAL/HIGH/MEDIUM/LOW/NONE. Use "UNKNOWN" when no source publishes one.
+severity = "HIGH"
+advisories = ["https://nvd.nist.gov/vuln/detail/CVE-2026-65015"]
+description = """Root cause: when the AI Agents chat path rebuilds an agent's runtime, n8n 2.29.7
+passes the agent's stored JSON tool config straight into tool resolution. A node tool ref
+(`{ type: "node", node: { nodeType, nodeTypeVersion, credentials } }`) owned by a Project
+Viewer therefore survives reconstruction, and resolving it builds a Tool whose handler calls
+`EphemeralNodeExecutor.executeInline` with the baked node parameters and credential details.
+The viewer never needed the workflow/credential authority the node would exercise; the
+`node-execution` tool is gated only by the agent's own membership in the project. The fix in
+2.29.8 adds `filterToolsForUser`, which drops node and workflow tool refs unless the caller
+holds `workflow:execute` (and `credential:read` for node tools) in the agent's project before
+the runtime is reconstructed, so the same ref produces no tool and the executor is never
+reached."""
+prerequisites = [
+  "Node.js 22 runtime with `module.registerHooks` and `--experimental-transform-types` (base image node:22-bookworm, Node 22.23.3)",
+  "Pinned n8n source worktree: 2.29.7 (vulnerable) or 2.29.8 (patched)",
+]
+
+[vulnerable]
+version = "2.29.7"
+source_url = "https://github.com/n8n-io/n8n"
+commit = "60109bba8cae51bdb60615a41552cebf397b7438"
+image = ""
+archive = "vulnerable-source.tar.gz"
+
+[patched]
+version = "2.29.8"
+source_url = "https://github.com/n8n-io/n8n"
+commit = "7786117e976664b67288f13d6cfcd1fcf1b1289b"
+image = ""
+archive = "patched-source.tar.gz"
+
+[build]
+# Locally cached node:22-bookworm pinned by manifest digest. It carries the Node 22
+# interpreter the mechanism reproduction drives plus python3 for the lab scripts.
+base_image = "node:22-bookworm@sha256:363e1587494626837fa7f9a23bdb453d13b0ff3c67c705c2805cfc69c2d2fad7"
+dockerfile = "Dockerfile"
+# Each entry: { name = "...", url = "https://...", sha256 = "..." }
+# The two GitHub tag archives are the complete upstream source of the pinned releases
+# (each carries the pnpm workspace lockfile and every workspace package). The executed
+# path loads the two pinned TypeScript modules under packages/cli/src/modules/agents
+# with Node's type stripping and resolves every bare specifier they request through the
+# in-process import-hook doubles, so no registry package has to be unpacked and the
+# runtime dependency closure actually installed is the base image's Node runtime.
+inputs = [
+  { name = "vulnerable-source.tar.gz", url = "https://codeload.github.com/n8n-io/n8n/tar.gz/refs/tags/n8n@2.29.7", sha256 = "97292e07a42a02b47dbe4a47628f6ac31bfb46abcef3ab400f323208551f2daf" },
+  { name = "patched-source.tar.gz", url = "https://codeload.github.com/n8n-io/n8n/tar.gz/refs/tags/n8n@2.29.8", sha256 = "64ce36f1217c9e65b2df720a5973ff08b9e22ee6690aa9bc172602c1ba7370b9" },
+]
+
+[runtime]
+isolation = "container"
+platforms = ["linux/amd64"]
+mode = "oneshot"
+harness = "python3"
+exceptions = []
+requires_model = false
+network_requirements = "no network"
+
+[verification.mechanism]
+status = "passed"
+verified_at = "2026-09-27T05:28:01.957211+00:00"
+evidence = ["evidence/20260927T052605Z-0e72bf8cb56f/report.json"]
+notes = "四场景三轮（12/12）已通过；归档报告 run_id=20260927T052605Z-0e72bf8cb56f，由 staging 验证结果迁移并按当前输入指纹复核。"
+
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
+
+[verification.agent_poc]
+status = "not_run"
+adapter_status = "not_run"
+verified_at = ""
+evidence = []
+notes = "An independently reviewed Agent-PoC Adapter is required before candidate evaluation."

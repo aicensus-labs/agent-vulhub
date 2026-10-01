@@ -1,5 +1,9 @@
 # AgentSec 关联约定
 
+候选抽取、草稿生成和六阶段复现编排见
+[AgentSec 候选到复现环境的自动化流水线](agentsec-reproduction-factory.md)
+（`python3 -m runner harvest` 与 `python3 -m runner factory`）。
+
 目前没有自动读写 AgentSec 数据库，也没有设置远程同步。
 
 建议未来单独维护环境关联：

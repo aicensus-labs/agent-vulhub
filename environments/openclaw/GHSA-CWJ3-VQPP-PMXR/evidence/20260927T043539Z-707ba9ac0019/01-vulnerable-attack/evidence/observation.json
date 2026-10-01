@@ -1,0 +1,27 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "pinned_version": "2026.4.22",
+  "pinned_commit": "02a8c135016665f0ef58122cf67bdeade507f645",
+  "expected_guard_sha256": "374c50794112c72a1237427cb4c193468e74d6b96d6c103ffab40f0b7b608e16",
+  "guard_module": "/lab/src/src/agents/tools/gateway-tool.ts",
+  "guard_module_sha256": "374c50794112c72a1237427cb4c193468e74d6b96d6c103ffab40f0b7b608e16",
+  "runner_command": "/lab/src/node_modules/.bin/tsx /tmp/avh-guard-dbzdjiyq/guard-driver.mjs /tmp/avh-guard-dbzdjiyq/request.json /tmp/avh-guard-dbzdjiyq/response.json",
+  "guard_outcome": "allowed",
+  "guard_error": null,
+  "case_outcomes": {
+    "primary": "allowed",
+    "apply": "allowed",
+    "control_protected": "rejected"
+  },
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T043539Z-707ba9ac0019",
+    "case_id": "01-vulnerable-attack",
+    "variant": "vulnerable",
+    "scenario": "attack"
+  }
+}

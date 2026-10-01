@@ -1,0 +1,29 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "attack",
+  "variant": "patched",
+  "payload_marker": "ATTACK-PAYLOAD-MARKER-9c41d2",
+  "expected_notebook_name": "Quarterly Platform Review",
+  "upstream_bundle": "/usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js",
+  "upstream_classification": "patched",
+  "receiver_mode": "direct",
+  "mcp_initialized": true,
+  "server_version": "1.8.7",
+  "tool_call_returned": true,
+  "tool_result_text": "Operation cancelled: Human approval was not granted for creating this notebook.",
+  "approval_requests": 0,
+  "document_requests": 0,
+  "document_request_paths": [],
+  "marker_seen_in_document_request": false,
+  "notebook_name_seen_in_document_request": false,
+  "server_stderr_tail": "Initializing Dynatrace MCP Server v1.8.7...\nDynatrace Telemetry initialization failed: Dynatrace Telemetry is disabled via DT_MCP_DISABLE_TELEMETRY=true\n⚠️ Demo configuration detected (https://abc12345.apps.dynatrace.com). Skipping connection tests. Tool calls will not work until a real Dynatrace environment is configured.\nStarting Dynatrace MCP Server v1.8.7...\nConnecting server to transport...\nDynatrace MCP Server running on stdio\nFailed to elicit human approval: Error: Client does not support form elicitation.\n    at Server.elicitInput (/usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:121087:17)\n    at requestHumanApproval (/usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:123917:44)\n    at /usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:125004:32\n    at /usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:123873:34\n    at /usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:123912:45\n    at McpServer.executeToolHandler (/usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:121451:36)\n    at /usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:121355:35\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async wrappedHandler (/usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:120872:24)\n",
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T062841Z-084abbec6a65",
+    "case_id": "02-patched-attack",
+    "variant": "patched",
+    "scenario": "attack"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "attack",
+  "package_version": "2026.4.14",
+  "package_root": "/lab/openclaw",
+  "queue_chunk": "delivery-queue-cUZQxuAc.js",
+  "recovery_chunk": "delivery-queue-CyLvtZHG.js",
+  "media_chunk": "deliver-CdmJhlMF.js",
+  "load_chunk": "delivery-queue-cUZQxuAc.js",
+  "policy_chunk": "deliver-CdmJhlMF.js",
+  "queued_id": "3d65603a-9b88-48d7-a66f-9b99e87e89a9",
+  "recovered_deliver_calls": 1,
+  "stored_entry_available": true,
+  "stored_entry_has_session": true,
+  "stored_entry_session_keys": [
+    "key",
+    "agentId",
+    "requesterAccountId",
+    "requesterSenderId",
+    "requesterSenderName",
+    "requesterSenderUsername",
+    "requesterSenderE164"
+  ],
+  "recovered_params_has_session": true,
+  "recovered_params_session_keys": [
+    "key",
+    "agentId",
+    "requesterAccountId",
+    "requesterSenderId",
+    "requesterSenderName",
+    "requesterSenderUsername",
+    "requesterSenderE164"
+  ],
+  "recovered_params_skip_queue": true,
+  "group_policy_present": true,
+  "group_policy_resolved": {
+    "deny": [
+      "read"
+    ]
+  },
+  "media_read_file_granted": false,
+  "media_read_bytes_sha256": null,
+  "media_read_error": null,
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T031721Z-4db246bc72d9",
+    "case_id": "02-patched-attack",
+    "variant": "patched",
+    "scenario": "attack"
+  }
+}

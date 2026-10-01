@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "scenario": "attack",
+  "purpose": "Shell command texts an attacker can get a coding agent to run while the SafeInstall agent guard is installed as a shell pre-hook. Every command stays inside the guard's pure classifier; no package manager is started and no registry is contacted.",
+  "provenance": {
+    "bypass_corpus": "The twenty fail-open commands are the verbatim `input` values of the upstream regression corpus `tests/fixtures/bypass-corpus/*.json` added by fix commit ccf3b30b08c5268c0c2c5b84e8e3d239deaf7d05 (release b19d262938a52bc799878e48a6c2f9e4bfdaa50b, safeinstall-cli 0.10.2).",
+    "expectations": "expect_vulnerable / expect_patched are the observed results of the pinned releases: safeinstall-cli 0.10.1 (tag v0.10.1, commit 06e8370d7cff0916169b28b61b20a826958db223) and safeinstall-cli 0.10.2 (tag v0.10.2, commit b19d262938a52bc799878e48a6c2f9e4bfdaa50b)."
+  },
+  "expectation_vocabulary": {
+    "install_finding": "analyzeShellCommand returns at least one installs entry",
+    "runner_finding": "analyzeShellCommand returns at least one runners entry",
+    "unanalyzable": "analyzeShellCommand returns at least one unanalyzable entry (fail-closed)",
+    "no_finding": "installs, runners and unanalyzable are all empty",
+    "uses_safeinstall": "usesSafeInstall is true and there is no finding"
+  },
+  "groups": {
+    "baseline": "Plain minimal form. The guard must still classify it as an install, otherwise a zero-finding result elsewhere would only mean the parser is broken.",
+    "case-sensitivity": "Manager or wrapper name differs from the lowercase table key. On a case-insensitive filesystem the shell resolves the real binary, while the vulnerable classifier compares the basename case-sensitively and concludes nothing.",
+    "redirection-prefix": "A valid shell redirection placed before the command position. The vulnerable classifier reports the redirection token itself as the command and stops, so the package manager call behind it is never classified.",
+    "wrapper-flag": "A wrapper command is followed by one of its own options. The vulnerable classifier skips only wrapper names, then reads the wrapper's option as the command position; `env -S` carries a nested command language and cannot be inspected at all.",
+    "remote-exec-subcommand": "`create`/`init` subcommands fetch and run a scaffold package from the registry, like `npx`/`pnpm dlx`, but the vulnerable classifier treats them as non-install subcommands and returns no conclusion.",
+    "routing": "Path-qualified manager invocation. Both revisions detect the install, but the vulnerable rewrite keeps the path text and the fixed rewrite normalizes the manager name."
+  },
+  "commands": [
+    {
+      "id": "baseline-plain-install",
+      "group": "baseline",
+      "category": "plain-install",
+      "command": "npm install evil-pkg",
+      "expect_vulnerable": "install_finding",
+      "expect_patched": "install_finding",
+      "note": "Positive control: the exact invocation shape both revisions are built to recognise."
+    },
+    {
+      "id": "case-npm-upper",
+      "group": "case-sensitivity",
+      "category": "case-sensitivity",
+      "command": "NPM install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/case-npm-upper.json",
+      "note": "On case-insensitive filesystems the shell resolves NPM to npm; the vulnerable basename() does not fold case before the table lookup."
+    },
+    {
+      "id": "case-npm-title",
+      "group": "case-sensitivity",
+      "category": "case-sensitivity",
+      "command": "Npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/case-npm-title.json"
+    },
+    {
+      "id": "case-pnpm-upper",
+      "group": "case-sensitivity",
+      "category": "case-sensitivity",
+      "command": "PNPM add evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/case-pnpm-upper.json"
+    },
+    {
+      "id": "case-bun-title",
+      "group": "case-sensitivity",
+      "category": "case-sensitivity",
+      "command": "Bun add evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/case-bun-title.json"
+    },
+    {
+      "id": "case-wrapper-sudo",
+      "group": "case-sensitivity",
+      "category": "case-sensitivity",
+      "command": "SUDO npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/case-wrapper-sudo.json",
+      "note": "Same case-folding gap on the wrapper set: SUDO is not in WRAPPER_COMMANDS, so the vulnerable classifier never looks past it. The fixed rewrite normalizes the manager but leaves the wrapper token as written."
+    },
+    {
+      "id": "redir-lead-stdin",
+      "group": "redirection-prefix",
+      "category": "redirection-prefix",
+      "command": "< in npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/redir-lead-stdin.json"
+    },
+    {
+      "id": "redir-lead-stdout",
+      "group": "redirection-prefix",
+      "category": "redirection-prefix",
+      "command": "> out npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/redir-lead-stdout.json"
+    },
+    {
+      "id": "redir-lead-stdout-nospace",
+      "group": "redirection-prefix",
+      "category": "redirection-prefix",
+      "command": ">out npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/redir-lead-stdout-nospace.json"
+    },
+    {
+      "id": "redir-lead-fd",
+      "group": "redirection-prefix",
+      "category": "redirection-prefix",
+      "command": "2>err npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/redir-lead-fd.json"
+    },
+    {
+      "id": "redir-lead-variable-fd",
+      "group": "redirection-prefix",
+      "category": "redirection-prefix",
+      "command": "{audit}>out npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/redir-lead-variable-fd.json",
+      "note": "Bash treats {audit}>out as a variable file-descriptor redirection; the vulnerable tokenizer mistakes the variable prefix for the command."
+    },
+    {
+      "id": "wrapper-sudo-user",
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "command": "sudo -u root npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/wrapper-sudo-user.json"
+    },
+    {
+      "id": "wrapper-sudo-preserve",
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "command": "sudo -E npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/wrapper-sudo-preserve.json"
+    },
+    {
+      "id": "wrapper-command-p",
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "command": "command -p npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/wrapper-command-p.json"
+    },
+    {
+      "id": "wrapper-env-ignore",
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "command": "env -i npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/wrapper-env-ignore.json"
+    },
+    {
+      "id": "wrapper-env-split-string",
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "command": "env -S 'npm install evil-pkg'",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "unanalyzable",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/wrapper-env-split-string.json",
+      "note": "The split-string value is a second command language; the fixed classifier refuses to guess and fails closed instead of returning an empty conclusion."
+    },
+    {
+      "id": "wrapper-time-p",
+      "group": "wrapper-flag",
+      "category": "wrapper-flag",
+      "command": "time -p npm install evil-pkg",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "install_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/wrapper-time-p.json"
+    },
+    {
+      "id": "exec-npm-create",
+      "group": "remote-exec-subcommand",
+      "category": "remote-exec-subcommand",
+      "command": "npm create vite@latest",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "runner_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/exec-npm-create.json"
+    },
+    {
+      "id": "exec-npm-init",
+      "group": "remote-exec-subcommand",
+      "category": "remote-exec-subcommand",
+      "command": "npm init foo",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "runner_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/exec-npm-init.json"
+    },
+    {
+      "id": "exec-pnpm-create",
+      "group": "remote-exec-subcommand",
+      "category": "remote-exec-subcommand",
+      "command": "pnpm create vite",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "runner_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/exec-pnpm-create.json"
+    },
+    {
+      "id": "exec-yarn-create",
+      "group": "remote-exec-subcommand",
+      "category": "remote-exec-subcommand",
+      "command": "yarn create foo",
+      "expect_vulnerable": "no_finding",
+      "expect_patched": "runner_finding",
+      "upstream_fixture": "tests/fixtures/bypass-corpus/exec-yarn-create.json"
+    },
+    {
+      "id": "path-qualified-npm",
+      "group": "routing",
+      "category": "routing",
+      "command": "/usr/bin/npm install evil-pkg",
+      "expect_vulnerable": "install_finding",
+      "expect_patched": "install_finding",
+      "note": "Both revisions find the install; the vulnerable rewrite emits 'safeinstall /usr/bin/npm install evil-pkg', the fixed rewrite emits 'safeinstall npm install evil-pkg'."
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+AVH-SYNTHETIC-AUDIO-MARKER voice-memo
+GHSA-GFG9-5357-HV4C local audio file that lives OUTSIDE the allowed media root
+The vulnerable webchat audio embedding path embeds these bytes as base64.

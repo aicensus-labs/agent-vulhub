@@ -1,0 +1,3 @@
+AVH-SYNTHETIC-AUDIO-MARKER greeting
+GHSA-GFG9-5357-HV4C benign local audio file that lives INSIDE the allowed
+media root, so both revisions may embed it.

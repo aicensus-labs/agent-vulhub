@@ -11,7 +11,8 @@ SERVICE_KEYS = {
 }
 
 
-def validate_compose(config, images, exceptions=(), allow_exceptions=False):
+def validate_compose(config, images, exceptions=(), allow_exceptions=False,
+                     tool_allocated=False):
     services = config.get("services", {})
     if not services or not {"vulnerable", "patched"}.issubset(services):
         raise ValueError("Compose requires vulnerable and patched services")
@@ -30,8 +31,15 @@ def validate_compose(config, images, exceptions=(), allow_exceptions=False):
         raise ValueError(f"Unsupported Compose sections: {sorted(unknown)}")
     for name, network in config.get("networks", {}).items():
         require(network.get("internal") is True, f"network.{name}.internal")
+        # `docker compose config` always emits an empty ipam mapping. A populated one is only
+        # reachable through the documented exception, so report that rule rather than the
+        # generic rejection below. A subnet the tool layer allocated itself (because the host
+        # ran out of Docker default pools) is host plumbing, not a recipe isolation choice:
+        # the network is still `internal = true`, so it needs no exception and no reviewer.
+        declared = bool(network.get("ipam")) and not tool_allocated
+        require(not declared, f"network.{name}.subnet")
         if (set(network) - {"name", "internal", "labels", "driver", "ipam"}
-                or network.get("ipam") or network.get("driver", "bridge") != "bridge"):
+                or network.get("driver", "bridge") != "bridge"):
             raise ValueError(f"Unsupported network configuration: {name}")
     for name, volume in config.get("volumes", {}).items():
         if volume and set(volume) - {"name", "labels"}:

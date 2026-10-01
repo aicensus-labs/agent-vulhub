@@ -1,0 +1,853 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T031721Z-4db246bc72d9",
+  "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+  "layer": "mechanism",
+  "rounds": 3,
+  "started_at": "2026-09-27T03:17:21.277282+00:00",
+  "cases": [
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "01-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 1,
+      "project": "avh-6e86be0240404711940c",
+      "layer": "mechanism",
+      "source_commit": "44e5b62c27e088128e32e209c146de346c3ea7e6",
+      "image": "sha256:d25ff6bfc4d8e5161943236992a2eb8e4358a687346632273d66dfd2597758dc",
+      "started_at": "2026-09-27T03:17:36.647343+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "denied group media replay loses the session context and the media read capability actually returns the canary bytes",
+          "actual": "denied group media replay loses the session context, resolves no group policy and the media read capability actually returns the 28-byte canary (sha256=00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43)",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:17:44.407254+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "01-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 1,
+      "project": "avh-af57d68d791e4be5bc2d",
+      "layer": "mechanism",
+      "source_commit": "48aae82bbc19ba8b0741e61a08063eb0d1df464e",
+      "image": "sha256:2948e7cca150061d4acdade319eee103a2d78e65b5b0e634490c522b33f2f335",
+      "started_at": "2026-09-27T03:17:44.410726+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "the recovered group session resolves the deny policy and the media read capability is withheld (no canary bytes)",
+          "actual": "the recovered group session resolves the deny read policy and the media read capability is withheld: the recorded media effect is empty",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:17:54.407573+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "01-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 1,
+      "project": "avh-7a81cc8c9b5446769056",
+      "layer": "mechanism",
+      "source_commit": "44e5b62c27e088128e32e209c146de346c3ea7e6",
+      "image": "sha256:d25ff6bfc4d8e5161943236992a2eb8e4358a687346632273d66dfd2597758dc",
+      "started_at": "2026-09-27T03:17:54.410939+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the allow-read group media replay keeps working and returns the canary bytes",
+          "actual": "the vulnerable allow-read group media replay keeps working and returns the 28-byte canary (sha256=00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43)",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:18:01.358010+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "01-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 1,
+      "project": "avh-917e3cc38d9d4592afa2",
+      "layer": "mechanism",
+      "source_commit": "48aae82bbc19ba8b0741e61a08063eb0d1df464e",
+      "image": "sha256:2948e7cca150061d4acdade319eee103a2d78e65b5b0e634490c522b33f2f335",
+      "started_at": "2026-09-27T03:18:01.361762+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the allow-read group media replay keeps working and returns the canary bytes",
+          "actual": "the patched allow-read group media replay keeps working and returns the 28-byte canary (sha256=00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43)",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:18:10.312156+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "02-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 2,
+      "project": "avh-aa2d64b90c234403be18",
+      "layer": "mechanism",
+      "source_commit": "44e5b62c27e088128e32e209c146de346c3ea7e6",
+      "image": "sha256:d25ff6bfc4d8e5161943236992a2eb8e4358a687346632273d66dfd2597758dc",
+      "started_at": "2026-09-27T03:18:10.315295+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "denied group media replay loses the session context and the media read capability actually returns the canary bytes",
+          "actual": "denied group media replay loses the session context, resolves no group policy and the media read capability actually returns the 28-byte canary (sha256=00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43)",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:18:17.614766+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "02-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 2,
+      "project": "avh-c487172feb104609852e",
+      "layer": "mechanism",
+      "source_commit": "48aae82bbc19ba8b0741e61a08063eb0d1df464e",
+      "image": "sha256:2948e7cca150061d4acdade319eee103a2d78e65b5b0e634490c522b33f2f335",
+      "started_at": "2026-09-27T03:18:17.617962+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "the recovered group session resolves the deny policy and the media read capability is withheld (no canary bytes)",
+          "actual": "the recovered group session resolves the deny read policy and the media read capability is withheld: the recorded media effect is empty",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:18:28.208700+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "02-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 2,
+      "project": "avh-cd0d1c116c6f4d7691c2",
+      "layer": "mechanism",
+      "source_commit": "44e5b62c27e088128e32e209c146de346c3ea7e6",
+      "image": "sha256:d25ff6bfc4d8e5161943236992a2eb8e4358a687346632273d66dfd2597758dc",
+      "started_at": "2026-09-27T03:18:28.211254+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the allow-read group media replay keeps working and returns the canary bytes",
+          "actual": "the vulnerable allow-read group media replay keeps working and returns the 28-byte canary (sha256=00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43)",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:18:35.483095+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "02-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 2,
+      "project": "avh-31e26c6306214e6ab9ae",
+      "layer": "mechanism",
+      "source_commit": "48aae82bbc19ba8b0741e61a08063eb0d1df464e",
+      "image": "sha256:2948e7cca150061d4acdade319eee103a2d78e65b5b0e634490c522b33f2f335",
+      "started_at": "2026-09-27T03:18:35.486408+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the allow-read group media replay keeps working and returns the canary bytes",
+          "actual": "the patched allow-read group media replay keeps working and returns the 28-byte canary (sha256=00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43)",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:18:44.810555+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "03-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 3,
+      "project": "avh-e5713a2323754daa9b84",
+      "layer": "mechanism",
+      "source_commit": "44e5b62c27e088128e32e209c146de346c3ea7e6",
+      "image": "sha256:d25ff6bfc4d8e5161943236992a2eb8e4358a687346632273d66dfd2597758dc",
+      "started_at": "2026-09-27T03:18:44.814737+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "denied group media replay loses the session context and the media read capability actually returns the canary bytes",
+          "actual": "denied group media replay loses the session context, resolves no group policy and the media read capability actually returns the 28-byte canary (sha256=00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43)",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:18:51.263610+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "03-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 3,
+      "project": "avh-be5707db34b64f8dae4f",
+      "layer": "mechanism",
+      "source_commit": "48aae82bbc19ba8b0741e61a08063eb0d1df464e",
+      "image": "sha256:2948e7cca150061d4acdade319eee103a2d78e65b5b0e634490c522b33f2f335",
+      "started_at": "2026-09-27T03:18:51.267830+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "the recovered group session resolves the deny policy and the media read capability is withheld (no canary bytes)",
+          "actual": "the recovered group session resolves the deny read policy and the media read capability is withheld: the recorded media effect is empty",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:19:00.638128+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "03-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 3,
+      "project": "avh-82ff42aa170d4fdf924d",
+      "layer": "mechanism",
+      "source_commit": "44e5b62c27e088128e32e209c146de346c3ea7e6",
+      "image": "sha256:d25ff6bfc4d8e5161943236992a2eb8e4358a687346632273d66dfd2597758dc",
+      "started_at": "2026-09-27T03:19:00.642434+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the allow-read group media replay keeps working and returns the canary bytes",
+          "actual": "the vulnerable allow-read group media replay keeps working and returns the 28-byte canary (sha256=00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43)",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:19:07.827004+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T031721Z-4db246bc72d9",
+      "case_id": "03-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+      "round": 3,
+      "project": "avh-a5f91382d91c418f9dae",
+      "layer": "mechanism",
+      "source_commit": "48aae82bbc19ba8b0741e61a08063eb0d1df464e",
+      "image": "sha256:2948e7cca150061d4acdade319eee103a2d78e65b5b0e634490c522b33f2f335",
+      "started_at": "2026-09-27T03:19:07.830393+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "the allow-read group media replay keeps working and returns the canary bytes",
+          "actual": "the patched allow-read group media replay keeps working and returns the 28-byte canary (sha256=00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43)",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "driver-report.json",
+            "queued-entry.json",
+            "media-read.bin"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T03:19:16.649157+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    }
+  ],
+  "outcome": "passed",
+  "exit_code": 0,
+  "fingerprint": "a1aa8cf27e7b49cab9d0a1b88bfbddb686f5aaa2f31e88697a0c1b03fb8e51ac",
+  "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+  "docker_version": "29.6.1",
+  "compose_version": "5.3.0",
+  "platform": "linux/amd64",
+  "host_system": "Linux",
+  "docker_operating_system": "Ubuntu 24.04.3 LTS",
+  "host_architecture": "x86_64",
+  "images": {
+    "vulnerable": "sha256:d25ff6bfc4d8e5161943236992a2eb8e4358a687346632273d66dfd2597758dc",
+    "patched": "sha256:2948e7cca150061d4acdade319eee103a2d78e65b5b0e634490c522b33f2f335"
+  },
+  "finished_at": "2026-09-27T03:19:16.659833+00:00"
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T055037Z-049befb5f9e2",
+  "case_id": "03-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": "the three comma/comment/trailing separator payloads are misclassified as read-only (False), the plain mutation is a write (True), the read-only gate is present, and the execute_graphql branch (branch hash pinned) has no project allow-list guard",
+      "actual": "{\"bypass_queries\": {\"comment_then_comma_mutation\": false, \"leading_comma_mutation\": false, \"trailing_comma_subscription\": false}, \"complete\": true, \"control_query\": true, \"execute_graphql_branch_sha256\": \"f7f1ba951ae5e1bbd83fc3a802c02aee791fe8914dfdf9edbc82b99073963959\", \"expected_execute_graphql_branch_sha256\": \"f7f1ba951ae5e1bbd83fc3a802c02aee791fe8914dfdf9edbc82b99073963959\", \"expected_module_sha256\": \"0ee49475446ca2eb4add393eca0014ad04e526281bd3d3171c538f04729e47e7\", \"expected_project_scope_guard_present\": false, \"expected_read_only_guard_present\": true, \"expected_scope_guard_definition_sha256\": \"0a70ef44c63f73cd705d8a9124b6c34ee15fe6b625ddf8ce395bef93529ba9f8\", \"module_sha256\": \"0ee49475446ca2eb4add393eca0014ad04e526281bd3d3171c538f04729e47e7\", \"observation_module_sha256\": \"0ee49475446ca2eb4add393eca0014ad04e526281bd3d3171c538f04729e47e7\", \"observed\": {\"bypass_query_flagged\": false, \"comment_bypass_observed\": true, \"out_of_allowlist_project\": \"424242\", \"plain_mutation_flagged\": true, \"project_scope_guard_present\": false, \"raw_endpoint\": \"/api/graphql\", \"read_only_bypass_observed\": true, \"read_only_guard_present\": true, \"separator_bypass_observed\": true}, \"pin_matches\": true, \"project_scope_guard_present\": false, \"read_only_guard_present\": true, \"scope_guard_definition_sha256\": \"0a70ef44c63f73cd705d8a9124b6c34ee15fe6b625ddf8ce395bef93529ba9f8\", \"variant\": \"vulnerable\"}",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "driver-results.json",
+        "driver-stdout.txt",
+        "driver-stderr.txt"
+      ]
+    }
+  ]
+}

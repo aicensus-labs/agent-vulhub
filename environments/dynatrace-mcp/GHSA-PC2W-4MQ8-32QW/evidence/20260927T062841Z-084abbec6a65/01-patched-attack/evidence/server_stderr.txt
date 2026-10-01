@@ -1,0 +1,16 @@
+Initializing Dynatrace MCP Server v1.8.7...
+Dynatrace Telemetry initialization failed: Dynatrace Telemetry is disabled via DT_MCP_DISABLE_TELEMETRY=true
+⚠️ Demo configuration detected (https://abc12345.apps.dynatrace.com). Skipping connection tests. Tool calls will not work until a real Dynatrace environment is configured.
+Starting Dynatrace MCP Server v1.8.7...
+Connecting server to transport...
+Dynatrace MCP Server running on stdio
+Failed to elicit human approval: Error: Client does not support form elicitation.
+    at Server.elicitInput (/usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:121087:17)
+    at requestHumanApproval (/usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:123917:44)
+    at /usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:125004:32
+    at /usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:123873:34
+    at /usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:123912:45
+    at McpServer.executeToolHandler (/usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:121451:36)
+    at /usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:121355:35
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async wrappedHandler (/usr/local/lib/node_modules/@dynatrace-oss/dynatrace-mcp-server/index.js:120872:24)

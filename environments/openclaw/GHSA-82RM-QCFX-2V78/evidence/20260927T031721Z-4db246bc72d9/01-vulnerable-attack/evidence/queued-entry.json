@@ -1,0 +1,25 @@
+{
+  "id": "b22baa84-c185-4df8-bda0-c3a717b00d2e",
+  "enqueuedAt": 1790479060727,
+  "channel": "telegram",
+  "to": "group:ops-room",
+  "accountId": "default",
+  "payloads": [
+    {
+      "text": "queued group media replay",
+      "mediaUrls": [
+        "/tmp/openclaw-repro-sdbw202e/workspace/canary-media.txt"
+      ]
+    }
+  ],
+  "mirror": {
+    "agentId": "main",
+    "sessionKey": "telegram:group:ops-room",
+    "isGroup": true,
+    "groupId": "ops-room"
+  },
+  "gatewayClientScopes": [
+    "gateway.chat.send"
+  ],
+  "retryCount": 0
+}

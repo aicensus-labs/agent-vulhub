@@ -1,0 +1,88 @@
+schema_version = 1
+id = "n8n/GHSA-5VFW-JC4P-FJ39"
+ghsa = "GHSA-5VFW-JC4P-FJ39"
+product = "n8n"
+title = "Duplicate Advisory: Member-Level Users Can Execute Other Users' MCP Server Trigger Workflows via Missing OAuth Authorization Check"
+lifecycle = "draft"
+agent_specificity = "agent_unique"
+# Advisory severity from the authoritative source, normalized to
+# CRITICAL/HIGH/MEDIUM/LOW/NONE. Use "UNKNOWN" when no source publishes one.
+severity = "MEDIUM"
+advisories = ["https://github.com/advisories/GHSA-5vfw-jc4p-fj39"]
+description = """Root cause: n8n's shared OAuth 2.1 authorization server models a protected
+resource as a purely descriptive ProtectedResource (id, getResourceUrl, getAudiences, scopes,
+displayName) with no membership check. The 2.29.7 consent service and access-token verifier both
+only confirm that the resource exists and that the token audience matches; they never ask whether
+the caller is allowed to act on that resource. A member-level user can therefore mint an access
+token for another user's active MCP Server Trigger and reach it in the owner's execution context.
+The fix adds an authorize(user) member to the resource contract and consults it in
+OAuthConsentService.getConsentDetails/handleConsentDecision and
+OAuthTokenService.verifyOAuthAccessToken, returning 403 / insufficient_scope otherwise."""
+prerequisites = [
+  "A pinned n8n release loaded by a Node.js interpreter: 2.29.7 (vulnerable) or 2.29.8 (patched).",
+]
+
+[vulnerable]
+version = "2.29.7"
+source_url = "https://github.com/n8n-io/n8n"
+commit = "60109bba8cae51bdb60615a41552cebf397b7438"
+image = ""
+archive = "n8n-2.29.7.tgz"
+
+[patched]
+version = "2.29.8"
+source_url = "https://github.com/n8n-io/n8n"
+commit = "7786117e976664b67288f13d6cfcd1fcf1b1289b"
+image = ""
+archive = "n8n-2.29.8.tgz"
+
+[build]
+# Locally cached node:22-bookworm pinned by manifest digest. It carries the node
+# interpreter the harness drives and python3 for reproduce.py / verify.py.
+base_image = "node:22-bookworm@sha256:363e1587494626837fa7f9a23bdb453d13b0ff3c67c705c2805cfc69c2d2fad7"
+dockerfile = "Dockerfile"
+# Each entry: { name = "...", url = "https://...", sha256 = "..." }
+# The two official npm tarballs are the pinned upstream releases (2.29.7
+# vulnerable / 2.29.8 patched) and are the variant `archive` inputs. The exercised
+# entrypoints import nothing outside the Node standard library and the 14 loader
+# shims, which the loader resolves under fixtures/harness/shims and which are
+# hash-pinned in fixtures/manifest.toml; see Dockerfile and research/build-res.toml.
+inputs = [
+  { name = "n8n-2.29.7.tgz", url = "https://registry.npmjs.org/n8n/-/n8n-2.29.7.tgz", sha256 = "cf98d3c9a35e730681b0e4afc881c60e55ecfc96f24aa94b49b458923167b341" },
+  { name = "n8n-2.29.8.tgz", url = "https://registry.npmjs.org/n8n/-/n8n-2.29.8.tgz", sha256 = "c6095893f456ea3e8c72ab7434fdaf5fcf6d29784979dc53107443bf2baf26ce" },
+]
+
+[runtime]
+isolation = "container"
+platforms = ["linux/amd64"]
+mode = "oneshot"
+harness = "python3"
+exceptions = []
+requires_model = false
+# Dedicated /16 so this environment's case networks never contend with the
+# tool layer's shared fallback space (10.0.0.0/8) on a host that runs several
+# reproduce pipelines at once. Without it, a concurrent run can claim the same
+# /24 between this case's subnet scan and `compose up`, and Docker rejects the
+# create with "Pool overlaps with other one on this address space" even though
+# the mechanism itself is fine. 10.249.0.0/16 is unused by the other recipes.
+network_pool = "10.249.0.0/16"
+network_requirements = "No network at build or run time: both pinned releases and the complete harness shim closure are baked into the image from SHA-256-verified inputs."
+
+[verification.mechanism]
+status = "passed"
+verified_at = "2026-09-27T05:27:07.314961+00:00"
+evidence = ["evidence/20260927T052507Z-0964286d2c6f/report.json"]
+notes = "四场景三轮（12/12）已通过；归档报告 run_id=20260927T052507Z-0964286d2c6f，由 staging 验证结果迁移并按当前输入指纹复核。"
+
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
+
+[verification.agent_poc]
+status = "not_run"
+adapter_status = "not_run"
+verified_at = ""
+evidence = []
+notes = "An independently reviewed Agent-PoC Adapter is required before candidate evaluation."

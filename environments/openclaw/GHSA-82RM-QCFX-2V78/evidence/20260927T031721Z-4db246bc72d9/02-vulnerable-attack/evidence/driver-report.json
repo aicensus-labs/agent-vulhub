@@ -1,0 +1,30 @@
+{
+  "package_version": "2026.4.10",
+  "package_root": "/lab/openclaw",
+  "queue_chunk": "delivery-queue-wYNXw79t.js",
+  "recovery_chunk": "delivery-queue-CI0H9BEM.js",
+  "media_chunk": "deliver-BA26RCnu.js",
+  "load_chunk": "delivery-queue-wYNXw79t.js",
+  "policy_chunk": "deliver-BA26RCnu.js",
+  "queued_id": "bfbfcbdf-5cdd-4cc9-89c9-0715f232d317",
+  "recovered_deliver_calls": 1,
+  "stored_entry_available": true,
+  "stored_entry_error": null,
+  "stored_entry_has_session": false,
+  "stored_entry_session_keys": [],
+  "recovered_params_has_session": false,
+  "recovered_params_session_keys": [],
+  "recovered_params_channel": "telegram",
+  "recovered_params_skip_queue": true,
+  "group_policy_present": false,
+  "group_policy_resolved": null,
+  "policy_error": null,
+  "media_read_file_granted": true,
+  "media_access_keys": [
+    "localRoots",
+    "readFile",
+    "workspaceDir"
+  ],
+  "media_read_bytes_sha256": "00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43",
+  "media_read_error": null
+}

@@ -1,0 +1,8 @@
+schema_version = 1
+
+# Keys are paths relative to fixtures/. Include attack AND benign inputs.
+# manifest.toml and README.md are excluded, as required by the contract.
+[files]
+"attack_redirect.json" = "abb34342dfd2ec97d696dfeb4cbbea8272810e4c45c06e99578518631c399284"
+"benign_loopback.json" = "eedf0725afae06041374070881dcb3555e2dda4ad625263a033b3c8b51d84d5d"
+"internal_canary.json" = "86ed14ff44b33e15449b984704124eb42a1039a4196c10c4110481d8cded9b61"

@@ -1,0 +1,17 @@
+{
+  "description": "Hair-pin initialize attempt: the caller sets mcp-init-host to an attacker-chosen upstream and supplies only the shared router key. It carries no gateway JWT session, so the gateway session validator was never satisfied.",
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {},
+    "clientInfo": {
+      "name": "synthetic-hairpin-attacker",
+      "version": "1.0.0"
+    }
+  },
+  "headers": {
+    "mcp-init-host": "attacker-chosen-backend.example.invalid",
+    "router-key": "shared-router-key-value"
+  },
+  "carries_gateway_session": false
+}

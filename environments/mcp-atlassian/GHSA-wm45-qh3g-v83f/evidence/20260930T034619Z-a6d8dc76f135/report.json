@@ -1,0 +1,829 @@
+{
+  "schema_version": 1,
+  "run_id": "20260930T034619Z-a6d8dc76f135",
+  "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+  "layer": "mechanism",
+  "rounds": 3,
+  "started_at": "2026-09-30T03:46:19.705570+00:00",
+  "cases": [
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "01-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 1,
+      "project": "avh-c1a7fe124a0b4b28880b",
+      "layer": "mechanism",
+      "source_commit": "c450a161ec630dd57f44a2b15d977debae19eba5",
+      "image": "sha256:eaf0fac94a43f4973454f0c79979105bac4224aae0156832fd956a038b7982ac",
+      "started_at": "2026-09-30T03:46:56.978808+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "A traversal path is opened by the upload method",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': '../fixtures/secret.txt', 'opened_paths': ['/lab/fixtures/secret.txt'], 'upload_calls': [{'issue_key': 'DEMO-1', 'filename': '/lab/fixtures/secret.txt'}], 'result': {'success': True, 'issue_key': 'DEMO-1', 'filename': 'secret.txt', 'size': 34, 'id': 'synthetic-attachment'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:47:05.775290+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "01-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 1,
+      "project": "avh-ab7fbbbb10f34942a907",
+      "layer": "mechanism",
+      "source_commit": "b041733473f95119dd539542a43c280737a8e460",
+      "image": "sha256:dbd1acfb73a90c896608079331604caaaabe8c8f0a2ad8b5b18b6232c63c82ca",
+      "started_at": "2026-09-30T03:47:05.778175+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "The upload source is confined to the workspace",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': '../fixtures/secret.txt', 'opened_paths': [], 'upload_calls': [], 'result': {'success': False, 'error': 'Path traversal detected: ../fixtures/secret.txt resolves outside /lab/workspace'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:47:11.991229+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "01-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 1,
+      "project": "avh-f1141545109146df879e",
+      "layer": "mechanism",
+      "source_commit": "c450a161ec630dd57f44a2b15d977debae19eba5",
+      "image": "sha256:eaf0fac94a43f4973454f0c79979105bac4224aae0156832fd956a038b7982ac",
+      "started_at": "2026-09-30T03:47:11.994741+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A workspace attachment remains uploadable",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': 'allowed.txt', 'opened_paths': ['/lab/workspace/allowed.txt'], 'upload_calls': [{'issue_key': 'DEMO-1', 'filename': '/lab/workspace/allowed.txt'}], 'result': {'success': True, 'issue_key': 'DEMO-1', 'filename': 'allowed.txt', 'size': 23, 'id': 'synthetic-attachment'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:47:18.103575+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "01-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 1,
+      "project": "avh-b3f75c73f47644b895a0",
+      "layer": "mechanism",
+      "source_commit": "b041733473f95119dd539542a43c280737a8e460",
+      "image": "sha256:dbd1acfb73a90c896608079331604caaaabe8c8f0a2ad8b5b18b6232c63c82ca",
+      "started_at": "2026-09-30T03:47:18.107156+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A workspace attachment remains uploadable",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': 'allowed.txt', 'opened_paths': ['/lab/workspace/allowed.txt'], 'upload_calls': [{'issue_key': 'DEMO-1', 'filename': '/lab/workspace/allowed.txt'}], 'result': {'success': True, 'issue_key': 'DEMO-1', 'filename': 'allowed.txt', 'size': 23, 'id': 'synthetic-attachment'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:47:24.713746+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "02-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 2,
+      "project": "avh-d5adbeaec2994199a546",
+      "layer": "mechanism",
+      "source_commit": "c450a161ec630dd57f44a2b15d977debae19eba5",
+      "image": "sha256:eaf0fac94a43f4973454f0c79979105bac4224aae0156832fd956a038b7982ac",
+      "started_at": "2026-09-30T03:47:24.717896+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "A traversal path is opened by the upload method",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': '../fixtures/secret.txt', 'opened_paths': ['/lab/fixtures/secret.txt'], 'upload_calls': [{'issue_key': 'DEMO-1', 'filename': '/lab/fixtures/secret.txt'}], 'result': {'success': True, 'issue_key': 'DEMO-1', 'filename': 'secret.txt', 'size': 34, 'id': 'synthetic-attachment'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:47:31.475580+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "02-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 2,
+      "project": "avh-5e90bace3c924d7ab104",
+      "layer": "mechanism",
+      "source_commit": "b041733473f95119dd539542a43c280737a8e460",
+      "image": "sha256:dbd1acfb73a90c896608079331604caaaabe8c8f0a2ad8b5b18b6232c63c82ca",
+      "started_at": "2026-09-30T03:47:31.479881+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "The upload source is confined to the workspace",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': '../fixtures/secret.txt', 'opened_paths': [], 'upload_calls': [], 'result': {'success': False, 'error': 'Path traversal detected: ../fixtures/secret.txt resolves outside /lab/workspace'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:47:39.037577+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "02-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 2,
+      "project": "avh-578cf1d3bc214b7d92d8",
+      "layer": "mechanism",
+      "source_commit": "c450a161ec630dd57f44a2b15d977debae19eba5",
+      "image": "sha256:eaf0fac94a43f4973454f0c79979105bac4224aae0156832fd956a038b7982ac",
+      "started_at": "2026-09-30T03:47:39.040333+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A workspace attachment remains uploadable",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': 'allowed.txt', 'opened_paths': ['/lab/workspace/allowed.txt'], 'upload_calls': [{'issue_key': 'DEMO-1', 'filename': '/lab/workspace/allowed.txt'}], 'result': {'success': True, 'issue_key': 'DEMO-1', 'filename': 'allowed.txt', 'size': 23, 'id': 'synthetic-attachment'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:47:46.149503+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "02-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 2,
+      "project": "avh-711069f0173a4f76bd1c",
+      "layer": "mechanism",
+      "source_commit": "b041733473f95119dd539542a43c280737a8e460",
+      "image": "sha256:dbd1acfb73a90c896608079331604caaaabe8c8f0a2ad8b5b18b6232c63c82ca",
+      "started_at": "2026-09-30T03:47:46.153611+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A workspace attachment remains uploadable",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': 'allowed.txt', 'opened_paths': ['/lab/workspace/allowed.txt'], 'upload_calls': [{'issue_key': 'DEMO-1', 'filename': '/lab/workspace/allowed.txt'}], 'result': {'success': True, 'issue_key': 'DEMO-1', 'filename': 'allowed.txt', 'size': 23, 'id': 'synthetic-attachment'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:47:55.585945+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "03-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 3,
+      "project": "avh-4ba0965356c34a68ab7a",
+      "layer": "mechanism",
+      "source_commit": "c450a161ec630dd57f44a2b15d977debae19eba5",
+      "image": "sha256:eaf0fac94a43f4973454f0c79979105bac4224aae0156832fd956a038b7982ac",
+      "started_at": "2026-09-30T03:47:55.590706+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "A traversal path is opened by the upload method",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': '../fixtures/secret.txt', 'opened_paths': ['/lab/fixtures/secret.txt'], 'upload_calls': [{'issue_key': 'DEMO-1', 'filename': '/lab/fixtures/secret.txt'}], 'result': {'success': True, 'issue_key': 'DEMO-1', 'filename': 'secret.txt', 'size': 34, 'id': 'synthetic-attachment'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:48:03.449165+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "03-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 3,
+      "project": "avh-2fd8f755d4344fcb94af",
+      "layer": "mechanism",
+      "source_commit": "b041733473f95119dd539542a43c280737a8e460",
+      "image": "sha256:dbd1acfb73a90c896608079331604caaaabe8c8f0a2ad8b5b18b6232c63c82ca",
+      "started_at": "2026-09-30T03:48:03.453486+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "The upload source is confined to the workspace",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': '../fixtures/secret.txt', 'opened_paths': [], 'upload_calls': [], 'result': {'success': False, 'error': 'Path traversal detected: ../fixtures/secret.txt resolves outside /lab/workspace'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:48:11.381664+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "03-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 3,
+      "project": "avh-c77d91f36c554d0dabde",
+      "layer": "mechanism",
+      "source_commit": "c450a161ec630dd57f44a2b15d977debae19eba5",
+      "image": "sha256:eaf0fac94a43f4973454f0c79979105bac4224aae0156832fd956a038b7982ac",
+      "started_at": "2026-09-30T03:48:11.385992+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A workspace attachment remains uploadable",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': 'allowed.txt', 'opened_paths': ['/lab/workspace/allowed.txt'], 'upload_calls': [{'issue_key': 'DEMO-1', 'filename': '/lab/workspace/allowed.txt'}], 'result': {'success': True, 'issue_key': 'DEMO-1', 'filename': 'allowed.txt', 'size': 23, 'id': 'synthetic-attachment'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:48:20.492235+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260930T034619Z-a6d8dc76f135",
+      "case_id": "03-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+      "round": 3,
+      "project": "avh-0b2ed747792a4e2baa54",
+      "layer": "mechanism",
+      "source_commit": "b041733473f95119dd539542a43c280737a8e460",
+      "image": "sha256:dbd1acfb73a90c896608079331604caaaabe8c8f0a2ad8b5b18b6232c63c82ca",
+      "started_at": "2026-09-30T03:48:20.495297+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A workspace attachment remains uploadable",
+          "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': 'allowed.txt', 'opened_paths': ['/lab/workspace/allowed.txt'], 'upload_calls': [{'issue_key': 'DEMO-1', 'filename': '/lab/workspace/allowed.txt'}], 'result': {'success': True, 'issue_key': 'DEMO-1', 'filename': 'allowed.txt', 'size': 23, 'id': 'synthetic-attachment'}, 'error': None}",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "jira_effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-30T03:48:29.833385+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    }
+  ],
+  "outcome": "passed",
+  "exit_code": 0,
+  "fingerprint": "b1cc43ca5d4d6c27f496b1110e92e60eca098f829d4e70fc5f9c373b79b78cd3",
+  "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+  "docker_version": "29.6.1",
+  "compose_version": "5.3.0",
+  "platform": "linux/amd64",
+  "host_system": "Linux",
+  "docker_operating_system": "Ubuntu 24.04.3 LTS",
+  "host_architecture": "x86_64",
+  "images": {
+    "vulnerable": "sha256:eaf0fac94a43f4973454f0c79979105bac4224aae0156832fd956a038b7982ac",
+    "patched": "sha256:dbd1acfb73a90c896608079331604caaaabe8c8f0a2ad8b5b18b6232c63c82ca"
+  },
+  "finished_at": "2026-09-30T03:48:29.842029+00:00"
+}

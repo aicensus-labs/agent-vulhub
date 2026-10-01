@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T031721Z-4db246bc72d9",
+  "case_id": "01-patched-benign",
+  "variant": "patched",
+  "scenario": "benign",
+  "environment_id": "openclaw/GHSA-82RM-QCFX-2V78",
+  "round": 1,
+  "project": "avh-917e3cc38d9d4592afa2",
+  "layer": "mechanism",
+  "source_commit": "48aae82bbc19ba8b0741e61a08063eb0d1df464e",
+  "image": "sha256:2948e7cca150061d4acdade319eee103a2d78e65b5b0e634490c522b33f2f335",
+  "started_at": "2026-09-27T03:18:01.361762+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "the allow-read group media replay keeps working and returns the canary bytes",
+      "actual": "the patched allow-read group media replay keeps working and returns the 28-byte canary (sha256=00fa0b5b903e14c90a028854e062f4b9ce151d378fb557536dcfcba8269dba43)",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "driver-report.json",
+        "queued-entry.json",
+        "media-read.bin"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-27T03:18:10.312156+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

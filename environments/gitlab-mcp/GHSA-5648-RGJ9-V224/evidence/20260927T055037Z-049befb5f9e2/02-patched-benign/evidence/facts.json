@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T055037Z-049befb5f9e2",
+  "case_id": "02-patched-benign",
+  "variant": "patched",
+  "scenario": "benign",
+  "execution_status": "completed",
+  "evidence": [
+    {
+      "path": "observation.json",
+      "sha256": "fab220eb3e5675d85135d512a5f9401ff8ab4cd4cc5c4cf9a85502d06b1730c6"
+    },
+    {
+      "path": "driver-results.json",
+      "sha256": "35f4c48a0ec4eca641b2e58f830f891817338c688a2b6565b37a9413ecdf6825"
+    },
+    {
+      "path": "driver-stdout.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "driver-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

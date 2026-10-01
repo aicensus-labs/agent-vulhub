@@ -1,0 +1,196 @@
+schema_version = 1
+id = "flowise/GHSA-M99R-2HXC-CP3Q"
+ghsa = "GHSA-M99R-2HXC-CP3Q"
+product = "flowise"
+title = "Flowise has an MCP Security Bypass that Enables RCE"
+lifecycle = "draft"
+agent_specificity = "agent_unique"
+# Advisory severity from the authoritative source, normalized to
+# CRITICAL/HIGH/MEDIUM/LOW/NONE. Use "UNKNOWN" when no source publishes one.
+severity = "HIGH"
+advisories = ["https://github.com/advisories/GHSA-m99r-2hxc-cp3q"]
+description = """
+The Custom MCP node stores its mcpServerConfig as attacker-controlled input: any
+authenticated user, or any API key with view & update permission on a chatflow,
+can write it and reach it through POST /api/v1/prediction/{chatflow_id}. The only
+server-side gate is validateMCPServerConfig() in
+packages/components/nodes/tools/MCP/core.ts. Its local-file-access rule uses
+/^\\/[^/]/, which does not match a path beginning with two slashes, so
+{"command": "node", "args": ["//pre-staged.js"]} passes validation even though a
+normal absolute path is rejected. The unmodified serverParams.command/args are
+then handed to MCPToolkit -> StdioClientTransport, which spawns the child process
+on the Flowise host: whitelist bypass equals arbitrary command execution. The
+same allowlist also omits docker's build subcommand and npx's --yes long form.
+Version 3.1.2 tightens the regex to /^\\// and adds the missing denylist entries.
+"""
+prerequisites = [
+    "A Flowise account of any role, or an API key with view & update permission on the target chatflow",
+    "The server-side deployment has node, npx or docker on PATH (all three are on the command allowlist)",
+    "CUSTOM_MCP_SECURITY_CHECK is left at its default value so validateMCPServerConfig() actually runs",
+    "The attacker-controlled JavaScript is already present at a known absolute path on the server (the advisory's upload plus export-import path recovery step)",
+]
+
+[vulnerable]
+version = "3.1.1"
+source_url = "https://github.com/FlowiseAI/Flowise/tree/flowise%403.1.1"
+commit = "34cf28546b700998e88a8f14d6f6d0754f572da4"
+image = ""
+archive = "vulnerable-source.tar.gz"
+
+[patched]
+version = "3.1.2"
+source_url = "https://github.com/FlowiseAI/Flowise/tree/flowise%403.1.2"
+commit = "4114b3b506e7bbee155141175a2ba48e426919dd"
+image = ""
+archive = "patched-source.tar.gz"
+
+[build]
+base_image = "node:22-bookworm@sha256:363e1587494626837fa7f9a23bdb453d13b0ff3c67c705c2805cfc69c2d2fad7"
+dockerfile = "Dockerfile"
+# Each entry: { name = "...", url = "https://...", sha256 = "..." }
+# Include source archives AND every dependency needed by network-disabled builds.
+inputs = [
+    { name = "vulnerable-source.tar.gz", url = "https://codeload.github.com/FlowiseAI/Flowise/tar.gz/34cf28546b700998e88a8f14d6f6d0754f572da4", sha256 = "9e66303af8ef6df288210ac44ebfc3d439de05fca43a1c8cf726e455da58943d" },
+    { name = "patched-source.tar.gz", url = "https://codeload.github.com/FlowiseAI/Flowise/tar.gz/4114b3b506e7bbee155141175a2ba48e426919dd", sha256 = "3586ef81a9a874ded1c92aef34d5df3cfc76b4271a6471fb4a5d353d37333f8d" },
+    { name = "flowise-components-vulnerable.tgz", url = "https://registry.npmjs.org/flowise-components/-/flowise-components-3.1.1.tgz", sha256 = "b23b4823014854fb6beac83c2f1e56f9f9ea8b5ef5f14a84dabfaebc9b2fc57d" },
+    { name = "flowise-components-patched.tgz", url = "https://registry.npmjs.org/flowise-components/-/flowise-components-3.1.2.tgz", sha256 = "c1d6dcb536081aed6b79ee1c71911e2f257c2347255c79d074d812295e0e9a23" },
+    { name = "cfworker-json-schema-4.1.1.tgz", url = "https://registry.npmjs.org/@cfworker/json-schema/-/json-schema-4.1.1.tgz", sha256 = "f3a8076b450505f0671fa78a6efb5e7726883e2c6dfb13b29261872803610203" },
+    { name = "langchain-core-1.1.20.tgz", url = "https://registry.npmjs.org/@langchain/core/-/core-1.1.20.tgz", sha256 = "2a348119163f5644c611bdf9e9d680146dc527c78c2bb7738325eb6c6299d477" },
+    { name = "modelcontextprotocol-sdk-1.10.1.tgz", url = "https://registry.npmjs.org/@modelcontextprotocol/sdk/-/sdk-1.10.1.tgz", sha256 = "550ed926ae5cfc8880133ba2f8dabea2b041f0ccee79fd152c7f3c71e68ef369" },
+    { name = "accepts-2.0.0.tgz", url = "https://registry.npmjs.org/accepts/-/accepts-2.0.0.tgz", sha256 = "173d915f7d88df8cd4db2129a030c3b1c9cafd3b7aee5b89465bf3ad18372542" },
+    { name = "ansi-styles-5.2.0.tgz", url = "https://registry.npmjs.org/ansi-styles/-/ansi-styles-5.2.0.tgz", sha256 = "4ddd9360421279bb2c2c4ba91bc41a5515663223432d09158f9e3805f9d4a05f" },
+    { name = "asynckit-0.4.0.tgz", url = "https://registry.npmjs.org/asynckit/-/asynckit-0.4.0.tgz", sha256 = "8c254f30f70792645042e4d71f590ec49f8e386a475772f7430c73b964b57dcf" },
+    { name = "axios-1.8.4.tgz", url = "https://registry.npmjs.org/axios/-/axios-1.8.4.tgz", sha256 = "9c20c6b5741548b51ec5df29389e351ef737fc4da225191b6a5ab5a9c0be16b3" },
+    { name = "base64-js-1.5.1.tgz", url = "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz", sha256 = "b1b7a945b52685269083425216d6597e33d97bf21699d656e92fdb3eb5210a85" },
+    { name = "body-parser-2.3.0.tgz", url = "https://registry.npmjs.org/body-parser/-/body-parser-2.3.0.tgz", sha256 = "031d7f6c5142e31be91d36a43f541f02a505943e3b871aa44ef5fb6939be258e" },
+    { name = "content-type-2.1.0.tgz", url = "https://registry.npmjs.org/content-type/-/content-type-2.1.0.tgz", sha256 = "47a08ee5ddf87a96dd263aa942c5e04b2c5d26251e04affa8ace6804b450d758" },
+    { name = "bytes-3.1.2.tgz", url = "https://registry.npmjs.org/bytes/-/bytes-3.1.2.tgz", sha256 = "835e37ad5a40da45eaed6e32d99847627a15b2a4671741182521fe48dee3c581" },
+    { name = "call-bind-apply-helpers-1.0.2.tgz", url = "https://registry.npmjs.org/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz", sha256 = "073e9ff9dbabedf5c128020a677381e9f92c90188d118830b30a7656a7c37d2c" },
+    { name = "call-bound-1.0.4.tgz", url = "https://registry.npmjs.org/call-bound/-/call-bound-1.0.4.tgz", sha256 = "32086f492fedf1b9b34811f2ee50ca2cca53da5c783f7cd5f939d3f1e86bbd32" },
+    { name = "camelcase-6.3.0.tgz", url = "https://registry.npmjs.org/camelcase/-/camelcase-6.3.0.tgz", sha256 = "2851fe487cf5607b5196895b13d6db4620200b225eec753897a9759f8912adb6" },
+    { name = "combined-stream-1.0.8.tgz", url = "https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.8.tgz", sha256 = "b6be5aabe53e90635beb77cd0e0ba7ae6a25c8cf903b15fcc342353e732e1512" },
+    { name = "content-disposition-1.1.0.tgz", url = "https://registry.npmjs.org/content-disposition/-/content-disposition-1.1.0.tgz", sha256 = "2f8b1925a8b123a86606c11322fc10aafc1dd85f2860fffe32893e20aef4093c" },
+    { name = "content-type-1.0.5.tgz", url = "https://registry.npmjs.org/content-type/-/content-type-1.0.5.tgz", sha256 = "ac31d098405f0242dd712218f38a14a6202bd4eb01067db05db765d9a9bd12c8" },
+    { name = "cookie-0.7.2.tgz", url = "https://registry.npmjs.org/cookie/-/cookie-0.7.2.tgz", sha256 = "76b160f8251c630a116a2e0acf03557b0758975b2c0df800607248fc9aae9e20" },
+    { name = "cookie-signature-1.2.2.tgz", url = "https://registry.npmjs.org/cookie-signature/-/cookie-signature-1.2.2.tgz", sha256 = "4d2bbaaf1c299e60ef0d7df952b52af95b20d56cbcbd4468d4210650083553d3" },
+    { name = "cors-2.8.6.tgz", url = "https://registry.npmjs.org/cors/-/cors-2.8.6.tgz", sha256 = "32242124397140800e1238a252b4cd74669d58c81b655d9d3721789b56c1c1ff" },
+    { name = "cross-spawn-7.0.6.tgz", url = "https://registry.npmjs.org/cross-spawn/-/cross-spawn-7.0.6.tgz", sha256 = "188c320cdc413adfec03098fda72af7a9b02152ba13d3a8f87f172d93ced38ea" },
+    { name = "debug-4.4.3.tgz", url = "https://registry.npmjs.org/debug/-/debug-4.4.3.tgz", sha256 = "89c1ac9c946ee8905a875837114528e97eeae35e03be3190584b2216af43e4a7" },
+    { name = "decamelize-1.2.0.tgz", url = "https://registry.npmjs.org/decamelize/-/decamelize-1.2.0.tgz", sha256 = "b4adeff510e38c3a02703bcba72ffbe3c65b591f13c78c6a459b5e801a3e2864" },
+    { name = "delayed-stream-1.0.0.tgz", url = "https://registry.npmjs.org/delayed-stream/-/delayed-stream-1.0.0.tgz", sha256 = "ac38fce4217dfb1d772427c7d8d0d073e35ecd832915e97a61d9ab5c504129d3" },
+    { name = "depd-2.0.0.tgz", url = "https://registry.npmjs.org/depd/-/depd-2.0.0.tgz", sha256 = "28a58a2056093441f1d00d677d95918d2e4b3e98bac86237159101cae315d4a7" },
+    { name = "dunder-proto-1.0.1.tgz", url = "https://registry.npmjs.org/dunder-proto/-/dunder-proto-1.0.1.tgz", sha256 = "ed1342228c82c10df9921c59d684df516a0cd6ed25b61e5f9d6330895326cfdb" },
+    { name = "ee-first-1.1.1.tgz", url = "https://registry.npmjs.org/ee-first/-/ee-first-1.1.1.tgz", sha256 = "5148e8eb7e222b2a09127618bbdb5033daf6262cfc735d3101ea98620128b99c" },
+    { name = "encodeurl-2.0.0.tgz", url = "https://registry.npmjs.org/encodeurl/-/encodeurl-2.0.0.tgz", sha256 = "9b2e418b8851b8f9e7a13d5ada3bd4d3c5ef042885867261f556347d4bbefb29" },
+    { name = "es-define-property-1.0.1.tgz", url = "https://registry.npmjs.org/es-define-property/-/es-define-property-1.0.1.tgz", sha256 = "5986b8b13121340a8b0d5c7d8f0f961aa80ef3a74515ca9cb7a78d86ed0385f7" },
+    { name = "es-errors-1.3.0.tgz", url = "https://registry.npmjs.org/es-errors/-/es-errors-1.3.0.tgz", sha256 = "d14dd1c35b4bd3b8aca3219fd3627eb7f3eb49cf6b4c8a7ca58b91fd7a190993" },
+    { name = "es-object-atoms-1.1.2.tgz", url = "https://registry.npmjs.org/es-object-atoms/-/es-object-atoms-1.1.2.tgz", sha256 = "f295c5df6751c65b4b9492b03c88fab5e13419de28a51ecdf17e693b4a421af0" },
+    { name = "es-set-tostringtag-2.1.0.tgz", url = "https://registry.npmjs.org/es-set-tostringtag/-/es-set-tostringtag-2.1.0.tgz", sha256 = "5675f51a5c33ee402bff8a2a341a0390f85e82d3c199859244d2f67091b0b93d" },
+    { name = "escape-html-1.0.3.tgz", url = "https://registry.npmjs.org/escape-html/-/escape-html-1.0.3.tgz", sha256 = "a101155c3cbdfb1e4f98f2f83c8b5e392db6accfa606df0eba8b87a5762b0366" },
+    { name = "etag-1.8.1.tgz", url = "https://registry.npmjs.org/etag/-/etag-1.8.1.tgz", sha256 = "f6a96c78a973d2ab660c9efeee6aa74a399cd9e770625ba1ed95e1aca9fd0faf" },
+    { name = "eventemitter3-4.0.7.tgz", url = "https://registry.npmjs.org/eventemitter3/-/eventemitter3-4.0.7.tgz", sha256 = "703cdecfa6951d9ad258f615ab96895750add3cb2d95e3727837b78709975de8" },
+    { name = "eventsource-3.0.7.tgz", url = "https://registry.npmjs.org/eventsource/-/eventsource-3.0.7.tgz", sha256 = "7c62d4bb196e59b39c5af79e550d6fe4261649a74d9f5e605b071e1da6081c92" },
+    { name = "eventsource-parser-3.1.1.tgz", url = "https://registry.npmjs.org/eventsource-parser/-/eventsource-parser-3.1.1.tgz", sha256 = "44a0a0ca6cecea76ac47de3e73414ceb32dbbfb8f3b6408906d81170c68e36ed" },
+    { name = "express-5.2.1.tgz", url = "https://registry.npmjs.org/express/-/express-5.2.1.tgz", sha256 = "1773a16c02b4422653479b9c4d211268f7022bdac0d817b5698535bb485dd005" },
+    { name = "express-rate-limit-7.5.1.tgz", url = "https://registry.npmjs.org/express-rate-limit/-/express-rate-limit-7.5.1.tgz", sha256 = "30cc471f09546bc04106815275b869c8254b9b2f6b4901a83328f8a778a9bd17" },
+    { name = "finalhandler-2.1.1.tgz", url = "https://registry.npmjs.org/finalhandler/-/finalhandler-2.1.1.tgz", sha256 = "22949bfc51a620b3598bbe67d65619a9efd781d52704a38d7ba675e248a8b872" },
+    { name = "follow-redirects-1.16.0.tgz", url = "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.16.0.tgz", sha256 = "eba127bdabdf79d668187c7bac7123c136eee08930dd421416ba8a72613bae77" },
+    { name = "form-data-4.0.6.tgz", url = "https://registry.npmjs.org/form-data/-/form-data-4.0.6.tgz", sha256 = "fc4d94e9b629f5378367ba46da7d96115696c01e25c99cd57c2c9a3d098bb557" },
+    { name = "mime-db-1.52.0.tgz", url = "https://registry.npmjs.org/mime-db/-/mime-db-1.52.0.tgz", sha256 = "b8e70bb4d52acd5d0d1ed848c0e6e3c903a533aa500acffbe003f011b18f9e3b" },
+    { name = "mime-types-2.1.35.tgz", url = "https://registry.npmjs.org/mime-types/-/mime-types-2.1.35.tgz", sha256 = "49734fc98906e9baaacf8034923470a4c84de72943a7c005face63360701d1c3" },
+    { name = "forwarded-0.2.0.tgz", url = "https://registry.npmjs.org/forwarded/-/forwarded-0.2.0.tgz", sha256 = "9b5a5de95fb85fcb58db5e4fcd94ce8ab9f0476d02202e20a5225cec60431c99" },
+    { name = "fresh-2.0.0.tgz", url = "https://registry.npmjs.org/fresh/-/fresh-2.0.0.tgz", sha256 = "ad08397ab05f62b2b507682e23aad699cf8cc33922e0030be0cb640a23277ad7" },
+    { name = "function-bind-1.1.2.tgz", url = "https://registry.npmjs.org/function-bind/-/function-bind-1.1.2.tgz", sha256 = "704402651b02a1454f17d445fc7dd716efc282d059407126d58ef30a47e807aa" },
+    { name = "get-intrinsic-1.3.0.tgz", url = "https://registry.npmjs.org/get-intrinsic/-/get-intrinsic-1.3.0.tgz", sha256 = "662e27e54e00fe46fbb08f9f4aacb054e3695dbe72cc14b436613fbcfb780544" },
+    { name = "get-proto-1.0.1.tgz", url = "https://registry.npmjs.org/get-proto/-/get-proto-1.0.1.tgz", sha256 = "eb2cc52afb1f1fd82c5fc2a58c2380f0f16fdcdb5631538f3c66887435d70681" },
+    { name = "gopd-1.2.0.tgz", url = "https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz", sha256 = "d536d0de4dd285dc1468fbb7f39334a47ee0eec9c27f9b626a6e71466c9fda82" },
+    { name = "has-symbols-1.1.0.tgz", url = "https://registry.npmjs.org/has-symbols/-/has-symbols-1.1.0.tgz", sha256 = "4460c7532f28b8df2ddc9a1ec17816d43c24d4b9591dc6c5936b82f7f86ae7c5" },
+    { name = "has-tostringtag-1.0.2.tgz", url = "https://registry.npmjs.org/has-tostringtag/-/has-tostringtag-1.0.2.tgz", sha256 = "dc1c74e3f1179a6271f84747d72c89f258aa46ad3e6464fae0e41737a7f0ef7b" },
+    { name = "hasown-2.0.4.tgz", url = "https://registry.npmjs.org/hasown/-/hasown-2.0.4.tgz", sha256 = "e9d2b03f95573600e1c13124ce618e3142ed2c538d164595bedcd4408b8a4e4c" },
+    { name = "http-errors-2.0.1.tgz", url = "https://registry.npmjs.org/http-errors/-/http-errors-2.0.1.tgz", sha256 = "ad62bbb11baf079699a3f269ed089efdb589be16083ceed94a1117801e1a6c61" },
+    { name = "iconv-lite-0.7.3.tgz", url = "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.7.3.tgz", sha256 = "40789b7733e230a0439e07075fe2f37819f4a47ee7115fe17188451fab8e3941" },
+    { name = "inherits-2.0.4.tgz", url = "https://registry.npmjs.org/inherits/-/inherits-2.0.4.tgz", sha256 = "d94dbc6c1bb3c5ac0fb12a73ade187108fc60de273a1b754f55044eb5e24afaf" },
+    { name = "ipaddr.js-2.2.0.tgz", url = "https://registry.npmjs.org/ipaddr.js/-/ipaddr.js-2.2.0.tgz", sha256 = "effc21a40acab3802e61b4a869821eef549d4d9bd5a6ad6f643bacaaf11aa71a" },
+    { name = "is-promise-4.0.0.tgz", url = "https://registry.npmjs.org/is-promise/-/is-promise-4.0.0.tgz", sha256 = "853891173876fa03b8762cf63e7f0c0d60e524947f4e4d5852d94c22acb445a7" },
+    { name = "isexe-2.0.0.tgz", url = "https://registry.npmjs.org/isexe/-/isexe-2.0.0.tgz", sha256 = "47cfe872e088e28c53b736fef305324b57cc1cfc9f72a9b0f769f92731cb8359" },
+    { name = "js-tiktoken-1.0.21.tgz", url = "https://registry.npmjs.org/js-tiktoken/-/js-tiktoken-1.0.21.tgz", sha256 = "3b1f24b185565ca9a8d8f51466dfc4f99d67f1f05bc009258710ddb7a8d810fa" },
+    { name = "langsmith-0.10.5.tgz", url = "https://registry.npmjs.org/langsmith/-/langsmith-0.10.5.tgz", sha256 = "13f7e3ced1fa7381aa865180259ce00b589f8fc444af188b87449b3f91912db1" },
+    { name = "math-intrinsics-1.1.0.tgz", url = "https://registry.npmjs.org/math-intrinsics/-/math-intrinsics-1.1.0.tgz", sha256 = "b8c2c35575493dc086df88cfc468a9e2651b6617336480ab3f00fcf853f443a7" },
+    { name = "media-typer-1.1.1.tgz", url = "https://registry.npmjs.org/media-typer/-/media-typer-1.1.1.tgz", sha256 = "412fefe4130ee5ab4b38f014d143397074f9541b55430c0280cfb1a74d1cb368" },
+    { name = "merge-descriptors-2.0.0.tgz", url = "https://registry.npmjs.org/merge-descriptors/-/merge-descriptors-2.0.0.tgz", sha256 = "ae88322a5fc71952d3990ae999a7afc7a4bf7cba086b9ccc1c9482432b101dce" },
+    { name = "mime-db-1.54.0.tgz", url = "https://registry.npmjs.org/mime-db/-/mime-db-1.54.0.tgz", sha256 = "2b21054e65d0eabd58c5002d2713e968dd47b15700bfed4b7281a344ded1c420" },
+    { name = "mime-types-3.0.2.tgz", url = "https://registry.npmjs.org/mime-types/-/mime-types-3.0.2.tgz", sha256 = "2f9dd28353c303ff8750fbf68e474755b01c54a989883d227d605f7bfa3dd2ac" },
+    { name = "ms-2.1.3.tgz", url = "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz", sha256 = "f6616e15e530ed552f9daa2d3ce71963947c6bc7c98c9b64fd3e673fd02622c6" },
+    { name = "mustache-4.2.0.tgz", url = "https://registry.npmjs.org/mustache/-/mustache-4.2.0.tgz", sha256 = "05ea84bf212d37d84fb201aa77a82b347a6f744a3fcaef750c88e58f889c357c" },
+    { name = "negotiator-1.1.0.tgz", url = "https://registry.npmjs.org/negotiator/-/negotiator-1.1.0.tgz", sha256 = "04ada283b29ea69189a5eac97fa3815f20480255fa4667258366c31e1d92ced4" },
+    { name = "node-fetch-2.7.0.tgz", url = "https://registry.npmjs.org/node-fetch/-/node-fetch-2.7.0.tgz", sha256 = "a70348669b01db602faf140e984e61b01c4380f9b4bf5e460b7960902412832b" },
+    { name = "object-assign-4.1.1.tgz", url = "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz", sha256 = "782d726a263ba7b26cced612af97b80035516df4b0cd788524e7b2cebc4e29ed" },
+    { name = "object-inspect-1.13.4.tgz", url = "https://registry.npmjs.org/object-inspect/-/object-inspect-1.13.4.tgz", sha256 = "8324967a3afd8a45b0401e3554aebc1843f493bec46a89a7ce8cf072e62e90bf" },
+    { name = "on-finished-2.4.1.tgz", url = "https://registry.npmjs.org/on-finished/-/on-finished-2.4.1.tgz", sha256 = "f64d42f1049c386cdac5204737e09564271639b2b7d203a3ea07ec07d5ddbd0a" },
+    { name = "once-1.4.0.tgz", url = "https://registry.npmjs.org/once/-/once-1.4.0.tgz", sha256 = "cf51460ba370c698f68b976e514d113497339ba018b6003e8e8eb569c6fccfcf" },
+    { name = "p-finally-1.0.0.tgz", url = "https://registry.npmjs.org/p-finally/-/p-finally-1.0.0.tgz", sha256 = "effd84e09e1330542a84a243f1f4da21a700d459b83761eaca16070eb1fb8841" },
+    { name = "p-queue-6.6.2.tgz", url = "https://registry.npmjs.org/p-queue/-/p-queue-6.6.2.tgz", sha256 = "4d94fe81f32ce77f88f6d7b676fdff3a844a1ac445da522b2a1d9467b86a405d" },
+    { name = "p-timeout-3.2.0.tgz", url = "https://registry.npmjs.org/p-timeout/-/p-timeout-3.2.0.tgz", sha256 = "226b0886e0a837928501e3f5f96c5ec2f4c97aa2e287719b50d5341678da1c67" },
+    { name = "parseurl-1.3.3.tgz", url = "https://registry.npmjs.org/parseurl/-/parseurl-1.3.3.tgz", sha256 = "56ef4bfa11e097ce8196b26fa04b42d6091c32498fcab4478e6dd298435f021a" },
+    { name = "path-key-3.1.1.tgz", url = "https://registry.npmjs.org/path-key/-/path-key-3.1.1.tgz", sha256 = "4b8999acb914830edcd3c5b8fec632b32c6bc759ac3edc86336f5a9e08ba7b92" },
+    { name = "path-to-regexp-8.4.2.tgz", url = "https://registry.npmjs.org/path-to-regexp/-/path-to-regexp-8.4.2.tgz", sha256 = "e8712a9c53b0a2a27cfecc7b80c54df92afb4643c01351e2b2ebb7784bcabd78" },
+    { name = "pkce-challenge-5.0.1.tgz", url = "https://registry.npmjs.org/pkce-challenge/-/pkce-challenge-5.0.1.tgz", sha256 = "d1fcbbae5bc05562d13de7c520c2951699e8262a8317fa6c8bbcd8dcff3bea70" },
+    { name = "proxy-addr-2.0.8.tgz", url = "https://registry.npmjs.org/proxy-addr/-/proxy-addr-2.0.8.tgz", sha256 = "ffcc8055b78b0852b2889a426ad3a3003b60bc79df704faca194157efa2b2587" },
+    { name = "ipaddr.js-1.9.1.tgz", url = "https://registry.npmjs.org/ipaddr.js/-/ipaddr.js-1.9.1.tgz", sha256 = "7441d9623f67fe4160eccfd82ae9a404dcd55e1e4f1b68e06e2374dade4e8fee" },
+    { name = "proxy-from-env-1.1.0.tgz", url = "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-1.1.0.tgz", sha256 = "94082454f05d3cac93e9709306c2bff175da0cb890ceba470fa80c906a17de0f" },
+    { name = "qs-6.16.0.tgz", url = "https://registry.npmjs.org/qs/-/qs-6.16.0.tgz", sha256 = "f7a1bfc96c3a0c1172f1f3ef3c280f5ce8054841922e715f0d686da62d7beba4" },
+    { name = "range-parser-1.3.0.tgz", url = "https://registry.npmjs.org/range-parser/-/range-parser-1.3.0.tgz", sha256 = "51b79ec072db6788b132680256e9e733af8bb091df4f8ce8562ca631118f0fae" },
+    { name = "raw-body-3.0.2.tgz", url = "https://registry.npmjs.org/raw-body/-/raw-body-3.0.2.tgz", sha256 = "66de2a025036de58bbe50ab1d42a24ec6d33eda338b8115a3ebf942dae8419db" },
+    { name = "router-2.2.0.tgz", url = "https://registry.npmjs.org/router/-/router-2.2.0.tgz", sha256 = "b144af37b39a9517f7a89f1d867e9c2cf29f13f4147d3e80c499fe6ffab69461" },
+    { name = "safer-buffer-2.1.2.tgz", url = "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz", sha256 = "78812f65ae3b98071ce1c9bacbe0666f4220d0b2753c2a11530eb27df440a3b3" },
+    { name = "send-1.2.1.tgz", url = "https://registry.npmjs.org/send/-/send-1.2.1.tgz", sha256 = "fa254fb316dd23ddcb2beebd533b23788aec4cf6a3dba58af34150170435c472" },
+    { name = "serve-static-2.2.1.tgz", url = "https://registry.npmjs.org/serve-static/-/serve-static-2.2.1.tgz", sha256 = "36d4f72bb59372eb18202fee25ff3d8bf46655f0121830fbe32e32cbdc625f43" },
+    { name = "setprototypeof-1.2.0.tgz", url = "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz", sha256 = "c83bcc6ea632567e3f6928a83a1c0c7073519aaca9b88b847a3b404417eadfe2" },
+    { name = "shebang-command-2.0.0.tgz", url = "https://registry.npmjs.org/shebang-command/-/shebang-command-2.0.0.tgz", sha256 = "9acba5bd18a51e9cdf5898380e4df63f803e1844def64ae1a46f88cff86d556e" },
+    { name = "shebang-regex-3.0.0.tgz", url = "https://registry.npmjs.org/shebang-regex/-/shebang-regex-3.0.0.tgz", sha256 = "fedbabaa6db26c6be0183f82777dfa852d59a62f8885de93bd32ebc28758958f" },
+    { name = "side-channel-1.1.1.tgz", url = "https://registry.npmjs.org/side-channel/-/side-channel-1.1.1.tgz", sha256 = "e6edbc8f203901612a3cd938f940ed520333923986d5427b95c87aa1882e7bd5" },
+    { name = "side-channel-list-1.0.1.tgz", url = "https://registry.npmjs.org/side-channel-list/-/side-channel-list-1.0.1.tgz", sha256 = "793c94ac215be772757045f8804406578b8cbc1bda7e1cde23011f9145af74f7" },
+    { name = "side-channel-map-1.0.1.tgz", url = "https://registry.npmjs.org/side-channel-map/-/side-channel-map-1.0.1.tgz", sha256 = "3b256b6421300bcc962d891b1588fd4b64e84e339b9c29f78c61b72f2a7116d6" },
+    { name = "side-channel-weakmap-1.0.2.tgz", url = "https://registry.npmjs.org/side-channel-weakmap/-/side-channel-weakmap-1.0.2.tgz", sha256 = "3b2a54f0c5e7ad898c8f0ffda2a6805fb2cc5d68f53addf0b4a9ec0db9d0d06e" },
+    { name = "statuses-2.0.2.tgz", url = "https://registry.npmjs.org/statuses/-/statuses-2.0.2.tgz", sha256 = "ca800a24710488b568f4e73e8f570dd6b911c122cbf42b06930dee7c25949fe0" },
+    { name = "toidentifier-1.0.1.tgz", url = "https://registry.npmjs.org/toidentifier/-/toidentifier-1.0.1.tgz", sha256 = "186fcc77488de327daf911d362d4e773bab9909f1df2a5f0c20b875205b92e08" },
+    { name = "tr46-0.0.3.tgz", url = "https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz", sha256 = "164ae1eb32cea353551bbc7f9358dcaae4ffabbe65ec37a92ca464a9570a2a0a" },
+    { name = "type-is-2.1.0.tgz", url = "https://registry.npmjs.org/type-is/-/type-is-2.1.0.tgz", sha256 = "9a53088d69cd488e0c2cb4fcee5a983089c0d492404cf212161c77501fb302fc" },
+    { name = "unpipe-1.0.0.tgz", url = "https://registry.npmjs.org/unpipe/-/unpipe-1.0.0.tgz", sha256 = "2dfb5e06d1d4bf1fe9f0fa7f633c4a2fde04d8b41cf0b9bd249a42561d5edfb6" },
+    { name = "uuid-10.0.0.tgz", url = "https://registry.npmjs.org/uuid/-/uuid-10.0.0.tgz", sha256 = "d7af318b653a28eb73b1fe62bc6f88b2ccbd85c68c6764f98e8ddeca6f3b54b1" },
+    { name = "vary-1.1.2.tgz", url = "https://registry.npmjs.org/vary/-/vary-1.1.2.tgz", sha256 = "7378860671377a35e7a443ecfdca0745cfd066f595c90d581b827defea246e71" },
+    { name = "webidl-conversions-3.0.1.tgz", url = "https://registry.npmjs.org/webidl-conversions/-/webidl-conversions-3.0.1.tgz", sha256 = "e4dfc34b40947c2cf0038cd95fa6de21f4dac93224a7ad8e169205f5c2e22da8" },
+    { name = "whatwg-url-5.0.0.tgz", url = "https://registry.npmjs.org/whatwg-url/-/whatwg-url-5.0.0.tgz", sha256 = "b09dc471f573a876eeac3902b8c1da62af5cdbbca2c6fba4a06f119f89cb7ed3" },
+    { name = "which-2.0.2.tgz", url = "https://registry.npmjs.org/which/-/which-2.0.2.tgz", sha256 = "a13adf5fddeb769655edce551e81fbb11904b9c9be76d95e41da8c4c499d4edc" },
+    { name = "wrappy-1.0.2.tgz", url = "https://registry.npmjs.org/wrappy/-/wrappy-1.0.2.tgz", sha256 = "aff3730d91b7b1e143822956d14608f563163cf11b9d0ae602df1fe1e430fdfb" },
+    { name = "zod-3.25.76.tgz", url = "https://registry.npmjs.org/zod/-/zod-3.25.76.tgz", sha256 = "9e1f1a05f0dd0c1dab64ee91ceb9bf55cd44d35368c70edda80a2fdc70a88377" },
+    { name = "zod-to-json-schema-3.25.2.tgz", url = "https://registry.npmjs.org/zod-to-json-schema/-/zod-to-json-schema-3.25.2.tgz", sha256 = "a4919ab5a32aff4fd6c119c9f187f0dd4b4c490d30c4c4fdaf7c5ff6f38d93f4" },
+]
+
+[runtime]
+isolation = "container"
+platforms = ["linux/amd64"]
+mode = "oneshot"
+harness = "python3"
+exceptions = []
+requires_model = false
+network_requirements = "no network: the mechanism reproduction is fully offline and needs no registry, no docker daemon and no model API"
+
+[verification.mechanism]
+status = "passed"
+verified_at = "2026-09-27T03:24:03.854538+00:00"
+evidence = ["evidence/20260927T032248Z-5c9953a43b42/report.json"]
+notes = "四场景三轮（12/12）已通过；归档报告 run_id=20260927T032248Z-5c9953a43b42，由 staging 验证结果迁移并按当前输入指纹复核。"
+
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
+
+[verification.agent_poc]
+status = "not_run"
+adapter_status = "not_run"
+verified_at = ""
+evidence = []
+notes = "An independently reviewed Agent-PoC Adapter is required before candidate evaluation."

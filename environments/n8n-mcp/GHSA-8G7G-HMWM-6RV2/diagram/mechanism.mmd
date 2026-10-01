@@ -1,0 +1,31 @@
+%% n8n-mcp 路径段穿越、跟随重定向 SSRF 与遥测载荷暴露 — generated from diagram.toml
+sequenceDiagram
+  actor caller as 已认证的 MCP 调用者
+  participant api_client as 持有 n8n API key 的 n8n API 客户端
+  participant n8n_api as 同源 n8n API
+  participant credential_store as n8n 凭据存储
+  participant caller_endpoint as 调用者控制的触发 URL 端点
+  participant redirect_host as 校验未覆盖的目标主机
+  participant telemetry_payload as 待上传的遥测载荷
+  Note over caller,api_client: 阶段 setup
+  caller ->> api_client: 1 调用者提交自己构造的 workflow 标识符、触发 URL 与 partial-update diff
+  Note over api_client,n8n_api: 阶段 trigger
+  api_client -->> n8n_api: 2 标识符被原样拼进路径段，出站请求规范化后落到同源的凭据端点
+  Note over api_client,n8n_api: 分歧点：漏洞版与修复版在此分叉
+  api_client -x api_client: 3 同一标识符因含白名单外的字符，在发出任何请求前被拒绝
+  Note over n8n_api,credential_store: 阶段 effect
+  n8n_api -->> credential_store: 4 请求携带配置的 API key，读取调用者无权访问的凭据列表
+  credential_store -->> caller: 5 凭据列表作为响应体回到调用者手里
+  Note over api_client,caller_endpoint: 阶段 trigger
+  api_client ->> caller_endpoint: 6 通过一次性 SSRF 校验的触发 URL 收到出站请求
+  caller_endpoint -->> redirect_host: 7 302 让请求跟随到校验从未覆盖的主机
+  Note over caller_endpoint,redirect_host: 分歧点：漏洞版与修复版在此分叉
+  api_client -x api_client: 8 客户端不再跟随重定向，停在 3xx 响应上
+  Note over redirect_host,caller: 阶段 effect
+  redirect_host -->> caller: 9 目标主机的响应体被原样交回调用者
+  Note over api_client,telemetry_payload: 阶段 trigger
+  api_client ->> telemetry_payload: 10 partial-update 完成后生成含 operation diff 的遥测记录
+  Note over api_client,telemetry_payload: 阶段 effect
+  api_client -->> telemetry_payload: 11 diff 中的 node 参数原文（bearer token、API key）直接进入待上传载荷
+  Note over api_client,telemetry_payload: 分歧点：漏洞版与修复版在此分叉
+  api_client -x telemetry_payload: 12 同一 diff 先经脱敏，凭据被替换为占位符后才进入载荷

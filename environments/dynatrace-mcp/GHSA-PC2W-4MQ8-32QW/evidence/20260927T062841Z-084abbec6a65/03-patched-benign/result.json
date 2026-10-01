@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T062841Z-084abbec6a65",
+  "case_id": "03-patched-benign",
+  "variant": "patched",
+  "scenario": "benign",
+  "environment_id": "dynatrace-mcp/GHSA-PC2W-4MQ8-32QW",
+  "round": 3,
+  "project": "avh-6b99b465e6cd4db18780",
+  "layer": "mechanism",
+  "source_commit": "3e5bef72603845ba6fde837b3c97347efc347927",
+  "image": "sha256:0d732ed1dad6d8b76d7c39a34fd57bcd1f7d4bf6fc8fd80d751b3e3c1d619cb1",
+  "started_at": "2026-09-27T06:30:08.383356+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "The operator-approved notebook write still succeeds in this build (and the patched build consults the approval gate first).",
+      "actual": "document_requests=1, marker_persisted=True, notebook_name_persisted=True, approval_requests=1, tool_result='Document created successfully: https://abc12345.apps.dynatrace.com/ui/apps/dynatrace.notebooks/notebook/notebook-6f1c2b7a9d0e4351'",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "mock_requests.json",
+        "tool_exchange.json",
+        "server_stderr.txt"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-27T06:30:14.226008+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

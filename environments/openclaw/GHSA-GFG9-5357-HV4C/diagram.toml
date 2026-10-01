@@ -1,0 +1,90 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram openclaw/GHSA-GFG9-5357-HV4C
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身），
+# 它们不属于漏洞的触发过程。
+schema_version = 1
+title = "openclaw / GHSA-GFG9-5357-HV4C 漏洞图解"
+summary = "OpenClaw gateway 的 webchat 本地音频嵌入路径把工具或模型回复里的 mediaUrl 直接当作宿主文件路径读取，只校验扩展名与文件大小，不检查该路径是否位于允许的本地媒体根目录之内。修复版在读取之前调用 assertLocalMediaAllowed 做包含性校验，根目录之外的路径会被拒绝。攻击者通过提示注入决定 mediaUrl，就能让允许根目录之外的本地音频文件被 base64 编码进 webchat 媒体响应。"
+
+[[entities]]
+id = "attacker"
+label = "提示注入攻击者"
+kind = "actor"
+trust = "attacker_controlled"
+role = "决定被注入的工具或模型回复内容，从而决定其中的 mediaUrl 字符串；不能直接读写目标主机的文件系统。"
+source = "fixtures/attack/injected_reply.json"
+
+[[entities]]
+id = "gateway"
+label = "OpenClaw gateway webchat 音频嵌入路径"
+kind = "service"
+trust = "trusted"
+role = "resolveLocalAudioFileForEmbedding 与 buildWebchatAudioContentBlocksFromReplyPayloads 把回复里的 mediaUrl 解析成本地路径并读取；漏洞版缺少对允许本地媒体根目录的包含性检查。"
+source = "src/gateway/server-methods/chat-webchat-media.ts"
+
+[[entities]]
+id = "local_audio"
+label = "允许根目录之外的本地音频文件"
+kind = "store"
+trust = "trusted"
+role = "gateway 进程可读、扩展名属音频类且不超过 15 MiB 的本地文件，是漏洞前提而不是攻击动作；它是攻击者想要读取但本来够不着的目标。"
+source = "fixtures/attack/voice-memo.mp3"
+
+[[entities]]
+id = "webchat_response"
+label = "webchat 媒体响应"
+kind = "sink"
+trust = "attacker_controlled"
+synthetic = true
+role = "被读出的文件内容以 base64 音频块进入 webchat 助手转录与媒体响应，最终到达发起会话的一方；这里承载的是无害的合成音频内容，不代表真实外部目标。"
+
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["attacker"]
+note = "攻击者只能控制被注入回复里的 mediaUrl 字符串，不能直接访问目标主机的文件系统。"
+
+[[boundaries]]
+id = "local_media"
+label = "本地媒体根目录边界"
+members = ["gateway", "local_audio", "webchat_response"]
+note = "允许的本地媒体根目录本应限定 gateway 可以嵌入哪些本地文件；漏洞版的音频嵌入路径跳过了包含性检查，根目录之外的文件也能被读出并放进 webchat 媒体响应。"
+
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker"
+to = "gateway"
+action = "被注入的工具回复把 mediaUrl 设为允许的本地媒体根之外的绝对音频路径"
+variant = "both"
+evidence = "fixtures/attack/injected_reply.json"
+
+[[steps]]
+n = 2
+phase = "trigger"
+from = "gateway"
+to = "local_audio"
+action = "漏洞版只校验扩展名和文件大小，直接读取允许根目录之外的本地音频文件"
+variant = "vulnerable_only"
+diverges = true
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "gateway"
+to = "gateway"
+action = "修复版在读取之前调用 assertLocalMediaAllowed，判定路径不在允许根目录内并拒绝"
+variant = "patched_only"
+diverges = true
+
+[[steps]]
+n = 4
+phase = "effect"
+from = "gateway"
+to = "webchat_response"
+action = "文件内容被 base64 编码成音频块写进 webchat 媒体响应"
+variant = "vulnerable_only"

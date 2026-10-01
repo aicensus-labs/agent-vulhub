@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260930T033228Z-1e7771c16fc5",
+    "case_id": "02-patched-attack",
+    "variant": "patched",
+    "scenario": "attack"
+  },
+  "target_ready": true,
+  "configured_project": true,
+  "daemon_base_url": "http://127.0.0.1:46721/agent-device",
+  "return_code": 1,
+  "stdout_tail": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"INVALID_ARGS\",\n    \"message\": \"Config key \\\"daemonBaseUrl\\\" is not allowed in project config file /lab/results/project/agent-device.json. Move it to ~/.agent-device/config.json, pass it with --config or AGENT_DEVICE_CONFIG, or provide it through CLI flags/environment variables.\",\n    \"hint\": \"Check command arguments and run --help for usage examples.\",\n    \"diagnosticId\": \"munk05dg-becfc9fe\",\n    \"logPath\": \"/lab/results/home/.agent-device/logs/default/2026-09-30/2026-09-30T03-36-41-527Z-munk05dg-becfc9fe.ndjson\"\n  }\n}\n",
+  "stderr_tail": "",
+  "observations": []
+}

@@ -1,0 +1,83 @@
+schema_version = 1
+id = "safeinstall/GHSA-XRMC-C5CG-RV7X"
+ghsa = "GHSA-XRMC-C5CG-RV7X"
+product = "safeinstall"
+title = "SafeInstall agent guard shell parsing can miss raw package execution"
+lifecycle = "draft"
+agent_specificity = "agent_unique"
+# Advisory severity from the authoritative source, normalized to
+# CRITICAL/HIGH/MEDIUM/LOW/NONE. Use "UNKNOWN" when no source publishes one.
+severity = "HIGH"
+advisories = ["https://github.com/advisories/GHSA-xrmc-c5cg-rv7x"]
+description = "The SafeInstall agent guard classifies a shell segment by the basename of the token it believes is the command, without folding case, without skipping redirections that precede the command position and without modelling wrapper option arity. Commands such as `NPM install evil-pkg`, `2>err npm install evil-pkg`, `sudo -u root npm install evil-pkg` and `npm create vite@latest` therefore produce no install, runner or unanalyzable finding at all, so the guard fails open instead of denying or asking; 0.10.2 adds case folding, leading-redirection skipping, a wrapper option-arity table with a failure-closed branch and create/init runner findings."
+prerequisites = [
+  "A coding agent executes shell commands through the installed SafeInstall guard hook.",
+  "The attacker can influence the command text the agent is about to run.",
+]
+
+[vulnerable]
+version = "0.10.1"
+source_url = "https://github.com/Mickdownunder/SafeInstall"
+commit = "06e8370d7cff0916169b28b61b20a826958db223"
+image = ""
+archive = "safeinstall-cli-0.10.1.tgz"
+
+[patched]
+version = "0.10.2"
+source_url = "https://github.com/Mickdownunder/SafeInstall"
+commit = "b19d262938a52bc799878e48a6c2f9e4bfdaa50b"
+image = ""
+archive = "safeinstall-cli-0.10.2.tgz"
+
+[build]
+# Locally present linux/amd64 base with Node.js >= 20 and python3 preinstalled,
+# so the network-disabled recipe never has to install an interpreter.
+base_image = "node:22-bookworm@sha256:363e1587494626837fa7f9a23bdb453d13b0ff3c67c705c2805cfc69c2d2fad7"
+dockerfile = "Dockerfile"
+# Each entry: { name = "...", url = "https://...", sha256 = "..." }
+# Include source archives AND every dependency needed by network-disabled builds.
+inputs = [
+  # Pinned upstream source snapshots at the two reviewed commits (MIT repository).
+  { name = "safeinstall-src-06e8370d7cff0916169b28b61b20a826958db223.tar.gz", url = "https://github.com/Mickdownunder/SafeInstall/archive/06e8370d7cff0916169b28b61b20a826958db223.tar.gz", sha256 = "1690fdf046817e21e7101be9bafbcb14ddbb2d5b00f8bfe5c907bd226521d5f8" },
+  { name = "safeinstall-src-b19d262938a52bc799878e48a6c2f9e4bfdaa50b.tar.gz", url = "https://github.com/Mickdownunder/SafeInstall/archive/b19d262938a52bc799878e48a6c2f9e4bfdaa50b.tar.gz", sha256 = "506a4da0ed1e3f8ba52389e62ca7d69b9e5b487974cb17f394c76196a29260c8" },
+  # Compiled upstream release artifacts for the same commits; these ship dist/.
+  { name = "safeinstall-cli-0.10.1.tgz", url = "https://registry.npmjs.org/safeinstall-cli/-/safeinstall-cli-0.10.1.tgz", sha256 = "9dfc52323dfeed66a2f925c4d9f96b30ca7d26d28fe07da27229ecd2fe579ed5" },
+  { name = "safeinstall-cli-0.10.2.tgz", url = "https://registry.npmjs.org/safeinstall-cli/-/safeinstall-cli-0.10.2.tgz", sha256 = "13f6f19c1a560c99ac6a4feccdf4882f6be016ee1f22df551cde9dc3fa7c7afb" },
+  # Locked production dependency closure required by dist/guard-commands.js
+  # (guard-commands -> specs -> npm-package-arg); see deps.tsv for install paths.
+  { name = "npm-package-arg-12.0.2.tgz", url = "https://registry.npmjs.org/npm-package-arg/-/npm-package-arg-12.0.2.tgz", sha256 = "6c81e7e8efeff16f9b6925443851c88004f16bf39fca05143396a5dd082abb32" },
+  { name = "hosted-git-info-8.1.0.tgz", url = "https://registry.npmjs.org/hosted-git-info/-/hosted-git-info-8.1.0.tgz", sha256 = "c4bdb0a9532cc072d6a5338c108e7d4bcab0f7a59f4115c746f3f3b4181d8be9" },
+  { name = "proc-log-5.0.0.tgz", url = "https://registry.npmjs.org/proc-log/-/proc-log-5.0.0.tgz", sha256 = "8bf8cfdb2a17d38eba941cfe63943ee1154bd0b622c23827d437d7df233f87d6" },
+  { name = "semver-7.8.5.tgz", url = "https://registry.npmjs.org/semver/-/semver-7.8.5.tgz", sha256 = "d85045d4300d7d57c891336b95df532e73f34c22ffcd222452b6d08b9d127d5d" },
+  { name = "validate-npm-package-name-6.0.2.tgz", url = "https://registry.npmjs.org/validate-npm-package-name/-/validate-npm-package-name-6.0.2.tgz", sha256 = "74cb70e2c6d8031e72be7374db00cd24e31ba5cba39e9681775d565637e8179d" },
+  { name = "lru-cache-10.4.3.tgz", url = "https://registry.npmjs.org/lru-cache/-/lru-cache-10.4.3.tgz", sha256 = "0ea17b527beaaaac504ea7a7aaab90db0581dc9a2e117bfbdba44789f15496ed" },
+  { name = "yaml-2.9.1.tgz", url = "https://registry.npmjs.org/yaml/-/yaml-2.9.1.tgz", sha256 = "4ef6c54cf559b8a207b7b518378230805a1c84af239b14960e8c67c7d59de5d3" },
+]
+
+[runtime]
+isolation = "container"
+platforms = ["linux/amd64"]
+mode = "oneshot"
+harness = "python3"
+exceptions = []
+requires_model = false
+network_requirements = "No network at build or run time: the guard parser is a pure function and every artifact is installed from a pinned local input."
+
+[verification.mechanism]
+status = "passed"
+verified_at = "2026-09-27T05:16:50.622533+00:00"
+evidence = ["evidence/20260927T051505Z-0e7e04cbd2eb/report.json"]
+notes = "四场景三轮（12/12）已通过；归档报告 run_id=20260927T051505Z-0e7e04cbd2eb，由 staging 验证结果迁移并按当前输入指纹复核。"
+
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
+
+[verification.agent_poc]
+status = "not_run"
+adapter_status = "not_run"
+verified_at = ""
+evidence = []
+notes = "An independently reviewed Agent-PoC Adapter is required before candidate evaluation."

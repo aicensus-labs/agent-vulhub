@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T054236Z-91f4d746b674",
+  "case_id": "02-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "execution_status": "completed",
+  "evidence": [
+    {
+      "path": "observation.json",
+      "sha256": "2773183758a3039f854f769b529fb50a8371889064d7c86d9a98ab0648469c55"
+    },
+    {
+      "path": "effect.json",
+      "sha256": "a6d996ecf3e8e4b7db695a6a9ff476c9ee01200ccaada98f7cd0388de02b251e"
+    }
+  ]
+}

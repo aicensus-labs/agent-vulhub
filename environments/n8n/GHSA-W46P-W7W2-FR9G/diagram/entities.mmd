@@ -1,0 +1,37 @@
+%% n8n AI Agents node 工具越权执行 — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["低权限项目成员侧"]
+    attacker["项目内 Project Viewer 账号<br/>actor · attacker_controlled"]
+  end
+  subgraph product["n8n 服务端与它信任的项目数据"]
+    agent_chat["Agent 对话入口（POST agents/v2/:agentId/chat）<br/>client · trusted"]
+    runtime["AgentRuntimeReconstructionService<br/>service · trusted"]
+    credential_store["项目共享凭据表<br/>store · trusted"]
+    executor["EphemeralNodeExecutor 单节点内联执行<br/>sink · trusted"]
+  end
+  host_effect["被执行的节点与命令效果记录<br/>⚠ sink · trusted"]
+  attacker -->|"1"| agent_chat
+  agent_chat -->|"2"| runtime
+  runtime -.->|"3"| runtime
+  runtime -.->|"4"| runtime
+  runtime -.->|"5"| executor
+  executor -.->|"6"| credential_store
+  executor -.->|"7"| host_effect
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class attacker actor
+  class agent_chat client
+  class runtime service
+  class credential_store store
+  class executor sink
+  class host_effect sink
+  class host_effect synthetic
+  style attacker_side fill:transparent
+  style product fill:transparent
+  linkStyle 2 stroke:#c0392b,stroke-width:2px
+  linkStyle 3 stroke:#2e7d32,stroke-width:2px

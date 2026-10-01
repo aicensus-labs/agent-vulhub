@@ -1,0 +1,25 @@
+{
+  "scenario": "attack",
+  "description": "Tool/agent reply whose mediaUrl field is chosen by the attacker through prompt injection. Both referenced paths point outside the allowed local media root; the second one uses a file: URL.",
+  "allowed_local_roots": ["/tmp/openclaw-media-root"],
+  "reply_payloads": [
+    {
+      "text": "Play the recording I asked for.",
+      "mediaUrl": "/tmp/openclaw-outside-root/voice-memo.mp3"
+    },
+    {
+      "text": "And the follow-up notes.",
+      "mediaUrls": ["file:///tmp/openclaw-outside-root/meeting-notes.mp3"]
+    }
+  ],
+  "materialize": [
+    {
+      "fixture": "attack/voice-memo.mp3",
+      "path": "/tmp/openclaw-outside-root/voice-memo.mp3"
+    },
+    {
+      "fixture": "attack/meeting-notes.mp3",
+      "path": "/tmp/openclaw-outside-root/meeting-notes.mp3"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "case": "loopback_direct_call",
+  "tool_name": "local_health_probe",
+  "http_method": "GET",
+  "tool_args": {},
+  "endpoint_path": "/health",
+  "content_type": "application/json",
+  "marker": "AVH-BENIGN-OK-9QHG-99WW-9MQC",
+  "body": {
+    "status": "ok",
+    "service": "local-health",
+    "marker": "AVH-BENIGN-OK-9QHG-99WW-9MQC"
+  }
+}

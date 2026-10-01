@@ -1,0 +1,24 @@
+{
+  "execution_status": "completed",
+  "target_ready": true,
+  "cve": "GHSA-wm45-qh3g-v83f",
+  "source": "/lab/app/src/mcp_atlassian/jira/attachments.py",
+  "requested_path": "allowed.txt",
+  "opened_paths": [
+    "/lab/workspace/allowed.txt"
+  ],
+  "upload_calls": [
+    {
+      "issue_key": "DEMO-1",
+      "filename": "/lab/workspace/allowed.txt"
+    }
+  ],
+  "result": {
+    "success": true,
+    "issue_key": "DEMO-1",
+    "filename": "allowed.txt",
+    "size": 23,
+    "id": "synthetic-attachment"
+  },
+  "error": null
+}

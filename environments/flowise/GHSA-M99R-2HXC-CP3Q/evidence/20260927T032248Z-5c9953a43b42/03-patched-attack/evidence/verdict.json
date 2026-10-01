@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T032248Z-5c9953a43b42",
+  "case_id": "03-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "patched_effect_blocked",
+      "passed": true,
+      "expected": "The double-slash config and the docker/npx bypasses are rejected before any transport is created, so no child process runs and no marker file exists.",
+      "actual": "validation='rejected' negative_control='rejected' bypasses={'rce_local_file_via_double_slash': False, 'docker_build_remote_context': False, 'npx_yes_remote_package': False} command='node' args=['//lab/fixtures/mcp_payload.js'] child_process_executed=False marker=None validation_error='Argument contains potential local file access: \"//lab/fixtures/mcp_payload.js\"' tools=None",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "resolved_mcp_config.json",
+        "harness_result.json",
+        "harness_stdout.txt"
+      ]
+    }
+  ]
+}

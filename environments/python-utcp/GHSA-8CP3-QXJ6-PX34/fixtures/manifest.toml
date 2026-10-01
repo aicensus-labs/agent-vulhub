@@ -1,0 +1,7 @@
+# SHA-256 of every file under fixtures/, excluding this manifest and fixtures/README.md.
+# Regenerate after any fixture change, e.g.:
+#   python3 -c 'import hashlib,pathlib; r=pathlib.Path("fixtures"); [print(p.relative_to(r), hashlib.sha256(p.read_bytes()).hexdigest()) for p in sorted(r.rglob("*")) if p.is_file() and p.name not in {"manifest.toml","README.md"}]'
+[files]
+"attack_openapi.json" = "1dd84b2c7ede5d973fc474f2fd2d8d1f77edf2f97e831a177ed82eeefb70c920"
+"benign_openapi.json" = "4eeea2c201b8e600b00dc3d6a2d0f1a673f55c57a2a00b98b9af87d35c71a7e8"
+"credentials.json" = "385e8a5302db7dc216bb4c205358181f05021a10555c195af4e36d278945023a"

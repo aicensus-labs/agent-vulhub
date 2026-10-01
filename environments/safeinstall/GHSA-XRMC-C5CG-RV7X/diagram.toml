@@ -1,0 +1,129 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram safeinstall/GHSA-XRMC-C5CG-RV7X
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# fixture 装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "safeinstall / GHSA-XRMC-C5CG-RV7X 漏洞图解"
+summary = "SafeInstall 的 agent guard 在把 coding agent 的 shell 命令交给策略判定之前先做命令分类，但漏洞版分类器只识别最简小写、无前导重定向、无 wrapper 取值选项的包管理器调用。大小写变体、命令位置之前的重定向、wrapper 的取值选项以及 create/init 远程脚手架都会让分类在命令位置停下并返回空结论，guard 静默放行。被绕过的正是「任何原始包管理调用都必须先经 SafeInstall 策略判定并改写成 safeinstall 路由」这道边界，后果是未经策略评估、也未禁用 lifecycle scripts 的安装或脚手架命令在开发者权限下执行。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（本仓库合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "attacker"
+label = "受攻击者影响的指令文本"
+kind = "actor"
+trust = "attacker_controlled"
+role = "构造会被 coding agent 执行的包管理命令文本：用大小写变体、命令位置之前的重定向、wrapper 的取值选项或 create/init 子命令，让调用形式偏离 guard 建模的最简形态。"
+source = "fixtures/attack.json"
+
+[[entities]]
+id = "coding_agent"
+label = "编码 agent 的命令发起方"
+kind = "client"
+trust = "semi_trusted"
+role = "把不可信指令转成 shell 命令，在执行前调用 guard 做前置判定，并信任 guard 返回的 allow/deny/ask 结论。"
+source = "fixtures/attack.json"
+
+[[entities]]
+id = "guard"
+label = "SafeInstall agent guard 命令分类器"
+kind = "service"
+trust = "trusted"
+role = "解析命令文本，定位命令位置、识别包管理器与 wrapper，产出 install/runner/unanalyzable 发现并据此 deny、ask 或改写成 safeinstall 路由；漏洞版对未建模的 shell 语法返回空结论。"
+source = "fixtures/attack.json"
+
+[[entities]]
+id = "package_manager"
+label = "原始包管理器进程"
+kind = "tool"
+trust = "trusted"
+role = "在命令没有被改写成 safeinstall 前缀时以原始形式启动，执行 install 或拉取远程 create/init 脚手架。"
+source = "fixtures/attack.json"
+
+[[entities]]
+id = "package_code"
+label = "未经策略评估的包代码执行（包名占位）"
+kind = "sink"
+trust = "trusted"
+synthetic = true
+role = "漏洞效果的落点：包代码在开发者账户权限下执行，SafeInstall 的策略拒绝与 lifecycle scripts 禁用都不再生效；这里只用包名占位，不会真的下载或执行外部包。"
+source = "fixtures/attack.json"
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["attacker"]
+note = "攻击者只能左右被诱导执行的指令文本，对开发机、guard 的安装状态和目标包都没有写权限。"
+
+[[boundaries]]
+id = "guard_boundary"
+label = "开发者机器上的 SafeInstall 策略边界"
+members = ["coding_agent", "guard", "package_manager", "package_code"]
+note = "guard 本应在任何原始包管理调用进入 shell 之前做策略判定，并把 install 改写成 safeinstall 路由；未建模的 shell 语法让判定在命令位置停下并返回空结论，这道边界因此静默失效。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。至少一步 diverges = true 表示漏洞版与修复版
+# 的分叉点，且该步 variant 不能是 both。
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker"
+to = "coding_agent"
+action = "攻击者影响的指令让 agent 生成一条包管理命令，命令用大小写、前导重定向、wrapper 取值选项或 create/init 子命令偏离最简调用形式"
+detail = "命令文本取自上游回归语料与公告描述的五类绕过。"
+variant = "both"
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 2
+phase = "setup"
+from = "coding_agent"
+to = "guard"
+action = "agent 在执行之前把命令文本交给 shell 前置钩子的分类器，等待 allow/deny/ask 结论"
+variant = "both"
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "guard"
+to = "guard"
+action = "分类器只在最简小写形式下找到命令位置：命令位置的可执行名查表失败就返回空结论，既没有 install/runner 发现，也没有 unanalyzable 的失败关闭"
+detail = "漏洞版 basename 不折叠大小写，命令位置之前的重定向不跳过，wrapper 只跳名字不跳取值选项，create/init 还被列入非安装子命令。"
+variant = "vulnerable_only"
+diverges = true
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "guard"
+to = "guard"
+action = "修复版先做 shell 分词、跳过重定向目标并按元数表扫描 wrapper 选项，同一条命令得到 install 发现（deny 并改写）、远程 runner 发现（ask）或显式失败关闭"
+detail = "路径限定的包管理器调用也被规范化后改写成 safeinstall 前缀。"
+variant = "patched_only"
+diverges = true
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 5
+phase = "effect"
+from = "coding_agent"
+to = "package_manager"
+action = "空结论被当成放行，agent 按原始文本执行命令，包管理器进程没有 safeinstall 前缀"
+variant = "vulnerable_only"
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 6
+phase = "effect"
+from = "package_manager"
+to = "package_code"
+action = "包管理器按原始形式安装依赖或拉取远程 create/init 脚手架，包代码在开发者权限下执行"
+variant = "vulnerable_only"
+evidence = "fixtures/attack.json"

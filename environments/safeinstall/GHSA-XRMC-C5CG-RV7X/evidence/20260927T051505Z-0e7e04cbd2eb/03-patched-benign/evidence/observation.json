@@ -1,0 +1,27 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "benign",
+  "variant": "patched",
+  "upstream_module": "/lab/upstream/node_modules/safeinstall-cli/dist/guard-commands.js",
+  "upstream_name": "safeinstall-cli",
+  "upstream_version": "0.10.2",
+  "upstream_guard_commands_sha256": "8df556da455d099ea38b7e047a04b23e0ac612bac2e19b01f9945fd9fba92409",
+  "node_version": "v22.23.3",
+  "command_count": 3,
+  "commands_with_finding": [
+    "control-plain-install"
+  ],
+  "commands_without_finding": [
+    "control-script-run",
+    "control-safeinstall-wrapper"
+  ],
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T051505Z-0e7e04cbd2eb",
+    "case_id": "03-patched-benign",
+    "variant": "patched",
+    "scenario": "benign"
+  }
+}

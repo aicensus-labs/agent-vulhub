@@ -1,0 +1,19 @@
+%% obot / GHSA-XWMW-PRC4-V3CR 漏洞图解 — generated from diagram.toml
+sequenceDiagram
+  actor attacker as 攻击者
+  participant oauth_server as MCP OAuth 授权服务
+  participant token_service as JWT token 校验服务
+  participant protected_api as 受害者的 Obot API 权限面
+  participant victim as 受害者角色分组
+  Note over attacker,oauth_server: 阶段 setup
+  attacker ->> oauth_server: 1 匿名 POST /oauth/register 注册 client，redirect_uri 指向自己控制的地址
+  attacker ->> oauth_server: 2 诱导已登录受害者发起以某个 MCP 服务器为 resource 的授权请求
+  oauth_server -->> attacker: 3 把授权码投递到攻击者注册的 redirect_uri，攻击者换得 audience 指向该 MCP 服务器、claim 携带受害者角色分组的 access token
+  Note over attacker,token_service: 阶段 trigger
+  attacker ->> token_service: 4 把这枚 audience 指向 MCP 服务器的 token 当作 Obot API 的 bearer 凭据提交
+  token_service -->> token_service: 5 只按 issuer 校验签名：audience 不参与校验，UserGroups claim 被原样映射为请求分组
+  Note over token_service: 分歧点：漏洞版与修复版在此分叉
+  token_service -x token_service: 6 按 audience 区分用途：aud 指向 mcp-connect 资源时只给出 mcp 与 authenticated 分组
+  Note over token_service,protected_api: 阶段 effect
+  token_service -->> protected_api: 7 请求以受害者的完整角色分组通过鉴权，攻击者取得该受害者才能访问的 API
+  token_service -x protected_api: 8 该 token 只剩 mcp 与 authenticated 分组，受害者的高权限 API 拒绝它

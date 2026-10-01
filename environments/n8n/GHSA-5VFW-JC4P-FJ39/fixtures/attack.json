@@ -1,0 +1,51 @@
+{
+  "scenario": "attack",
+  "description": "A member-level account mints an OAuth 2.1 access token for another user's active MCP Server Trigger resource and invokes it.",
+  "users": [
+    {
+      "id": "user-owner-9f21",
+      "name": "Workflow Owner",
+      "role": "global:owner"
+    },
+    {
+      "id": "user-member-4c77",
+      "name": "Member Caller",
+      "role": "global:member"
+    }
+  ],
+  "resource": {
+    "workflow_id": "wf-victim-7b3d",
+    "workflow_name": "Billing MCP Server",
+    "workflow_owner": "user-owner-9f21",
+    "url": "http://127.0.0.1:5678/mcp/victim-mcp-path",
+    "webhook_path": "victim-mcp-path",
+    "node_name": "MCP Server Trigger",
+    "authentication": "n8nOAuth2"
+  },
+  "access": [
+    {
+      "user": "user-owner-9f21",
+      "workflow": "wf-victim-7b3d",
+      "scope": "workflow:execute",
+      "granted": true,
+      "source": "project ownership"
+    },
+    {
+      "user": "user-member-4c77",
+      "workflow": "wf-victim-7b3d",
+      "scope": "workflow:execute",
+      "granted": false,
+      "source": "no project or workflow role"
+    }
+  ],
+  "subject": {
+    "id": "user-member-4c77"
+  },
+  "attacker": {
+    "id": "user-member-4c77"
+  },
+  "expected": {
+    "vulnerable_effect": "member token accepted for the owner's resource and the workflow runs in the owner's context",
+    "patched_effect": "consent is forbidden and the runtime token verifier reports insufficient_scope"
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "variant": "patched",
+  "scenario": "attack",
+  "target_ready": true,
+  "execution_status": "completed",
+  "upstream": {
+    "package": "n8n-mcp",
+    "version": "2.50.1",
+    "module": "/tmp/n8n-mcp-lab-uilqq4dq/package/dist/services/n8n-api-client.js",
+    "telemetry_module": "/tmp/n8n-mcp-lab-uilqq4dq/package/dist/telemetry/mutation-tracker.js",
+    "traversal_identifier": "../credentials",
+    "benign_identifier": "wf-normal-1"
+  },
+  "dependencies": {
+    "axios": "1.20.0",
+    "zod": "3.25.76"
+  },
+  "observer": {
+    "webhook_security_mode": "permissive",
+    "listener_ports": {
+      "api": "59481",
+      "redirect": "54597",
+      "target": "55655",
+      "webhook": "42389"
+    },
+    "telemetry_payload_mode": "credential-bearing"
+  },
+  "observed": {
+    "traversal": {
+      "operation": "traversal-get-workflow",
+      "node_outcome": "rejected",
+      "node_error": "Invalid workflowId: must contain only alphanumeric characters, hyphens, or underscores",
+      "node_status": null,
+      "response_digest": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "response_keys": [],
+      "request_paths": [],
+      "api_key_present": false,
+      "request_carries_synthetic_credential": false
+    },
+    "redirect": {
+      "operation": "redirect-trigger-webhook",
+      "node_outcome": "resolved",
+      "node_error": null,
+      "node_status": 302,
+      "response_digest": "6bc0da1f42f96fc37b8bd7ed20ba57606d2a0da5cda2b135c7854fbdc985b8a3",
+      "response_keys": [
+        "ok"
+      ],
+      "request_paths": [],
+      "api_key_present": false,
+      "request_carries_synthetic_credential": false
+    },
+    "redirect_chain": {
+      "first_hop_paths": [
+        "/hook"
+      ],
+      "second_hop_paths": []
+    },
+    "benign_workflow": {
+      "operation": "benign-get-workflow",
+      "node_outcome": "resolved",
+      "node_error": null,
+      "node_status": null,
+      "response_digest": "bf290d071dc066839394d834a7df8d49be7ea7a98d927f333348d1f604a657a2",
+      "response_keys": [
+        "data"
+      ],
+      "request_paths": [
+        "/api/v1/workflows/wf-normal-1"
+      ],
+      "api_key_present": true,
+      "request_carries_synthetic_credential": false
+    },
+    "benign_webhook": {
+      "operation": "benign-trigger-webhook",
+      "node_outcome": "resolved",
+      "node_error": null,
+      "node_status": 200,
+      "response_digest": "84ddb0cf5ba05718330e4644933f311c0665c5c8c1cd39a955a67e3cd2d8a77e",
+      "response_keys": [
+        "status",
+        "workflowId"
+      ],
+      "request_paths": [
+        "/hook"
+      ],
+      "api_key_present": false,
+      "request_carries_synthetic_credential": false
+    },
+    "telemetry": {
+      "operation": "telemetry-process-mutation",
+      "node_outcome": "resolved",
+      "record_present": true,
+      "record_digest": "b7f6064ceed4a4e54144369e2257d5302ade587bfd17163b60203c9ab92b45bf",
+      "record_keys": [
+        "connectionsAdded",
+        "connectionsRemoved",
+        "durationMs",
+        "errorsIntroduced",
+        "errorsResolved",
+        "intentClassification",
+        "mutationError",
+        "mutationSuccess",
+        "nodesAdded",
+        "nodesModified",
+        "nodesRemoved",
+        "operationCount",
+        "operationTypes",
+        "operations",
+        "propertiesChanged",
+        "sessionId",
+        "toolName",
+        "userId",
+        "userIntent",
+        "validationAfter",
+        "validationBefore",
+        "validationImproved",
+        "workflowAfter",
+        "workflowBefore",
+        "workflowHashAfter",
+        "workflowHashBefore",
+        "workflowStructureHashAfter",
+        "workflowStructureHashBefore"
+      ],
+      "markers_in_fields": {
+        "operations": [],
+        "validationBefore": [],
+        "validationAfter": [],
+        "mutationError": []
+      },
+      "markers_anywhere": [],
+      "markers_in_workflow_body": []
+    }
+  },
+  "recorded_events": {
+    "api": [
+      {
+        "seq": 1,
+        "listener": "api",
+        "method": "GET",
+        "path": "/api/v1/workflows/wf-normal-1",
+        "headers": {
+          "x-n8n-api-key": "sk-test-n8n-api-key-0000",
+          "x-attack-marker": "benign-get-workflow",
+          "content-type": "application/json"
+        },
+        "body": "",
+        "seen_at_ms": 1790483929975
+      }
+    ],
+    "redirect": [
+      {
+        "seq": 1,
+        "listener": "redirect",
+        "method": "POST",
+        "path": "/hook",
+        "headers": {
+          "x-n8n-api-key": null,
+          "x-attack-marker": "redirect-trigger-webhook",
+          "content-type": "application/json"
+        },
+        "body": "{\"event\":\"attack\"}",
+        "seen_at_ms": 1790483929981
+      }
+    ],
+    "target": [],
+    "webhook": [
+      {
+        "seq": 1,
+        "listener": "webhook",
+        "method": "POST",
+        "path": "/hook",
+        "headers": {
+          "x-n8n-api-key": null,
+          "x-attack-marker": "benign-trigger-webhook",
+          "content-type": "application/json"
+        },
+        "body": "{\"event\":\"benign\"}",
+        "seen_at_ms": 1790483929985
+      }
+    ]
+  },
+  "credential_markers_in_observation": [],
+  "evidence_digest": "593b29d87bbb2a48d9e56d46e6b9388f761abde728a7c6d169f97c065d054eee",
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T043820Z-51eb2875d369",
+    "case_id": "01-patched-attack",
+    "variant": "patched",
+    "scenario": "attack"
+  }
+}

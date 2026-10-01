@@ -1,0 +1,20 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "scenario": "benign",
+  "variant": "vulnerable",
+  "pinned_package": "openclaw-mcp",
+  "upstream_entry": "/lab/app/dist/index.js",
+  "probe_exit_code": 0,
+  "probe_ok": true,
+  "server_started": true,
+  "effect_file": "effect.json",
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T052802Z-a87d514a644e",
+    "case_id": "01-vulnerable-benign",
+    "variant": "vulnerable",
+    "scenario": "benign"
+  }
+}

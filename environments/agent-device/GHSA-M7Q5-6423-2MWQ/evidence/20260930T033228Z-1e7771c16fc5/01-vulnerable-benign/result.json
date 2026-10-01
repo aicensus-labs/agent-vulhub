@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "run_id": "20260930T033228Z-1e7771c16fc5",
+  "case_id": "01-vulnerable-benign",
+  "variant": "vulnerable",
+  "scenario": "benign",
+  "environment_id": "agent-device/GHSA-M7Q5-6423-2MWQ",
+  "round": 1,
+  "project": "avh-937483128a3742ff9b4a",
+  "layer": "mechanism",
+  "source_commit": "b4487f57a7e5c7aff2f50b573fa6bf95e32e0a17",
+  "image": "sha256:6d40d37370fb416a07c94b309813801a96ae7cc2536c6f292a1abbf87cd6f710",
+  "started_at": "2026-09-30T03:36:11.957145+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The upstream CLI executes to a terminal state",
+      "actual": "return_code=0",
+      "reason": "The complete upstream build is present and the CLI invocation completed or reported its rejection.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "No project config means no remote credential-bearing request",
+      "actual": "0 token requests",
+      "reason": "The normal no-project control must not send the synthetic token to a remote endpoint.",
+      "evidence": [
+        "observation.json"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-30T03:36:21.732501+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

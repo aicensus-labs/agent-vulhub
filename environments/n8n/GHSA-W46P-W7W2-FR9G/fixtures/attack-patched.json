@@ -1,0 +1,57 @@
+{
+  "marker": "AVH-N8N-W46P-EXEC",
+  "projectId": "project-viewer-canary",
+  "sendUserObject": true,
+  "user": {
+    "id": "user-viewer",
+    "role": "project:viewer",
+    "scopes": [],
+    "projectScopes": []
+  },
+  "credentials": [
+    {
+      "id": "cred-exec",
+      "name": "Server Admin Credential",
+      "type": "httpBasicAuth",
+      "projectId": "project-viewer-canary",
+      "owner": "user-admin",
+      "sharedWith": [
+        "user-viewer"
+      ]
+    }
+  ],
+  "workflows": [],
+  "agent": {
+    "id": "agent-ops",
+    "schema": {
+      "tools": [
+        {
+          "name": "Run Shell",
+          "type": "node",
+          "description": "Runs a host command",
+          "node": {
+            "nodeType": "n8n-nodes-base.executeCommand",
+            "nodeTypeVersion": 1,
+            "nodeParameters": {
+              "command": "id > /lab/results/marker.txt"
+            },
+            "credentials": {
+              "httpBasicAuth": {
+                "id": "cred-exec",
+                "name": "Server Admin Credential"
+              }
+            }
+          }
+        },
+        {
+          "name": "Echo Note",
+          "type": "custom",
+          "description": "Team-authored helper"
+        }
+      ]
+    }
+  },
+  "invocation": {
+    "command": "id > /lab/results/marker.txt"
+  }
+}

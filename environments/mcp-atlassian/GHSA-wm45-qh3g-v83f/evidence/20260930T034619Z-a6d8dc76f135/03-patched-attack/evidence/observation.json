@@ -1,0 +1,22 @@
+{
+  "execution_status": "completed",
+  "target_ready": true,
+  "cve": "GHSA-wm45-qh3g-v83f",
+  "source": "/lab/app/src/mcp_atlassian/jira/attachments.py",
+  "requested_path": "../fixtures/secret.txt",
+  "opened_paths": [],
+  "upload_calls": [],
+  "result": {
+    "success": false,
+    "error": "Path traversal detected: ../fixtures/secret.txt resolves outside /lab/workspace"
+  },
+  "error": null,
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260930T034619Z-a6d8dc76f135",
+    "case_id": "03-patched-attack",
+    "variant": "patched",
+    "scenario": "attack"
+  }
+}

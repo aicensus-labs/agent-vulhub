@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "description": "Fixed environment for the GHSA-f9ff-5x35-7gfw mechanism proof: one scoped agent identity, its task tree, and the sessions bound to those tasks. Everything here is synthetic; the API key is a visible marker, not a credential.",
+  "api_key": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+  "scoped_token_claims": {
+    "sub": "task-caller",
+    "pid": "ws-alpha",
+    "per": "persona-orchestrator",
+    "sid": "sess-caller"
+  },
+  "persona": {
+    "id": "persona-orchestrator",
+    "note": "Mirrors ORCHESTRATOR_MCP_TOOLS from packages/common/src/mcp-tool-presets.ts at the pinned vulnerable revision; it is why task_update/task_delete/task_resume/session_kill are reachable at all.",
+    "allowed_mcp_tools": [
+      "task_create",
+      "task_list",
+      "task_search",
+      "task_show",
+      "task_start",
+      "task_complete",
+      "session_attach",
+      "session_send_input",
+      "persona_list",
+      "persona_show",
+      "ipc_spawn",
+      "ipc_write",
+      "ipc_close",
+      "ipc_terminate",
+      "ipc_list_fds",
+      "ipc_create_stream",
+      "ipc_attach",
+      "ipc_share_stream",
+      "knowledge_search",
+      "knowledge_get_node",
+      "logs_get",
+      "workpad_write",
+      "workpad_read",
+      "schedule_list",
+      "schedule_show",
+      "show_hello_widget",
+      "component_register",
+      "component_update",
+      "component_list",
+      "component_render",
+      "component_search",
+      "component_promote",
+      "widget_show",
+      "component_show",
+      "task_update",
+      "task_delete",
+      "task_resume",
+      "session_spawn",
+      "session_kill",
+      "session_status",
+      "persona_create",
+      "schedule_create",
+      "schedule_update",
+      "schedule_delete",
+      "escalate_to_human"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "system",
+      "parentTaskId": "",
+      "workspaceId": "ws-alpha",
+      "title": "Root orchestrator task",
+      "description": "Human-authoritative root of the workspace.",
+      "status": 1
+    },
+    {
+      "id": "task-caller",
+      "parentTaskId": "system",
+      "workspaceId": "ws-alpha",
+      "title": "Attacker-controlled orchestrator task",
+      "description": "The scoped agent that holds the token used in every probe.",
+      "status": 2
+    },
+    {
+      "id": "task-caller-child",
+      "parentTaskId": "task-caller",
+      "workspaceId": "ws-alpha",
+      "title": "Legitimate delegated subtask",
+      "description": "A descendant of the caller; operating on it is authorized.",
+      "status": 2
+    },
+    {
+      "id": "task-sibling",
+      "parentTaskId": "system",
+      "workspaceId": "ws-alpha",
+      "title": "Peer task owned by another agent",
+      "description": "Shares a parent with the caller but is not its descendant.",
+      "status": 2
+    },
+    {
+      "id": "task-nephew",
+      "parentTaskId": "task-sibling",
+      "workspaceId": "ws-alpha",
+      "title": "Subtask of the peer task",
+      "description": "Descendant of the peer, not of the caller.",
+      "status": 1
+    },
+    {
+      "id": "task-foreign",
+      "parentTaskId": "",
+      "workspaceId": "ws-beta",
+      "title": "Task in another workspace",
+      "description": "Out of the caller's workspace; used to describe the cross-workspace variant.",
+      "status": 1
+    }
+  ],
+  "sessions": [
+    {
+      "id": "sess-caller",
+      "taskId": "task-caller",
+      "status": "running"
+    },
+    {
+      "id": "sess-caller-child",
+      "taskId": "task-caller-child",
+      "status": "running"
+    },
+    {
+      "id": "sess-sibling",
+      "taskId": "task-sibling",
+      "status": "running"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+%% n8n OAuth 2.1 受保护资源缺少按用户授权判定 — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["攻击者侧"]
+    member_account["实例 member 级用户<br/>actor · attacker_controlled"]
+    oauth_client["自行注册的 OAuth client<br/>actor · attacker_controlled"]
+  end
+  subgraph product["实例的授权服务器与属主项目"]
+    oauth_server["共享 OAuth 2.1 授权服务器<br/>service · trusted"]
+    resource_authorization["受保护资源按用户授权判定<br/>service · trusted"]
+    mcp_trigger["受害 workflow 的 MCP Server Trigger<br/>service · trusted"]
+    workflow_owner["属主项目中的执行上下文<br/>service · trusted"]
+    victim_credentials["属主已保存的凭据<br/>store · trusted"]
+  end
+  member_account -->|"1"| oauth_client
+  oauth_client -->|"2"| oauth_server
+  oauth_server -->|"3"| mcp_trigger
+  member_account -->|"4"| oauth_server
+  oauth_server -.->|"5"| mcp_trigger
+  oauth_server -.->|"6"| resource_authorization
+  resource_authorization -.->|"7"| oauth_server
+  member_account -.->|"8"| mcp_trigger
+  mcp_trigger -.->|"9"| workflow_owner
+  workflow_owner -.->|"10"| victim_credentials
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class member_account actor
+  class oauth_client actor
+  class oauth_server service
+  class resource_authorization service
+  class mcp_trigger service
+  class workflow_owner service
+  class victim_credentials store
+  style attacker_side fill:transparent
+  style product fill:transparent
+  linkStyle 4 stroke:#c0392b,stroke-width:2px
+  linkStyle 5 stroke:#2e7d32,stroke-width:2px
+  linkStyle 6 stroke:#2e7d32,stroke-width:2px
+  linkStyle 7 stroke:#c0392b,stroke-width:2px
+  linkStyle 8 stroke:#c0392b,stroke-width:2px
+  linkStyle 9 stroke:#c0392b,stroke-width:2px

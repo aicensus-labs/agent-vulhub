@@ -1,0 +1,21 @@
+{
+  "AuthProviderName": "",
+  "AuthProviderNamespace": "",
+  "AuthProviderUserID": "",
+  "MCPID": "",
+  "Model": "",
+  "ModelProvider": "",
+  "Namespace": "",
+  "Scope": "",
+  "TokenType": "",
+  "UserGroups": "owner,admin,power-user-plus,power-user,basic,authenticated",
+  "aud": "https://obot.example.com/mcp-connect/victim-mcp-server",
+  "email": "victim-owner@example.invalid",
+  "exp": 1790492129,
+  "iat": 1790488469,
+  "iss": "https://obot.example.com",
+  "name": "victim-owner",
+  "picture": "",
+  "scope": "",
+  "sub": "1001"
+}

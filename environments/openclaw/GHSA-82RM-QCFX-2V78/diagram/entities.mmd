@@ -1,0 +1,48 @@
+%% openclaw / GHSA-82RM-QCFX-2V78 漏洞图解 — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["攻击者侧"]
+    attacker["群组会话攻击者<br/>actor · attacker_controlled"]
+    group_channel["攻击者所在的群组出站渠道<br/>sink · attacker_controlled"]
+  end
+  subgraph outbound_stack["出站投递与授权判定"]
+    delivery_queue["写前投递队列<br/>store · trusted"]
+    recovery["投递队列恢复重放<br/>service · trusted"]
+    group_policy["群组工具策略判定<br/>service · trusted"]
+    policy_config["群组工具策略配置<br/>store · trusted"]
+    media_read["主机媒体读取能力<br/>tool · trusted"]
+  end
+  subgraph protected_host["群组策略保护的主机数据"]
+    host_media["被群组策略保护的主机媒体<br/>⚠ store · trusted"]
+  end
+  attacker -->|"1"| delivery_queue
+  delivery_queue -->|"2"| recovery
+  recovery -.->|"3"| recovery
+  recovery -.->|"4"| recovery
+  recovery -.->|"5"| group_policy
+  recovery -.->|"6"| group_policy
+  group_policy -.->|"7"| media_read
+  media_read -.->|"8"| host_media
+  media_read -.->|"9"| group_channel
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class attacker actor
+  class delivery_queue store
+  class recovery service
+  class group_policy service
+  class policy_config store
+  class media_read tool
+  class host_media store
+  class host_media synthetic
+  class group_channel sink
+  style attacker_side fill:transparent
+  style outbound_stack fill:transparent
+  style protected_host fill:transparent
+  linkStyle 2 stroke:#c0392b,stroke-width:2px
+  linkStyle 3 stroke:#2e7d32,stroke-width:2px
+  linkStyle 4 stroke:#c0392b,stroke-width:2px
+  linkStyle 5 stroke:#2e7d32,stroke-width:2px

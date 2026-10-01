@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T052605Z-0e72bf8cb56f",
+  "case_id": "03-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "patched_effect_blocked",
+      "passed": true,
+      "expected": "the patched runtime's filterToolsForUser drops Run Shell (keeping the custom tool) and the executor is never called",
+      "actual": {
+        "executor_node_types": [],
+        "resolved_tool_names": [],
+        "filter_tools_for_user_present": true,
+        "filter_tools_for_user_kept": [
+          "Echo Note"
+        ],
+        "tool_invocations": [],
+        "summary_matches_raw": true,
+        "summary_executor_node_types": [],
+        "raw_executor_node_types": [],
+        "summary_resolved_tool_names": [],
+        "raw_resolved_tool_names": [],
+        "summary_credential_ids": [],
+        "raw_credential_ids": []
+      },
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "effect.json",
+        "harness-observation.json"
+      ]
+    }
+  ]
+}

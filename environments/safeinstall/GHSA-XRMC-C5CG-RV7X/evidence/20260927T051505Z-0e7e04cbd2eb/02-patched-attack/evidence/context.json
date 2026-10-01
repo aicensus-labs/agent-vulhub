@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T051505Z-0e7e04cbd2eb",
+  "case_id": "02-patched-attack",
+  "variant": "patched",
+  "scenario": "attack"
+}

@@ -1,0 +1,40 @@
+%% openclaw-mcp / GHSA-C4QG-MG2R-2C56 跨连接异步任务泄露 — generated from diagram.toml
+flowchart LR
+  subgraph victim_connection["受害连接 A"]
+    client_a["客户端 A（异步任务拥有者）<br/>client · semi_trusted"]
+  end
+  subgraph attacker_side["攻击者侧"]
+    client_b["客户端 B（攻击者控制的连接）<br/>client · attacker_controlled"]
+  end
+  subgraph server_process["受影响的 openclaw-mcp 服务进程"]
+    mcp_server["openclaw-mcp HTTP 服务进程<br/>service · trusted"]
+    task_tools["异步任务工具处理器<br/>tool · trusted"]
+    task_store["进程级异步任务表<br/>store · trusted"]
+  end
+  gateway["OpenClaw 实例接口<br/>⚠ service · semi_trusted"]
+  client_a -->|"1"| mcp_server
+  mcp_server -->|"2"| task_store
+  client_b -->|"3"| mcp_server
+  mcp_server -->|"4"| task_tools
+  task_tools -.->|"5"| task_store
+  task_tools -.->|"6"| task_store
+  task_tools -.->|"7"| client_b
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class client_a client
+  class client_b client
+  class mcp_server service
+  class task_tools tool
+  class task_store store
+  class gateway service
+  class gateway synthetic
+  style victim_connection fill:transparent
+  style attacker_side fill:transparent
+  style server_process fill:transparent
+  linkStyle 4 stroke:#c0392b,stroke-width:2px
+  linkStyle 5 stroke:#2e7d32,stroke-width:2px

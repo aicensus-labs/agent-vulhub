@@ -1,0 +1,35 @@
+%% python-utcp / GHSA-8CP3-QXJ6-PX34 漏洞图解 — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["攻击者侧"]
+    attacker_spec["攻击者提供的 OpenAPI 规范<br/>actor · attacker_controlled"]
+    token_endpoint["攻击者指定的 token 端点<br/>⚠ sink · attacker_controlled"]
+  end
+  subgraph victim_runtime["受害者的 UTCP 运行时"]
+    converter["utcp-http 的 OpenAPI 转换器<br/>service · trusted"]
+    call_template["注册后的工具调用模板<br/>store · trusted"]
+    credentials["受害者的 OAuth2 客户端凭据<br/>store · trusted"]
+    http_protocol["utcp-http 的 OAuth2 令牌获取流程<br/>service · trusted"]
+  end
+  attacker_spec -->|"1"| converter
+  converter -.->|"2"| call_template
+  converter -.->|"3"| converter
+  call_template -.->|"4"| http_protocol
+  http_protocol -.->|"5"| token_endpoint
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class attacker_spec actor
+  class converter service
+  class call_template store
+  class credentials store
+  class http_protocol service
+  class token_endpoint sink
+  class token_endpoint synthetic
+  style attacker_side fill:transparent
+  style victim_runtime fill:transparent
+  linkStyle 1 stroke:#c0392b,stroke-width:2px
+  linkStyle 2 stroke:#2e7d32,stroke-width:2px

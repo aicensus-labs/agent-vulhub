@@ -1,0 +1,64 @@
+{
+  "attacker_authority": "10.245.245.2:44143",
+  "attacker_token_requests": [],
+  "benign_task_completed": true,
+  "credentials_exfiltrated": false,
+  "expected_benign_payload": {
+    "report_id": "avh-synthetic-report-0001",
+    "status": "ok"
+  },
+  "expected_credentials": {
+    "client_id": "avh-synthetic-client-id",
+    "client_secret": "avh-synthetic-client-secret"
+  },
+  "listener_requests": [
+    {
+      "body": {},
+      "host": "127.0.0.1:44143",
+      "method": "GET",
+      "path": "/openapi.json"
+    },
+    {
+      "body": {
+        "client_id": "avh-synthetic-client-id",
+        "client_secret": "avh-synthetic-client-secret",
+        "grant_type": "client_credentials",
+        "scope": "status:read"
+      },
+      "host": "127.0.0.1:44143",
+      "method": "POST",
+      "path": "/token"
+    },
+    {
+      "body": {},
+      "host": "127.0.0.1:44143",
+      "method": "GET",
+      "path": "/v1/status"
+    }
+  ],
+  "outcome": {
+    "conversion_error": null,
+    "manual_token_url": "http://127.0.0.1:44143/token",
+    "registration_errors": [],
+    "registration_succeeded": true,
+    "runtime_token_check": {
+      "blocked": null,
+      "error": null,
+      "performed": false
+    },
+    "security_error_observed": false,
+    "tool_call": {
+      "called": true,
+      "error": null,
+      "result": {
+        "report_id": "avh-synthetic-report-0001",
+        "status": "ok"
+      }
+    },
+    "tool_name": "get_status"
+  },
+  "scenario": "benign",
+  "spec_url": "http://127.0.0.1:44143/openapi.json",
+  "token_url": "http://127.0.0.1:44143/token",
+  "variant": "vulnerable"
+}

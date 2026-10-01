@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "description": "Deployment scope used by the allow-list path of GHSA-5648-rgj9-v224. The identifiers are reserved documentation values, not a reachable GitLab instance.",
+  "allowed_project_ids": ["101", "202"],
+  "server_project_id": "303",
+  "out_of_allowlist_project": "424242",
+  "gate_tool": "execute_graphql",
+  "raw_endpoint": "/api/graphql",
+  "note": "The pre-fix tool branch sends this document to the raw GraphQL endpoint without consulting the project allow-list, while the fixed branch rejects any project-scoped deployment before parsing arguments."
+}

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "scenario": "attack",
+  "description": "Attacker-controlled MCP tool calls. Every target is a task or session the scoped caller is NOT an ancestor of; on the vulnerable revision the tool layer forwards them unchanged.",
+  "probes": [
+    {
+      "id": "delete_non_descendant_task",
+      "actor": "scoped",
+      "tool": "task_delete",
+      "args": {
+        "taskId": "task-sibling"
+      },
+      "target": "task-sibling",
+      "note": "F2: task_delete carries no ancestry check in the vulnerable tool layer, so deleteTask reaches the backend."
+    },
+    {
+      "id": "update_non_descendant_task",
+      "actor": "scoped",
+      "tool": "task_update",
+      "args": {
+        "taskId": "task-sibling",
+        "title": "rewritten-by-non-ancestor"
+      },
+      "target": "task-sibling",
+      "note": "F2: task_update carries no ancestry check either; the changed title comes back in the tool result."
+    },
+    {
+      "id": "kill_sibling_session",
+      "actor": "scoped",
+      "tool": "session_kill",
+      "args": {
+        "sessionId": "sess-sibling"
+      },
+      "target": "sess-sibling",
+      "note": "F6: session_kill resolves neither the session nor its owning task before killing it."
+    },
+    {
+      "id": "delete_cross_workspace_task",
+      "actor": "scoped",
+      "tool": "task_delete",
+      "args": {
+        "taskId": "task-foreign"
+      },
+      "target": "task-foreign",
+      "note": "Same missing check across a workspace boundary: the target lives in ws-beta while the caller is bound to ws-alpha."
+    }
+  ]
+}

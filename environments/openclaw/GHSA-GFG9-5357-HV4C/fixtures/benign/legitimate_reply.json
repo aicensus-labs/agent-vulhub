@@ -1,0 +1,17 @@
+{
+  "scenario": "benign",
+  "description": "Legitimate reply that references an audio file inside the allowed local media root. Both revisions must still embed it.",
+  "allowed_local_roots": ["/tmp/openclaw-media-root"],
+  "reply_payloads": [
+    {
+      "text": "Here is the greeting you generated.",
+      "mediaUrl": "/tmp/openclaw-media-root/greeting.mp3"
+    }
+  ],
+  "materialize": [
+    {
+      "fixture": "benign/greeting.mp3",
+      "path": "/tmp/openclaw-media-root/greeting.mp3"
+    }
+  ]
+}

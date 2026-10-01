@@ -1,0 +1,67 @@
+schema_version = 1
+id = "obot/GHSA-VW82-7FV8-R6GP"
+ghsa = "GHSA-VW82-7FV8-R6GP"
+product = "obot"
+title = "Obot has an authorization bypass in /mcp-connect/{id} that allows any authenticated user to use any registered MCP server"
+lifecycle = "draft"
+agent_specificity = "agent_unique"
+# Advisory severity from the authoritative source, normalized to
+# CRITICAL/HIGH/MEDIUM/LOW/NONE. Use "UNKNOWN" when no source publishes one.
+severity = "CRITICAL"
+advisories = ["https://github.com/advisories/GHSA-vw82-7fv8-r6gp"]
+description = "Obot's API authorizer in pkg/api/authz (v0.21.0) lets any authenticated user reach /mcp-connect/{mcp_id}. The blanket staticRules[anyGroup] entry for the \"/mcp-connect/\" prefix makes Authorizer.Authorize return true before the request ever reaches the per-server checkMCPID access-control-rule evaluation, and the /api-only UI fallback admits the same path a second time. The trust boundary that fails is between an authenticated-but-unauthorized caller and a registered MCP server: the mcp_id path segment is treated as authorized on its prefix alone while ownership and access-control-rule checks are skipped. v0.21.1 removes both escapes, so the request falls through to the access-control-rule evaluation and non-ACR principals are denied."
+prerequisites = ["Pinned obot v0.21.0 and v0.21.1 source archives (fixed commits, not tags that can move)", "A pinned Go 1.26.2 toolchain and the locked module closure for pkg/api/authz, both supplied as offline build inputs", "No network is required at build or run time; the lab compose network is internal"]
+
+[vulnerable]
+version = "0.21.0"
+source_url = "https://github.com/obot-platform/obot/tree/821a705516116c8035df221611be4a439e238998"
+commit = "821a705516116c8035df221611be4a439e238998"
+image = ""
+archive = "obot-0.21.0-source.tar.gz"
+
+[patched]
+version = "0.21.1"
+source_url = "https://github.com/obot-platform/obot/tree/2a2ec3f23ac564b2e2fab6b09fdef4ecd05fd496"
+commit = "2a2ec3f23ac564b2e2fab6b09fdef4ecd05fd496"
+image = ""
+archive = "obot-0.21.1-source.tar.gz"
+
+[build]
+base_image = "python@sha256:9534e5a8e315485d4061ed659af0fd78a284c015f9b73661b41d6bab25604534"
+dockerfile = "Dockerfile"
+# Each entry: { name = "...", url = "https://...", sha256 = "..." }
+# Include source archives AND every dependency needed by network-disabled builds.
+inputs = [
+  { name = "obot-0.21.0-source.tar.gz", url = "https://github.com/obot-platform/obot/archive/821a705516116c8035df221611be4a439e238998.tar.gz", sha256 = "ccd6211c306fbb7ed7a9f8831ee9040b4cf9ce376fe32984e642ccf52c550429" },
+  { name = "obot-0.21.1-source.tar.gz", url = "https://github.com/obot-platform/obot/archive/2a2ec3f23ac564b2e2fab6b09fdef4ecd05fd496.tar.gz", sha256 = "98945931aa1f20e00a4740919817de86892c84e82421bea2567b55ffc44d96ff" },
+  { name = "go1.26.2.linux-amd64.tar.gz", url = "https://go.dev/dl/go1.26.2.linux-amd64.tar.gz", sha256 = "990e6b4bbba816dc3ee129eaeaf4b42f17c2800b88a2166c265ac1a200262282" },
+  { name = "obot-go-mod-cache.tar.gz", url = "https://raw.githubusercontent.com/aicensus-labs/agent-vulhub/main/environments/obot/GHSA-VW82-7FV8-R6GP/inputs/obot-go-mod-cache.tar.gz", sha256 = "2c3c1a9fd969055485aea3d863504d2ea369dff69a5ccb8f2afad373b6ed78fc" },
+]
+
+[runtime]
+isolation = "container"
+platforms = ["linux/amd64"]
+mode = "oneshot"
+harness = "python3"
+exceptions = []
+requires_model = false
+network_requirements = "No outbound network at build or run time: the image is assembled entirely from the pinned local inputs (Go toolchain, module closure, source archives) and the harness evaluates the upstream authorizer in-process. The compose lab network is internal."
+
+[verification.mechanism]
+status = "passed"
+verified_at = "2026-09-27T03:25:14.709734+00:00"
+evidence = ["evidence/20260927T032148Z-9e908c61ac06/report.json"]
+notes = "四场景三轮（12/12）已通过；归档报告 run_id=20260927T032148Z-9e908c61ac06，由 staging 验证结果迁移并按当前输入指纹复核。"
+
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
+
+[verification.agent_poc]
+status = "not_run"
+adapter_status = "not_run"
+verified_at = ""
+evidence = []
+notes = "An independently reviewed Agent-PoC Adapter is required before candidate evaluation."

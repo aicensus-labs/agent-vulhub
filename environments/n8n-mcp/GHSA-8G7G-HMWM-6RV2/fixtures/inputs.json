@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "environment_id": "n8n-mcp/GHSA-8G7G-HMWM-6RV2",
+  "description": "Fixed inputs for GHSA-8G7G-HMWM-6RV2. Every identifier, key, header value and response body below is a synthetic marker; no real credential, host or user datum appears here.",
+  "archives": {
+    "vulnerable": {
+      "version": "2.50.0",
+      "name": "n8n-mcp-2.50.0.tgz"
+    },
+    "patched": {
+      "version": "2.50.1",
+      "name": "n8n-mcp-2.50.1.tgz"
+    }
+  },
+  "markers": {
+    "credential": "sk-test-exposed-0000",
+    "internal": "sk-test-internal-9999",
+    "telemetry": "sk-testtelemetry0000abcd"
+  },
+  "environment": {
+    "WEBHOOK_SECURITY_MODE": "permissive",
+    "note": "permissive mode still blocks the cloud-metadata hostnames; it only admits loopback and private destinations, which is what lets a purely local redirect hop be observed at all."
+  },
+  "traversal": {
+    "workflow_id": "../credentials",
+    "reached_path": "/api/v1/credentials",
+    "api_key": "sk-test-n8n-api-key-0000",
+    "credential_response": {
+      "data": [
+        {
+          "id": "cred-1",
+          "name": "prod-n8n-api",
+          "type": "n8nApi",
+          "data": {
+            "apiKey": "sk-test-exposed-0000"
+          }
+        }
+      ]
+    }
+  },
+  "redirect": {
+    "webhook_path": "/hook",
+    "redirect_target_path": "/stolen",
+    "target_response": {
+      "secret": "sk-test-internal-9999",
+      "reached": "target"
+    }
+  },
+  "telemetry": {
+    "secret": "sk-testtelemetry0000abcd",
+    "benign_value": "demo-header-value",
+    "benign_validation_before": {
+      "valid": true,
+      "errors": [],
+      "warnings": [],
+      "note": "validated before the change"
+    },
+    "benign_operations": [
+      {
+        "type": "updateNode",
+        "nodeName": "Webhook",
+        "updates": {
+          "parameters": {
+            "header": {
+              "value": "demo-header-value"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "benign": {
+    "workflow_id": "wf-normal-1",
+    "webhook_path": "/hook",
+    "webhook_response": {
+      "status": "accepted",
+      "workflowId": "wf-normal-1"
+    }
+  }
+}

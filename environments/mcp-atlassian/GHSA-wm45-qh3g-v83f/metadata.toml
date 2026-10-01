@@ -5,6 +5,7 @@ product = "mcp-atlassian"
 title = "MCP Atlassian attachment upload arbitrary server-side file read"
 lifecycle = "draft"
 agent_specificity = "agent_unique"
+severity = "HIGH"
 advisories = ["https://github.com/sooperset/mcp-atlassian/security/advisories/GHSA-wm45-qh3g-v83f", "https://github.com/advisories/GHSA-wm45-qh3g-v83f"]
 description = "The attachment-upload tools accept a client-supplied file_path and open it on the server host. On a remote HTTP or SSE deployment, a client can read arbitrary server-readable files and exfiltrate them as Atlassian attachments, including secrets from /proc/self/environ."
 prerequisites = ["Pinned mcp-atlassian 0.21.0 source", "Pinned mcp-atlassian 0.22.0 source", "A remote MCP transport with attachment upload enabled"]
@@ -24,14 +25,16 @@ image = ""
 archive = "mcp-atlassian-0.22.0.tar.gz"
 
 [build]
-base_image = "codex-universal@sha256:55e6ae2ade43eb3ca29741f475d833a0f52bffe4208ca199ee717c1f8ef8188b"
+base_image = "buildpack-deps@sha256:97d2909fdc9d46ae7f9d3bd081749549c1078899585e37abb60fd5f4cd593484"
 dockerfile = "Dockerfile"
 # Each entry: { name = "...", url = "https://...", sha256 = "..." }
 # Include source archives AND every dependency needed by network-disabled builds.
 inputs = [
+
   { name = "mcp-atlassian-0.21.0.tar.gz", url = "https://github.com/sooperset/mcp-atlassian/archive/c450a161ec630dd57f44a2b15d977debae19eba5.tar.gz", sha256 = "fbe59d73f23e688bfa83d2a83917d65fc7cb7c813dadef1fdbeed64f855234f2" },
   { name = "mcp-atlassian-0.22.0.tar.gz", url = "https://github.com/sooperset/mcp-atlassian/archive/b041733473f95119dd539542a43c280737a8e460.tar.gz", sha256 = "4740af64608f975a38fd422f85f35d0507212bfe012935b4a9dd2f735061c887" },
-  { name = "python-runtime-deps.tar.gz", url = "https://raw.githubusercontent.com/hejunjie/agent-vulhub/main/environments/mcp-atlassian/GHSA-wm45-qh3g-v83f/inputs/python-runtime-deps.tar.gz", sha256 = "354c218bc0268db421987c19b21edd05908482a1a7d7126ea2367cb11ba7e0b5" },
+  { name = "python-runtime-deps.tar.gz", url = "https://raw.githubusercontent.com/aicensus-labs/agent-vulhub/main/environments/mcp-atlassian/GHSA-wm45-qh3g-v83f/inputs/python-runtime-deps.tar.gz", sha256 = "354c218bc0268db421987c19b21edd05908482a1a7d7126ea2367cb11ba7e0b5" },
+  { name = "pip-25.1.1-py3-none-any.whl", url = "https://files.pythonhosted.org/packages/29/a2/d40fb2460e883eca5199c62cfc2463fd261f760556ae6290f88488c362c0/pip-25.1.1-py3-none-any.whl", sha256 = "2913a38a2abf4ea6b64ab507bd9e967f3b53dc1ede74b01b0931e1ce548751af" },
 ]
 
 [runtime]
@@ -39,14 +42,17 @@ isolation = "container"
 platforms = ["linux/amd64"]
 mode = "oneshot"
 harness = "python3"
-exceptions = []
+network_pool = "10.200.0.0/16"
+exceptions = [
+  { rule = "network.lab.subnet", reason = "Host Docker default address pools are exhausted; this environment declares a private /24 pool instead." },
+]
 requires_model = false
 network_requirements = "No network is used by this draft; source archives are fetched by the runner before container execution"
 
 [verification.mechanism]
 status = "passed"
-verified_at = "2026-09-17T15:32:18.405870+00:00"
-evidence = ["results/mcp-atlassian/GHSA-wm45-qh3g-v83f/20260917T153135Z-270c2be15fa4/report.json"]
+verified_at = "2026-09-30T03:48:29.842029+00:00"
+evidence = ["evidence/20260930T034619Z-a6d8dc76f135/report.json"]
 notes = ""
 
 [verification.end_to_end]

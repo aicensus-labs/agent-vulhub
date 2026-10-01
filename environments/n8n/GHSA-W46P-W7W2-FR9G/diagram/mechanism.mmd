@@ -1,0 +1,19 @@
+%% n8n AI Agents node 工具越权执行 — generated from diagram.toml
+sequenceDiagram
+  actor attacker as 项目内 Project Viewer 账号
+  participant agent_chat as Agent 对话入口（POST agents/v2/:agentId/chat）
+  participant runtime as AgentRuntimeReconstructionService
+  participant executor as EphemeralNodeExecutor 单节点内联执行
+  participant credential_store as 项目共享凭据表
+  participant host_effect as 被执行的节点与命令效果记录
+  Note over attacker,agent_chat: 阶段 setup
+  attacker ->> agent_chat: 1 Project Viewer 向启用了 node 工具的 agent 发起对话，请求里带的是正常聊天输入
+  agent_chat ->> runtime: 2 入口把该 agent 的 JSON 配置交给运行时重建，让运行时解析其中的工具引用
+  Note over runtime: 阶段 trigger
+  runtime -->> runtime: 3 漏洞版直接按 agent 配置重建运行时，type=node 的工具引用不做用户级校验就进入工具解析
+  Note over runtime: 分歧点：漏洞版与修复版在此分叉
+  runtime -x runtime: 4 修复版先按调用者的 workflow:execute 与 credential:read 丢弃不可执行的 node 工具引用，再重建运行时
+  runtime -->> executor: 5 保留下来的 node 工具被解析成可调用工具，其处理器调用单节点内联执行
+  executor -->> credential_store: 6 执行器只确认凭据被共享给该 project，就把攻击者无权读取的密钥装进节点执行
+  Note over executor,host_effect: 阶段 effect
+  executor -->> host_effect: 7 命令类节点以项目凭据实际执行，节点类型、参数与凭据标识落到效果记录上

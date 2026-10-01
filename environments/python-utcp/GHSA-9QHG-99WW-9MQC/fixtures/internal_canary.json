@@ -1,0 +1,14 @@
+{
+  "resource": "iam-security-credentials",
+  "path": "/latest/meta-data/iam/security-credentials/lab-role",
+  "content_type": "application/json",
+  "marker": "AVH-CANARY-9QHG-99WW-9MQC",
+  "body": {
+    "Code": "Success",
+    "Type": "AWS-HMAC",
+    "AccessKeyId": "AKIAVHNOTAREALKEY9QHG",
+    "SecretAccessKey": "not-a-real-secret-9qhg-99ww-9mqc",
+    "Token": "AVH-CANARY-9QHG-99WW-9MQC",
+    "Expiration": "2030-01-01T00:00:00Z"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "initialize": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {
+      "tools": {
+        "listChanged": true
+      },
+      "resources": {
+        "listChanged": true
+      }
+    },
+    "serverInfo": {
+      "name": "Dynatrace MCP Server",
+      "version": "1.8.7"
+    }
+  },
+  "approval_requests": 0,
+  "tool_result": {
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Operation cancelled: Human approval was not granted for creating this notebook."
+        }
+      ]
+    },
+    "jsonrpc": "2.0",
+    "id": 2
+  },
+  "unparsed_stdout": []
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T062841Z-084abbec6a65",
+  "case_id": "01-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": "The vulnerable build POSTs the attacker-controlled notebook (marker and name) to /platform/document/v1/documents without any human approval.",
+      "actual": "document_requests=1, marker_persisted=True, notebook_name_persisted=True, approval_requests=0, tool_result='Document created successfully: https://abc12345.apps.dynatrace.com/ui/apps/dynatrace.notebooks/notebook/notebook-6f1c2b7a9d0e4351'",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "mock_requests.json",
+        "tool_exchange.json",
+        "server_stderr.txt"
+      ]
+    }
+  ]
+}

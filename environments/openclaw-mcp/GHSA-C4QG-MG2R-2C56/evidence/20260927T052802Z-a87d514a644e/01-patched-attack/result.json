@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T052802Z-a87d514a644e",
+  "case_id": "01-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+  "round": 1,
+  "project": "avh-1d5f82e143104eca8234",
+  "layer": "mechanism",
+  "source_commit": "751d58a4d6947809e18d968d92604e50398ee98c",
+  "image": "sha256:dbbd8d359c1cc1a89d2cce15d41af601f708f195051b1b011c0309bd27b575a5",
+  "started_at": "2026-09-27T05:28:18.083142+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "patched_effect_blocked",
+      "passed": true,
+      "expected": "The intruder connection is refused: its task list is empty or denied and its status call for the victim task returns an error, so neither the victim task id nor its model result is disclosed.",
+      "actual": {
+        "owner_completed_with_model_reply": true,
+        "intruder_list_discloses_owner_task": false,
+        "intruder_status_discloses_owner_result": false,
+        "intruder_list_denied_or_empty": true,
+        "intruder_status_refused": true,
+        "gateway_saw_only_victim_session": true
+      },
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "effect.json"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-27T05:28:26.372231+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

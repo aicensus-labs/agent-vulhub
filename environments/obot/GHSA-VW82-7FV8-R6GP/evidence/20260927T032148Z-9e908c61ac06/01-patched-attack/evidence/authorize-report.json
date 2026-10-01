@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "variant": "patched",
+  "scenario": "attack",
+  "commit": "",
+  "cases": [
+    {
+      "id": "authorized_user_reaches_catalog_server",
+      "path": "/mcp-connect/ms1catalog",
+      "method": "GET",
+      "user": "authorized",
+      "uid": "authorized-uid",
+      "expected_allowed": true,
+      "allowed": true,
+      "matches_expectation": true
+    },
+    {
+      "id": "unprivileged_user_reaches_catalog_server",
+      "path": "/mcp-connect/ms1catalog",
+      "method": "GET",
+      "user": "attacker",
+      "uid": "attacker-uid",
+      "expected_allowed": false,
+      "allowed": false,
+      "matches_expectation": true
+    }
+  ],
+  "all_match": true
+}

@@ -1,0 +1,44 @@
+{
+  "scenario": "benign",
+  "variant": "vulnerable",
+  "mechanism_loaded": true,
+  "filter_tools_for_user_present": false,
+  "filter_tools_for_user_kept": null,
+  "resolved_tools": [
+    {
+      "name": "fetch_status",
+      "kind": "node"
+    }
+  ],
+  "executor_calls": [
+    {
+      "nodeType": "n8n-nodes-base.httpRequestTool",
+      "projectId": "project-editor-workspace",
+      "credentialDetails": {
+        "httpHeaderAuth": {
+          "id": "cred-api",
+          "name": "Status API"
+        }
+      },
+      "nodeParameters": {
+        "url": "http://127.0.0.1:5678/healthz"
+      }
+    }
+  ],
+  "node_tool_invocations": [
+    {
+      "tool": "fetch_status",
+      "result": {
+        "status": "success",
+        "data": [
+          {
+            "json": {
+              "marker": "AVH-N8N-W46P-BENIGN"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "harness_exit_code": 0
+}
