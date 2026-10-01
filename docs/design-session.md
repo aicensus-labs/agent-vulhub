@@ -36,7 +36,7 @@ Compose 默认使用内部网络且不发布端口，不挂载宿主机目录，
 
 ## 已确认的镜像策略
 
-每个环境提交可重建 Dockerfile 和构建上下文，分别构建漏洞版与修复版；源码固定完整 commit SHA，基础镜像固定 digest，最终镜像 digest 写入 `metadata.toml`。Compose 和复现记录只接受 `image@sha256:...`，不接受浮动 tag。
+每个环境提交可重建 Dockerfile 和构建上下文，分别构建漏洞版与修复版；源码固定完整 commit SHA，每个构建输入固定 URL 与 SHA-256，基础镜像固定 digest，并支持 `--offline` 构建。发布镜像是可选的（见 [ADR-0004](adr/0004-reproducible-immutable-images.md)）：未发布时 `metadata.toml` 的 `image` 留空，复现性由固定输入保证；发布时两版都必须写 `image@sha256:...`。Compose 和复现记录只接受不可变 digest，不接受浮动 tag。
 
 ### 标准运行器入口
 

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "run_id": "20260930T033228Z-1e7771c16fc5",
+  "case_id": "03-vulnerable-benign",
+  "variant": "vulnerable",
+  "scenario": "benign",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The upstream CLI executes to a terminal state",
+      "actual": "return_code=0",
+      "reason": "The complete upstream build is present and the CLI invocation completed or reported its rejection.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "No project config means no remote credential-bearing request",
+      "actual": "0 token requests",
+      "reason": "The normal no-project control must not send the synthetic token to a remote endpoint.",
+      "evidence": [
+        "observation.json"
+      ]
+    }
+  ]
+}

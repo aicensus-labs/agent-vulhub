@@ -9,13 +9,15 @@
 
 | 指标 | 数量 |
 | --- | ---: |
-| 已收录环境 | 39 |
-| 机制验收通过 | 31 |
-| 尚未运行 | 8 |
+| 已收录环境 | 276 |
+| 机制验收通过 | 275 |
+| 尚未运行 | 1 |
 | `ready` 环境 | 0 |
 | 已发布 GHCR 镜像 | 0 |
 
 “机制验收通过”不等于 `ready`：`ready` 还要求固定的可分发镜像、至少三轮完整验收和维护者审阅。验证使用容器内的 synthetic 效果和修复对照；Docker smoke 只验证工具链，不构成漏洞复现证明。
+
+其中本轮纳入的 322 个 AgentSec 候选有 237 个完成四场景三轮机制验收，85 个因没有可构造的修复对照、平台不匹配或因果性不足保留为 `not_run`；具体原因记录在各环境的 `metadata.toml`。
 
 ## 快速开始
 
@@ -34,7 +36,13 @@ python3 -m unittest discover -s tests -v
 python3 -m runner reproduce mcp-filesystem/CVE-2025-53109 --build --rounds 1
 ```
 
-`--build` 会从固定输入构建漏洞版和修复版镜像，再分别运行攻击和正常任务。完整验收流程见[复现与图解工作流](docs/reproduction-workflow.md)。
+### 复现方式：本地构建
+
+**复现性来自固定的构建输入，不依赖我们发布镜像。** 每个环境的 `metadata.toml` 固定了源码完整 commit SHA，`build.inputs` 中每一项都记录 URL 与 SHA-256，基础镜像固定 digest。`--build` 会校验这些输入、从仓库内 Dockerfile 构建漏洞版和修复版镜像，再分别运行攻击和正常任务。
+
+因此使用者可以自行构建并独立验证来源，无需信任任何预构建镜像。首次构建需要联网下载已固定的输入，之后可加 `--offline` 复用 `.cache/sha256/` 中的缓存。
+
+已发布镜像（如有）只是省去构建的便利路径，不是复现的前提；见 [ADR-0004](docs/adr/0004-reproducible-immutable-images.md)。完整验收流程见[复现与图解工作流](docs/reproduction-workflow.md)。
 
 ## 环境
 
@@ -47,7 +55,11 @@ python3 -m runner reproduce mcp-filesystem/CVE-2025-53109 --build --rounds 1
 - [环境执行协议](docs/environment-contract.md)：输入固定、隔离、证据和状态定义
 - [新增环境](CONTRIBUTING.md)：收录、验收和提交要求
 - [漏洞图解契约](docs/diagram-contract.md)：机制图的来源和校验规则
+- [AgentSec 候选自动化流水线](docs/agentsec-reproduction-factory.md)：从 AgentSec 数据库抽取 `agent_unique` 候选，生成 staging 草稿、图解与六阶段验收编排
 - [Agent-PoC 评测设计](docs/adr/0019-agent-generated-poc-evaluation.md)：实验性 Agent 生成 PoC 流程
+- [安全能力基准对照](docs/agent-security-benchmarks.md)：CyberGym / SEC-bench / ExploitGym / ExploitBench 的任务、数据集与判定机制
+- [Agent/MCP 漏洞来源清单](docs/agent-vuln-sources.md)：可用的漏洞库、检索通路与策展清单盘点
+- [同类复现数据库对比](docs/reproducible-vuln-databases-comparison.md)：ARVO / CVE-Factory / 靶场等同类项目对比与差异分析
 - [设计决策](docs/adr/)：仓库工具链和验证规则的 ADR
 
 ## 安全边界

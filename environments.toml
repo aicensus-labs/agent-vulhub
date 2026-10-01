@@ -155,3 +155,951 @@ path = "environments/praisonai/CVE-2026-61445"
 [[environments]]
 id = "vtcode/GHSA-WQGW-CRR5-CR2P"
 path = "environments/vtcode/GHSA-WQGW-CRR5-CR2P"
+
+[[environments]]
+id = "3de5f50d167a878f7530f57ed018d508/CVE-2026-19244"
+path = "environments/3de5f50d167a878f7530f57ed018d508/CVE-2026-19244"
+
+[[environments]]
+id = "agenticmail/CVE-2026-57495"
+path = "environments/agenticmail/CVE-2026-57495"
+
+[[environments]]
+id = "agenticseek/CVE-2026-72776"
+path = "environments/agenticseek/CVE-2026-72776"
+
+[[environments]]
+id = "ai-agent-automation/CVE-2026-54519"
+path = "environments/ai-agent-automation/CVE-2026-54519"
+
+[[environments]]
+id = "ai-engine-the-chatbot/CVE-2026-8719"
+path = "environments/ai-engine-the-chatbot/CVE-2026-8719"
+
+[[environments]]
+id = "anthropic-sdk-typescript/CVE-2026-34451"
+path = "environments/anthropic-sdk-typescript/CVE-2026-34451"
+
+[[environments]]
+id = "anthropic-sdk-typescript/CVE-2026-41686"
+path = "environments/anthropic-sdk-typescript/CVE-2026-41686"
+
+[[environments]]
+id = "anything-llm/CVE-2026-45403"
+path = "environments/anything-llm/CVE-2026-45403"
+
+[[environments]]
+id = "anything-llm/CVE-2026-48116"
+path = "environments/anything-llm/CVE-2026-48116"
+
+[[environments]]
+id = "apify-mcp-server/CVE-2026-46341"
+path = "environments/apify-mcp-server/CVE-2026-46341"
+
+[[environments]]
+id = "apify-mcp-server/CVE-2026-50143"
+path = "environments/apify-mcp-server/CVE-2026-50143"
+
+[[environments]]
+id = "auto-gpt/CVE-2023-37273"
+path = "environments/auto-gpt/CVE-2023-37273"
+
+[[environments]]
+id = "auto-gpt/CVE-2023-37274"
+path = "environments/auto-gpt/CVE-2023-37274"
+
+[[environments]]
+id = "autogpt/CVE-2024-1881"
+path = "environments/autogpt/CVE-2024-1881"
+
+[[environments]]
+id = "autogpt/CVE-2026-26020"
+path = "environments/autogpt/CVE-2026-26020"
+
+[[environments]]
+id = "banks/CVE-2026-61536"
+path = "environments/banks/CVE-2026-61536"
+
+[[environments]]
+id = "bifrost/CVE-2026-90898"
+path = "environments/bifrost/CVE-2026-90898"
+
+[[environments]]
+id = "browse-mcp/CVE-2026-55557"
+path = "environments/browse-mcp/CVE-2026-55557"
+
+[[environments]]
+id = "claude-code/CVE-2025-64755"
+path = "environments/claude-code/CVE-2025-64755"
+
+[[environments]]
+id = "claude-code/CVE-2025-66032"
+path = "environments/claude-code/CVE-2025-66032"
+
+[[environments]]
+id = "codewhale/CVE-2026-75859"
+path = "environments/codewhale/CVE-2026-75859"
+
+[[environments]]
+id = "codewhale/CVE-2026-75911"
+path = "environments/codewhale/CVE-2026-75911"
+
+[[environments]]
+id = "codewhale/CVE-2026-75913"
+path = "environments/codewhale/CVE-2026-75913"
+
+[[environments]]
+id = "codewhale/CVE-2026-75914"
+path = "environments/codewhale/CVE-2026-75914"
+
+[[environments]]
+id = "codewhale/CVE-2026-75915"
+path = "environments/codewhale/CVE-2026-75915"
+
+[[environments]]
+id = "codex/CVE-2025-59532"
+path = "environments/codex/CVE-2025-59532"
+
+[[environments]]
+id = "codex/CVE-2026-19591"
+path = "environments/codex/CVE-2026-19591"
+
+[[environments]]
+id = "contentful-mcp-server/CVE-2026-53957"
+path = "environments/contentful-mcp-server/CVE-2026-53957"
+
+[[environments]]
+id = "crewai/CVE-2026-2287"
+path = "environments/crewai/CVE-2026-2287"
+
+[[environments]]
+id = "crewai-codeinterpreter-tool-falls-back-to-sandbo/CVE-2026-2275"
+path = "environments/crewai-codeinterpreter-tool-falls-back-to-sandbo/CVE-2026-2275"
+
+[[environments]]
+id = "cve-2026-18236-google-adk-up-to-2-4-x-tool-confi/CVE-2026-18236"
+path = "environments/cve-2026-18236-google-adk-up-to-2-4-x-tool-confi/CVE-2026-18236"
+
+[[environments]]
+id = "cve-2026-2256-poc/CVE-2026-2256"
+path = "environments/cve-2026-2256-poc/CVE-2026-2256"
+
+[[environments]]
+id = "d265f46fc3161b31ac2e81db44d662e1/CVE-2023-32786"
+path = "environments/d265f46fc3161b31ac2e81db44d662e1/CVE-2023-32786"
+
+[[environments]]
+id = "deepchat/CVE-2025-66222"
+path = "environments/deepchat/CVE-2025-66222"
+
+[[environments]]
+id = "deepseek-mcp-server/CVE-2026-55604"
+path = "environments/deepseek-mcp-server/CVE-2026-55604"
+
+[[environments]]
+id = "deeptutor/CVE-2026-58168"
+path = "environments/deeptutor/CVE-2026-58168"
+
+[[environments]]
+id = "discourse/CVE-2026-27740"
+path = "environments/discourse/CVE-2026-27740"
+
+[[environments]]
+id = "dive/CVE-2026-23523"
+path = "environments/dive/CVE-2026-23523"
+
+[[environments]]
+id = "dynatrace-mcp/GHSA-PC2W-4MQ8-32QW"
+path = "environments/dynatrace-mcp/GHSA-PC2W-4MQ8-32QW"
+
+[[environments]]
+id = "enclave/CVE-2026-22686"
+path = "environments/enclave/CVE-2026-22686"
+
+[[environments]]
+id = "fastgpt/CVE-2026-44287"
+path = "environments/fastgpt/CVE-2026-44287"
+
+[[environments]]
+id = "flaw/CVE-2026-44192"
+path = "environments/flaw/CVE-2026-44192"
+
+[[environments]]
+id = "flowise/CVE-2025-34267"
+path = "environments/flowise/CVE-2025-34267"
+
+[[environments]]
+id = "flowise/CVE-2026-40933"
+path = "environments/flowise/CVE-2026-40933"
+
+[[environments]]
+id = "flowise/CVE-2026-41138"
+path = "environments/flowise/CVE-2026-41138"
+
+[[environments]]
+id = "flowise/CVE-2026-41265"
+path = "environments/flowise/CVE-2026-41265"
+
+[[environments]]
+id = "flowise/CVE-2026-46442"
+path = "environments/flowise/CVE-2026-46442"
+
+[[environments]]
+id = "flowise/CVE-2026-73485"
+path = "environments/flowise/CVE-2026-73485"
+
+[[environments]]
+id = "flowise/CVE-2026-73487"
+path = "environments/flowise/CVE-2026-73487"
+
+[[environments]]
+id = "flowise/CVE-2026-91935"
+path = "environments/flowise/CVE-2026-91935"
+
+[[environments]]
+id = "flowise/GHSA-M99R-2HXC-CP3Q"
+path = "environments/flowise/GHSA-M99R-2HXC-CP3Q"
+
+[[environments]]
+id = "forgecode/CVE-2026-57860"
+path = "environments/forgecode/CVE-2026-57860"
+
+[[environments]]
+id = "gitlab-mcp/CVE-2026-61462"
+path = "environments/gitlab-mcp/CVE-2026-61462"
+
+[[environments]]
+id = "gitlab-mcp/CVE-2026-61559"
+path = "environments/gitlab-mcp/CVE-2026-61559"
+
+[[environments]]
+id = "gitlab-mcp/GHSA-5648-RGJ9-V224"
+path = "environments/gitlab-mcp/GHSA-5648-RGJ9-V224"
+
+[[environments]]
+id = "go-sdk/CVE-2026-34742"
+path = "environments/go-sdk/CVE-2026-34742"
+
+[[environments]]
+id = "goose/CVE-2026-72718"
+path = "environments/goose/CVE-2026-72718"
+
+[[environments]]
+id = "grackle/GHSA-F9FF-5X35-7GFW"
+path = "environments/grackle/GHSA-F9FF-5X35-7GFW"
+
+[[environments]]
+id = "graphiti/CVE-2026-32247"
+path = "environments/graphiti/CVE-2026-32247"
+
+[[environments]]
+id = "ibm-langflow-oss-1-0-0/CVE-2026-10564"
+path = "environments/ibm-langflow-oss-1-0-0/CVE-2026-10564"
+
+[[environments]]
+id = "ibm-langflow-oss-1-0-0/CVE-2026-13448"
+path = "environments/ibm-langflow-oss-1-0-0/CVE-2026-13448"
+
+[[environments]]
+id = "ibm-langflow-oss-1-0-0/CVE-2026-9135"
+path = "environments/ibm-langflow-oss-1-0-0/CVE-2026-9135"
+
+[[environments]]
+id = "improper-neutralization-of-input-used-for-llm-pr/CVE-2026-78379"
+path = "environments/improper-neutralization-of-input-used-for-llm-pr/CVE-2026-78379"
+
+[[environments]]
+id = "in-eclipse-theia-versions/CVE-2026-22551"
+path = "environments/in-eclipse-theia-versions/CVE-2026-22551"
+
+[[environments]]
+id = "in-eclipse-theia-versions/CVE-2026-44688"
+path = "environments/in-eclipse-theia-versions/CVE-2026-44688"
+
+[[environments]]
+id = "in-eclipse-theia-versions/CVE-2026-46580"
+path = "environments/in-eclipse-theia-versions/CVE-2026-46580"
+
+[[environments]]
+id = "in-spring-ai-s-tool-calling-support/CVE-2026-59318"
+path = "environments/in-spring-ai-s-tool-calling-support/CVE-2026-59318"
+
+[[environments]]
+id = "inspector/CVE-2025-58444"
+path = "environments/inspector/CVE-2025-58444"
+
+[[environments]]
+id = "java-sdk/CVE-2026-35568"
+path = "environments/java-sdk/CVE-2026-35568"
+
+[[environments]]
+id = "junoclaw/CVE-2026-43992"
+path = "environments/junoclaw/CVE-2026-43992"
+
+[[environments]]
+id = "kimi-code/CVE-2026-95660"
+path = "environments/kimi-code/CVE-2026-95660"
+
+[[environments]]
+id = "langchain/CVE-2023-36095"
+path = "environments/langchain/CVE-2023-36095"
+
+[[environments]]
+id = "langchain/CVE-2024-21513"
+path = "environments/langchain/CVE-2024-21513"
+
+[[environments]]
+id = "langchain/CVE-2024-27444"
+path = "environments/langchain/CVE-2024-27444"
+
+[[environments]]
+id = "langchain/CVE-2024-38459"
+path = "environments/langchain/CVE-2024-38459"
+
+[[environments]]
+id = "langchain/CVE-2024-8309"
+path = "environments/langchain/CVE-2024-8309"
+
+[[environments]]
+id = "langflow/CVE-2026-27966"
+path = "environments/langflow/CVE-2026-27966"
+
+[[environments]]
+id = "langflow/CVE-2026-33873"
+path = "environments/langflow/CVE-2026-33873"
+
+[[environments]]
+id = "langgenius-dify-versions-1-1-0-to-1-1-2/CVE-2025-3466"
+path = "environments/langgenius-dify-versions-1-1-0-to-1-1-2/CVE-2025-3466"
+
+[[environments]]
+id = "langgraphjs/CVE-2026-48121"
+path = "environments/langgraphjs/CVE-2026-48121"
+
+[[environments]]
+id = "langroid/CVE-2026-50180"
+path = "environments/langroid/CVE-2026-50180"
+
+[[environments]]
+id = "langroid/CVE-2026-54769"
+path = "environments/langroid/CVE-2026-54769"
+
+[[environments]]
+id = "langsmith-sdk/CVE-2026-45134"
+path = "environments/langsmith-sdk/CVE-2026-45134"
+
+[[environments]]
+id = "librechat/CVE-2026-22252"
+path = "environments/librechat/CVE-2026-22252"
+
+[[environments]]
+id = "librechat/CVE-2026-31951"
+path = "environments/librechat/CVE-2026-31951"
+
+[[environments]]
+id = "librechat/CVE-2026-44654"
+path = "environments/librechat/CVE-2026-44654"
+
+[[environments]]
+id = "librechat/CVE-2026-54027"
+path = "environments/librechat/CVE-2026-54027"
+
+[[environments]]
+id = "lightrag/CVE-2026-85740"
+path = "environments/lightrag/CVE-2026-85740"
+
+[[environments]]
+id = "lightrag/CVE-2026-86062"
+path = "environments/lightrag/CVE-2026-86062"
+
+[[environments]]
+id = "litellm/CVE-2026-30623"
+path = "environments/litellm/CVE-2026-30623"
+
+[[environments]]
+id = "llama-index/CVE-2024-12911"
+path = "environments/llama-index/CVE-2024-12911"
+
+[[environments]]
+id = "llama-index/CVE-2024-3098"
+path = "environments/llama-index/CVE-2024-3098"
+
+[[environments]]
+id = "markdownify-mcp/CVE-2025-5273"
+path = "environments/markdownify-mcp/CVE-2025-5273"
+
+[[environments]]
+id = "markdownify-mcp/CVE-2025-5276"
+path = "environments/markdownify-mcp/CVE-2025-5276"
+
+[[environments]]
+id = "mattermost-versions-10-4-x-10-4-2/CVE-2025-31363"
+path = "environments/mattermost-versions-10-4-x-10-4-2/CVE-2025-31363"
+
+[[environments]]
+id = "maxkb/CVE-2026-39417"
+path = "environments/maxkb/CVE-2026-39417"
+
+[[environments]]
+id = "maxkb/CVE-2026-77516"
+path = "environments/maxkb/CVE-2026-77516"
+
+[[environments]]
+id = "mcp/CVE-2026-16584"
+path = "environments/mcp/CVE-2026-16584"
+
+[[environments]]
+id = "mcp/CVE-2026-4270"
+path = "environments/mcp/CVE-2026-4270"
+
+[[environments]]
+id = "mcp-atlassian/CVE-2026-73498"
+path = "environments/mcp-atlassian/CVE-2026-73498"
+
+[[environments]]
+id = "mcp-atlassian/CVE-2026-77243"
+path = "environments/mcp-atlassian/CVE-2026-77243"
+
+[[environments]]
+id = "mcp-atlassian/CVE-2026-77251"
+path = "environments/mcp-atlassian/CVE-2026-77251"
+
+[[environments]]
+id = "mcp-atlassian/CVE-2026-77255"
+path = "environments/mcp-atlassian/CVE-2026-77255"
+
+[[environments]]
+id = "mcp-atlassian/CVE-2026-77258"
+path = "environments/mcp-atlassian/CVE-2026-77258"
+
+[[environments]]
+id = "mcp-atlassian/CVE-2026-77259"
+path = "environments/mcp-atlassian/CVE-2026-77259"
+
+[[environments]]
+id = "mcp-atlassian/CVE-2026-77260"
+path = "environments/mcp-atlassian/CVE-2026-77260"
+
+[[environments]]
+id = "mcp-atlassian/CVE-2026-77262"
+path = "environments/mcp-atlassian/CVE-2026-77262"
+
+[[environments]]
+id = "mcp-atlassian/CVE-2026-77266"
+path = "environments/mcp-atlassian/CVE-2026-77266"
+
+[[environments]]
+id = "mcp-atlassian/CVE-2026-77270"
+path = "environments/mcp-atlassian/CVE-2026-77270"
+
+[[environments]]
+id = "mcp-gitlab-server/CVE-2026-44895"
+path = "environments/mcp-gitlab-server/CVE-2026-44895"
+
+[[environments]]
+id = "mcp-kubernetes-server/CVE-2025-59376"
+path = "environments/mcp-kubernetes-server/CVE-2025-59376"
+
+[[environments]]
+id = "mcp-memory-keeper/CVE-2026-54561"
+path = "environments/mcp-memory-keeper/CVE-2026-54561"
+
+[[environments]]
+id = "mcp-memory-service/CVE-2026-33010"
+path = "environments/mcp-memory-service/CVE-2026-33010"
+
+[[environments]]
+id = "mcp-remote/CVE-2025-6514"
+path = "environments/mcp-remote/CVE-2025-6514"
+
+[[environments]]
+id = "mcp-server-kubernetes/CVE-2025-66404"
+path = "environments/mcp-server-kubernetes/CVE-2025-66404"
+
+[[environments]]
+id = "mcp-server-kubernetes/CVE-2026-47250"
+path = "environments/mcp-server-kubernetes/CVE-2026-47250"
+
+[[environments]]
+id = "mcp-toolbox/CVE-2026-11720"
+path = "environments/mcp-toolbox/CVE-2026-11720"
+
+[[environments]]
+id = "mcp-toolbox/CVE-2026-14537"
+path = "environments/mcp-toolbox/CVE-2026-14537"
+
+[[environments]]
+id = "mcp-toolbox/CVE-2026-14538"
+path = "environments/mcp-toolbox/CVE-2026-14538"
+
+[[environments]]
+id = "mcphub/CVE-2026-79745"
+path = "environments/mcphub/CVE-2026-79745"
+
+[[environments]]
+id = "mcpvault/CVE-2026-57441"
+path = "environments/mcpvault/CVE-2026-57441"
+
+[[environments]]
+id = "mcpvault/CVE-2026-57442"
+path = "environments/mcpvault/CVE-2026-57442"
+
+[[environments]]
+id = "minds-platform/CVE-2026-73678"
+path = "environments/minds-platform/CVE-2026-73678"
+
+[[environments]]
+id = "mlflow/CVE-2026-2611"
+path = "environments/mlflow/CVE-2026-2611"
+
+[[environments]]
+id = "n8n/CVE-2026-59207"
+path = "environments/n8n/CVE-2026-59207"
+
+[[environments]]
+id = "n8n/GHSA-5VFW-JC4P-FJ39"
+path = "environments/n8n/GHSA-5VFW-JC4P-FJ39"
+
+[[environments]]
+id = "n8n/GHSA-W46P-W7W2-FR9G"
+path = "environments/n8n/GHSA-W46P-W7W2-FR9G"
+
+[[environments]]
+id = "n8n-mcp/CVE-2026-45707"
+path = "environments/n8n-mcp/CVE-2026-45707"
+
+[[environments]]
+id = "n8n-mcp/GHSA-8G7G-HMWM-6RV2"
+path = "environments/n8n-mcp/GHSA-8G7G-HMWM-6RV2"
+
+[[environments]]
+id = "network-ai/CVE-2026-42856"
+path = "environments/network-ai/CVE-2026-42856"
+
+[[environments]]
+id = "network-ai/CVE-2026-54051"
+path = "environments/network-ai/CVE-2026-54051"
+
+[[environments]]
+id = "network-ai/CVE-2026-58481"
+path = "environments/network-ai/CVE-2026-58481"
+
+[[environments]]
+id = "network-ai/CVE-2026-58482"
+path = "environments/network-ai/CVE-2026-58482"
+
+[[environments]]
+id = "notebooklm-mcp/CVE-2026-61647"
+path = "environments/notebooklm-mcp/CVE-2026-61647"
+
+[[environments]]
+id = "obot/GHSA-VW82-7FV8-R6GP"
+path = "environments/obot/GHSA-VW82-7FV8-R6GP"
+
+[[environments]]
+id = "obot/GHSA-XWMW-PRC4-V3CR"
+path = "environments/obot/GHSA-XWMW-PRC4-V3CR"
+
+[[environments]]
+id = "omnigent/CVE-2026-62675"
+path = "environments/omnigent/CVE-2026-62675"
+
+[[environments]]
+id = "omnigent/CVE-2026-62676"
+path = "environments/omnigent/CVE-2026-62676"
+
+[[environments]]
+id = "omnigent/CVE-2026-62677"
+path = "environments/omnigent/CVE-2026-62677"
+
+[[environments]]
+id = "open-webui/CVE-2026-28788"
+path = "environments/open-webui/CVE-2026-28788"
+
+[[environments]]
+id = "open-webui/CVE-2026-44560"
+path = "environments/open-webui/CVE-2026-44560"
+
+[[environments]]
+id = "open-webui/CVE-2026-44570"
+path = "environments/open-webui/CVE-2026-44570"
+
+[[environments]]
+id = "open-webui/CVE-2026-45350"
+path = "environments/open-webui/CVE-2026-45350"
+
+[[environments]]
+id = "open-webui/CVE-2026-45395"
+path = "environments/open-webui/CVE-2026-45395"
+
+[[environments]]
+id = "open-webui/CVE-2026-59216"
+path = "environments/open-webui/CVE-2026-59216"
+
+[[environments]]
+id = "open-webui/CVE-2026-59217"
+path = "environments/open-webui/CVE-2026-59217"
+
+[[environments]]
+id = "open-webui/CVE-2026-70487"
+path = "environments/open-webui/CVE-2026-70487"
+
+[[environments]]
+id = "openclaude/CVE-2026-42074"
+path = "environments/openclaude/CVE-2026-42074"
+
+[[environments]]
+id = "openclaw/CVE-2026-24764"
+path = "environments/openclaw/CVE-2026-24764"
+
+[[environments]]
+id = "openclaw/CVE-2026-25475"
+path = "environments/openclaw/CVE-2026-25475"
+
+[[environments]]
+id = "openclaw/CVE-2026-26320"
+path = "environments/openclaw/CVE-2026-26320"
+
+[[environments]]
+id = "openclaw/CVE-2026-26321"
+path = "environments/openclaw/CVE-2026-26321"
+
+[[environments]]
+id = "openclaw/CVE-2026-27001"
+path = "environments/openclaw/CVE-2026-27001"
+
+[[environments]]
+id = "openclaw/CVE-2026-35651"
+path = "environments/openclaw/CVE-2026-35651"
+
+[[environments]]
+id = "openclaw/CVE-2026-41349"
+path = "environments/openclaw/CVE-2026-41349"
+
+[[environments]]
+id = "openclaw/CVE-2026-41389"
+path = "environments/openclaw/CVE-2026-41389"
+
+[[environments]]
+id = "openclaw/CVE-2026-42432"
+path = "environments/openclaw/CVE-2026-42432"
+
+[[environments]]
+id = "openclaw/CVE-2026-42433"
+path = "environments/openclaw/CVE-2026-42433"
+
+[[environments]]
+id = "openclaw/CVE-2026-42434"
+path = "environments/openclaw/CVE-2026-42434"
+
+[[environments]]
+id = "openclaw/CVE-2026-43530"
+path = "environments/openclaw/CVE-2026-43530"
+
+[[environments]]
+id = "openclaw/CVE-2026-43532"
+path = "environments/openclaw/CVE-2026-43532"
+
+[[environments]]
+id = "openclaw/CVE-2026-43534"
+path = "environments/openclaw/CVE-2026-43534"
+
+[[environments]]
+id = "openclaw/CVE-2026-43566"
+path = "environments/openclaw/CVE-2026-43566"
+
+[[environments]]
+id = "openclaw/CVE-2026-43574"
+path = "environments/openclaw/CVE-2026-43574"
+
+[[environments]]
+id = "openclaw/CVE-2026-43583"
+path = "environments/openclaw/CVE-2026-43583"
+
+[[environments]]
+id = "openclaw/CVE-2026-44110"
+path = "environments/openclaw/CVE-2026-44110"
+
+[[environments]]
+id = "openclaw/CVE-2026-44112"
+path = "environments/openclaw/CVE-2026-44112"
+
+[[environments]]
+id = "openclaw/CVE-2026-44113"
+path = "environments/openclaw/CVE-2026-44113"
+
+[[environments]]
+id = "openclaw/CVE-2026-44118"
+path = "environments/openclaw/CVE-2026-44118"
+
+[[environments]]
+id = "openclaw/CVE-2026-44995"
+path = "environments/openclaw/CVE-2026-44995"
+
+[[environments]]
+id = "openclaw/CVE-2026-44997"
+path = "environments/openclaw/CVE-2026-44997"
+
+[[environments]]
+id = "openclaw/CVE-2026-44998"
+path = "environments/openclaw/CVE-2026-44998"
+
+[[environments]]
+id = "openclaw/CVE-2026-45001"
+path = "environments/openclaw/CVE-2026-45001"
+
+[[environments]]
+id = "openclaw/CVE-2026-53820"
+path = "environments/openclaw/CVE-2026-53820"
+
+[[environments]]
+id = "openclaw/CVE-2026-62195"
+path = "environments/openclaw/CVE-2026-62195"
+
+[[environments]]
+id = "openclaw/GHSA-82RM-QCFX-2V78"
+path = "environments/openclaw/GHSA-82RM-QCFX-2V78"
+
+[[environments]]
+id = "openclaw/GHSA-CWJ3-VQPP-PMXR"
+path = "environments/openclaw/GHSA-CWJ3-VQPP-PMXR"
+
+[[environments]]
+id = "openclaw/GHSA-GFG9-5357-HV4C"
+path = "environments/openclaw/GHSA-GFG9-5357-HV4C"
+
+[[environments]]
+id = "openclaw-mcp/GHSA-C4QG-MG2R-2C56"
+path = "environments/openclaw-mcp/GHSA-C4QG-MG2R-2C56"
+
+[[environments]]
+id = "openharness/CVE-2026-56695"
+path = "environments/openharness/CVE-2026-56695"
+
+[[environments]]
+id = "openhuman/CVE-2026-55743"
+path = "environments/openhuman/CVE-2026-55743"
+
+[[environments]]
+id = "overly-permissive-sandbox-configuration/CVE-2025-12695"
+path = "environments/overly-permissive-sandbox-configuration/CVE-2025-12695"
+
+[[environments]]
+id = "pandasai-uses-an-interactive-prompt-function-tha/CVE-2024-12366"
+path = "environments/pandasai-uses-an-interactive-prompt-function-tha/CVE-2024-12366"
+
+[[environments]]
+id = "paperclip/CVE-2026-41208"
+path = "environments/paperclip/CVE-2026-41208"
+
+[[environments]]
+id = "pgadmin4/CVE-2026-17351"
+path = "environments/pgadmin4/CVE-2026-17351"
+
+[[environments]]
+id = "praisonai/CVE-2026-39305"
+path = "environments/praisonai/CVE-2026-39305"
+
+[[environments]]
+id = "praisonai/CVE-2026-39888"
+path = "environments/praisonai/CVE-2026-39888"
+
+[[environments]]
+id = "praisonai/CVE-2026-40111"
+path = "environments/praisonai/CVE-2026-40111"
+
+[[environments]]
+id = "praisonai/CVE-2026-40117"
+path = "environments/praisonai/CVE-2026-40117"
+
+[[environments]]
+id = "praisonai/CVE-2026-40153"
+path = "environments/praisonai/CVE-2026-40153"
+
+[[environments]]
+id = "praisonai/CVE-2026-44336"
+path = "environments/praisonai/CVE-2026-44336"
+
+[[environments]]
+id = "praisonai/CVE-2026-56834"
+path = "environments/praisonai/CVE-2026-56834"
+
+[[environments]]
+id = "praisonai/CVE-2026-56839"
+path = "environments/praisonai/CVE-2026-56839"
+
+[[environments]]
+id = "praisonai/CVE-2026-57137"
+path = "environments/praisonai/CVE-2026-57137"
+
+[[environments]]
+id = "praisonai/CVE-2026-57141"
+path = "environments/praisonai/CVE-2026-57141"
+
+[[environments]]
+id = "praisonai/CVE-2026-57143"
+path = "environments/praisonai/CVE-2026-57143"
+
+[[environments]]
+id = "praisonai/CVE-2026-61447"
+path = "environments/praisonai/CVE-2026-61447"
+
+[[environments]]
+id = "pydantic-ai/CVE-2026-54249"
+path = "environments/pydantic-ai/CVE-2026-54249"
+
+[[environments]]
+id = "pydantic-ai/CVE-2026-65975"
+path = "environments/pydantic-ai/CVE-2026-65975"
+
+[[environments]]
+id = "python-sandbox-escape-leading-to-remote-code-exe/CVE-2025-5120"
+path = "environments/python-sandbox-escape-leading-to-remote-code-exe/CVE-2025-5120"
+
+[[environments]]
+id = "python-utcp/GHSA-8CP3-QXJ6-PX34"
+path = "environments/python-utcp/GHSA-8CP3-QXJ6-PX34"
+
+[[environments]]
+id = "python-utcp/GHSA-9QHG-99WW-9MQC"
+path = "environments/python-utcp/GHSA-9QHG-99WW-9MQC"
+
+[[environments]]
+id = "ragflow/CVE-2026-75898"
+path = "environments/ragflow/CVE-2026-75898"
+
+[[environments]]
+id = "rails-mcp-server/CVE-2026-81097"
+path = "environments/rails-mcp-server/CVE-2026-81097"
+
+[[environments]]
+id = "roo-code/CVE-2025-53097"
+path = "environments/roo-code/CVE-2025-53097"
+
+[[environments]]
+id = "roo-code/CVE-2025-53098"
+path = "environments/roo-code/CVE-2025-53098"
+
+[[environments]]
+id = "roo-code/CVE-2025-53536"
+path = "environments/roo-code/CVE-2025-53536"
+
+[[environments]]
+id = "roo-code/CVE-2025-54377"
+path = "environments/roo-code/CVE-2025-54377"
+
+[[environments]]
+id = "roo-code/CVE-2025-57771"
+path = "environments/roo-code/CVE-2025-57771"
+
+[[environments]]
+id = "roo-code/CVE-2025-58370"
+path = "environments/roo-code/CVE-2025-58370"
+
+[[environments]]
+id = "roo-code/CVE-2025-58372"
+path = "environments/roo-code/CVE-2025-58372"
+
+[[environments]]
+id = "roo-code/CVE-2025-58374"
+path = "environments/roo-code/CVE-2025-58374"
+
+[[environments]]
+id = "roo-code/CVE-2025-65946"
+path = "environments/roo-code/CVE-2025-65946"
+
+[[environments]]
+id = "rtk/CVE-2026-54555"
+path = "environments/rtk/CVE-2026-54555"
+
+[[environments]]
+id = "safeinstall/GHSA-XRMC-C5CG-RV7X"
+path = "environments/safeinstall/GHSA-XRMC-C5CG-RV7X"
+
+[[environments]]
+id = "serena/CVE-2026-49471"
+path = "environments/serena/CVE-2026-49471"
+
+[[environments]]
+id = "siyuan/CVE-2026-82233"
+path = "environments/siyuan/CVE-2026-82233"
+
+[[environments]]
+id = "skill-ninja-mcp-server/CVE-2026-19328"
+path = "environments/skill-ninja-mcp-server/CVE-2026-19328"
+
+[[environments]]
+id = "skyvern/CVE-2026-82447"
+path = "environments/skyvern/CVE-2026-82447"
+
+[[environments]]
+id = "smolagents/CVE-2025-9959"
+path = "environments/smolagents/CVE-2025-9959"
+
+[[environments]]
+id = "spring-ai-s-support-for-anthropic-s-skills-api-u/CVE-2026-41863"
+path = "environments/spring-ai-s-support-for-anthropic-s-skills-api-u/CVE-2026-41863"
+
+[[environments]]
+id = "spring-ai-s-vectorstorechatmemoryadvisor-convers/CVE-2026-40966"
+path = "environments/spring-ai-s-vectorstorechatmemoryadvisor-convers/CVE-2026-40966"
+
+[[environments]]
+id = "sqlbot/CVE-2026-32622"
+path = "environments/sqlbot/CVE-2026-32622"
+
+[[environments]]
+id = "text-generation-webui/CVE-2026-35486"
+path = "environments/text-generation-webui/CVE-2026-35486"
+
+[[environments]]
+id = "theia/CVE-2026-82217"
+path = "environments/theia/CVE-2026-82217"
+
+[[environments]]
+id = "toolhive-studio/CVE-2026-58197"
+path = "environments/toolhive-studio/CVE-2026-58197"
+
+[[environments]]
+id = "tools/CVE-2026-15746"
+path = "environments/tools/CVE-2026-15746"
+
+[[environments]]
+id = "tooluniverse/CVE-2026-81096"
+path = "environments/tooluniverse/CVE-2026-81096"
+
+[[environments]]
+id = "vulnerability/CVE-2024-10252"
+path = "environments/vulnerability/CVE-2024-10252"
+
+[[environments]]
+id = "vulnerability/CVE-2025-61260"
+path = "environments/vulnerability/CVE-2025-61260"
+
+[[environments]]
+id = "warp/CVE-2026-48703"
+path = "environments/warp/CVE-2026-48703"
+
+[[environments]]
+id = "weknora/CVE-2026-22687"
+path = "environments/weknora/CVE-2026-22687"
+
+[[environments]]
+id = "weknora/CVE-2026-30856"
+path = "environments/weknora/CVE-2026-30856"
+
+[[environments]]
+id = "windows-mcp/CVE-2026-48989"
+path = "environments/windows-mcp/CVE-2026-48989"
+
+[[environments]]
+id = "wireshark-mcp/CVE-2026-43901"
+path = "environments/wireshark-mcp/CVE-2026-43901"
+
+[[environments]]
+id = "zed/CVE-2025-55012"
+path = "environments/zed/CVE-2025-55012"
+
+[[environments]]
+id = "zed/CVE-2025-68433"
+path = "environments/zed/CVE-2025-68433"

@@ -3,3 +3,26 @@ environments/agent-device/GHSA-M7Q5-6423-2MWQ/inputs/agent-device-patched-node-d
 environments/vtcode/GHSA-WQGW-CRR5-CR2P/inputs/vtcode-vulnerable-cargo-vendor.tar.gz filter=lfs diff=lfs merge=lfs -text
 environments/vtcode/GHSA-WQGW-CR2P/inputs/vtcode-patched-cargo-vendor.tar.gz filter=lfs diff=lfs merge=lfs -text
 environments/vtcode/GHSA-WQGW-CRR5-CR2P/inputs/vtcode-patched-cargo-vendor.tar.gz filter=lfs diff=lfs merge=lfs -text
+environments/omnigent/CVE-2026-62674/inputs/python-runtime-deps.tar.gz filter=lfs diff=lfs merge=lfs -text
+
+# Candidate inputs above GitHub's 100 MiB per-file limit.
+environments/librechat/CVE-2026-31951/inputs/node-modules-v0.8.3-rc1.tar.gz filter=lfs diff=lfs merge=lfs -text
+environments/librechat/CVE-2026-31951/inputs/node-modules-v0.8.3-rc2.tar.gz filter=lfs diff=lfs merge=lfs -text
+environments/librechat/CVE-2026-54027/inputs/node-modules-v0.8.3.tar.gz filter=lfs diff=lfs merge=lfs -text
+environments/librechat/CVE-2026-54027/inputs/node-modules-v0.8.4-rc1.tar.gz filter=lfs diff=lfs merge=lfs -text
+environments/mcp-memory-service/CVE-2026-33010/inputs/nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_x86_64.whl filter=lfs diff=lfs merge=lfs -text
+environments/mcp-memory-service/CVE-2026-33010/inputs/nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_x86_64.whl filter=lfs diff=lfs merge=lfs -text
+environments/mcp-memory-service/CVE-2026-33010/inputs/nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl filter=lfs diff=lfs merge=lfs -text
+environments/mcp-memory-service/CVE-2026-33010/inputs/nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_x86_64.whl filter=lfs diff=lfs merge=lfs -text
+environments/mcp-memory-service/CVE-2026-33010/inputs/nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl filter=lfs diff=lfs merge=lfs -text
+environments/mcp-memory-service/CVE-2026-33010/inputs/nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_x86_64.whl filter=lfs diff=lfs merge=lfs -text
+environments/mcp-memory-service/CVE-2026-33010/inputs/nvidia_nccl_cu12-2.27.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl filter=lfs diff=lfs merge=lfs -text
+environments/mcp-memory-service/CVE-2026-33010/inputs/torch-2.8.0-cp312-cp312-manylinux_2_28_x86_64.whl filter=lfs diff=lfs merge=lfs -text
+environments/mcp-memory-service/CVE-2026-33010/inputs/triton-3.4.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl filter=lfs diff=lfs merge=lfs -text
+environments/minds-platform/CVE-2026-73678/inputs/openai_codex_cli_bin-0.147.0-py3-none-manylinux_2_17_x86_64.whl filter=lfs diff=lfs merge=lfs -text
+environments/paperclip/CVE-2026-41208/inputs/pnpm-store-v3.tar.gz filter=lfs diff=lfs merge=lfs -text
+environments/siyuan/CVE-2026-82233/inputs/gomod-0033-zip.zip filter=lfs diff=lfs merge=lfs -text
+environments/siyuan/CVE-2026-82233/inputs/patched-source.tar.gz filter=lfs diff=lfs merge=lfs -text
+environments/siyuan/CVE-2026-82233/inputs/vulnerable-source.tar.gz filter=lfs diff=lfs merge=lfs -text
+environments/warp/CVE-2026-48721/inputs/patched-source.tar.gz filter=lfs diff=lfs merge=lfs -text
+environments/warp/CVE-2026-48721/inputs/vulnerable-source.tar.gz filter=lfs diff=lfs merge=lfs -text
