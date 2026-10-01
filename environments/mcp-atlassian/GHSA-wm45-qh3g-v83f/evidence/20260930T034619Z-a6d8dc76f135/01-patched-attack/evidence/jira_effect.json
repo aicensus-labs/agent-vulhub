@@ -1,0 +1,14 @@
+{
+  "execution_status": "completed",
+  "target_ready": true,
+  "cve": "GHSA-wm45-qh3g-v83f",
+  "source": "/lab/app/src/mcp_atlassian/jira/attachments.py",
+  "requested_path": "../fixtures/secret.txt",
+  "opened_paths": [],
+  "upload_calls": [],
+  "result": {
+    "success": false,
+    "error": "Path traversal detected: ../fixtures/secret.txt resolves outside /lab/workspace"
+  },
+  "error": null
+}

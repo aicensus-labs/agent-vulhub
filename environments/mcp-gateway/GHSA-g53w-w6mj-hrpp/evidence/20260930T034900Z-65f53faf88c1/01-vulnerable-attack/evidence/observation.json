@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260930T034900Z-65f53faf88c1",
+    "case_id": "01-vulnerable-attack",
+    "variant": "vulnerable",
+    "scenario": "attack"
+  },
+  "target_ready": true,
+  "request": {
+    "headers": {
+      "mcp-init-host": "attacker-chosen-backend.example.invalid",
+      "router-key": "shared-router-key-value"
+    },
+    "method": "initialize"
+  },
+  "response": {
+    "clear_route_cache": true,
+    "count": 1,
+    "kind": "request_body_mutation"
+  },
+  "header_rewrite": {
+    "-mcp-init-host": "",
+    "-router-key": "",
+    ":authority": "attacker-chosen-backend.example.invalid",
+    "x-mcp-method": "initialize"
+  }
+}

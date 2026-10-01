@@ -1,0 +1,32 @@
+{
+  "execution_status": "completed",
+  "target_ready": true,
+  "cve": "GHSA-wm45-qh3g-v83f",
+  "source": "/lab/app/src/mcp_atlassian/jira/attachments.py",
+  "requested_path": "../fixtures/secret.txt",
+  "opened_paths": [
+    "/lab/fixtures/secret.txt"
+  ],
+  "upload_calls": [
+    {
+      "issue_key": "DEMO-1",
+      "filename": "/lab/fixtures/secret.txt"
+    }
+  ],
+  "result": {
+    "success": true,
+    "issue_key": "DEMO-1",
+    "filename": "secret.txt",
+    "size": 34,
+    "id": "synthetic-attachment"
+  },
+  "error": null,
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260930T034619Z-a6d8dc76f135",
+    "case_id": "02-vulnerable-attack",
+    "variant": "vulnerable",
+    "scenario": "attack"
+  }
+}

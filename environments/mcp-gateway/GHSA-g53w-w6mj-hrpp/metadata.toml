@@ -5,6 +5,7 @@ product = "mcp-gateway"
 title = "MCP Gateway router hair-pin path bypasses JWT session authorization"
 lifecycle = "draft"
 agent_specificity = "agent_unique"
+severity = "CRITICAL"
 advisories = ["https://github.com/Kuadrant/mcp-gateway/security/advisories/GHSA-g53w-w6mj-hrpp", "https://github.com/advisories/GHSA-g53w-w6mj-hrpp"]
 description = "An unauthenticated router initialize path trusts the mcp-init-host header after only a shared router-key check. It can bypass the gateway JWT session validator and rewrite the upstream :authority header, forwarding requests to registered backends without the broker's signed capability filter."
 prerequisites = ["Pinned MCP Gateway 0.6.0 source", "Pinned MCP Gateway 0.7.0 source", "Access to the unauthenticated router hair-pin path"]
@@ -24,13 +25,16 @@ image = ""
 archive = "mcp-gateway-0.7.0.tar.gz"
 
 [build]
-base_image = "codex-universal@sha256:55e6ae2ade43eb3ca29741f475d833a0f52bffe4208ca199ee717c1f8ef8188b"
+base_image = "buildpack-deps@sha256:97d2909fdc9d46ae7f9d3bd081749549c1078899585e37abb60fd5f4cd593484"
 dockerfile = "Dockerfile"
 # Each entry: { name = "...", url = "https://...", sha256 = "..." }
 # Include source archives AND every dependency needed by network-disabled builds.
 inputs = [
   { name = "mcp-gateway-0.6.0.tar.gz", url = "https://github.com/Kuadrant/mcp-gateway/archive/9799d0a704862455f3ba22721bd097242fd8fdf3.tar.gz", sha256 = "a78c47f6706783bc1d39ed7cfe1d764ce1e928da772ae07e568cad9b5d8974fb" },
   { name = "mcp-gateway-0.7.0.tar.gz", url = "https://github.com/Kuadrant/mcp-gateway/archive/5d96c6fb51e46e35a54682bdf814a66d480ab8a9.tar.gz", sha256 = "5d384f66dd0b748e70ad1f2e1ad14276addbde1017a0c03997e0a712c43ac2ef" },
+  { name = "go1.25.9.linux-amd64.tar.gz", url = "https://go.dev/dl/go1.25.9.linux-amd64.tar.gz", sha256 = "00859d7bd6defe8bf84d9db9e57b9a4467b2887c18cd93ae7460e713db774bc1" },
+  { name = "mcp-gateway-vendor-vulnerable.tar.gz", url = "https://raw.githubusercontent.com/aicensus-labs/agent-vulhub/main/environments/mcp-gateway/GHSA-g53w-w6mj-hrpp/inputs/mcp-gateway-vendor-vulnerable.tar.gz", sha256 = "89b9618f689df1d99d959dec6d6291f55bad2d211e671cdfe065863772b71902" },
+  { name = "mcp-gateway-vendor-patched.tar.gz", url = "https://raw.githubusercontent.com/aicensus-labs/agent-vulhub/main/environments/mcp-gateway/GHSA-g53w-w6mj-hrpp/inputs/mcp-gateway-vendor-patched.tar.gz", sha256 = "07cf95cda3a6089116d7acf3757ba1e48d666620567caa1d2ce2b5cfbb51db6e" },
 ]
 
 [runtime]
@@ -43,9 +47,9 @@ requires_model = false
 network_requirements = "No network is used by this draft; source archives are fetched by the runner before container execution"
 
 [verification.mechanism]
-status = "not_run"
-verified_at = ""
-evidence = []
+status = "passed"
+verified_at = "2026-09-30T03:54:20.618120+00:00"
+evidence = ["evidence/20260930T034900Z-65f53faf88c1/report.json"]
 notes = ""
 
 [verification.end_to_end]

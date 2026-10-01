@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "run_id": "20260930T034900Z-65f53faf88c1",
+  "case_id": "03-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "execution_status": "completed",
+  "evidence": [
+    {
+      "path": "observation.json",
+      "sha256": "55f3b53197a0bd59830c3d53bc7944f93a2de3b9c4a3731860c9a17a26d5f4d4"
+    }
+  ]
+}

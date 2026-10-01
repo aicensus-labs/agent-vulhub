@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "run_id": "20260930T034619Z-a6d8dc76f135",
+  "case_id": "03-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "environment_id": "mcp-atlassian/GHSA-wm45-qh3g-v83f",
+  "round": 3,
+  "project": "avh-4ba0965356c34a68ab7a",
+  "layer": "mechanism",
+  "source_commit": "c450a161ec630dd57f44a2b15d977debae19eba5",
+  "image": "sha256:eaf0fac94a43f4973454f0c79979105bac4224aae0156832fd956a038b7982ac",
+  "started_at": "2026-09-30T03:47:55.590706+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "3630186020a66dccfcb52692c31de8721d66ae3531bb24896f6324499c7515c5",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": "A traversal path is opened by the upload method",
+      "actual": "{'execution_status': 'completed', 'target_ready': True, 'cve': 'GHSA-wm45-qh3g-v83f', 'source': '/lab/app/src/mcp_atlassian/jira/attachments.py', 'requested_path': '../fixtures/secret.txt', 'opened_paths': ['/lab/fixtures/secret.txt'], 'upload_calls': [{'issue_key': 'DEMO-1', 'filename': '/lab/fixtures/secret.txt'}], 'result': {'success': True, 'issue_key': 'DEMO-1', 'filename': 'secret.txt', 'size': 34, 'id': 'synthetic-attachment'}, 'error': None}",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "jira_effect.json"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-30T03:48:03.449165+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

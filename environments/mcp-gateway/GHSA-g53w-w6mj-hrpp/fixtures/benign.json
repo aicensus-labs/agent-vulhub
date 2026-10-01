@@ -1,0 +1,14 @@
+{
+  "description": "Direct client initialize with no mcp-init-host header. This is the ordinary path: the router forwards to the broker and performs no authority rewrite. Must keep working in both variants.",
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {},
+    "clientInfo": {
+      "name": "synthetic-direct-client",
+      "version": "1.0.0"
+    }
+  },
+  "headers": {},
+  "carries_gateway_session": false
+}

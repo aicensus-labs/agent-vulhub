@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260930T034900Z-65f53faf88c1",
+    "case_id": "02-patched-attack",
+    "variant": "patched",
+    "scenario": "attack"
+  },
+  "target_ready": true,
+  "request": {
+    "headers": {
+      "mcp-init-host": "attacker-chosen-backend.example.invalid",
+      "router-key": "shared-router-key-value"
+    },
+    "method": "initialize"
+  },
+  "response": {
+    "count": 1,
+    "immediate_body": "bad request",
+    "immediate_code": 400,
+    "immediate_status": "BadRequest",
+    "kind": "immediate_response"
+  },
+  "header_rewrite": {}
+}

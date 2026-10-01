@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "run_id": "20260930T034900Z-65f53faf88c1",
+  "case_id": "02-vulnerable-attack",
+  "variant": "vulnerable",
+  "scenario": "attack",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "upstream HandleNoneToolCall runs to completion",
+      "actual": "True",
+      "reason": "The real upstream router method was invoked in-process.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "vulnerable_effect_observed",
+      "passed": true,
+      "expected": ":authority is rewritten to attacker-chosen-backend.example.invalid on a shared-key-only request",
+      "actual": ":authority='attacker-chosen-backend.example.invalid'",
+      "reason": "0.6.0 accepts the shared router key and re-targets the request to a caller-chosen backend.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "vulnerable_strips_internal_routing_headers",
+      "passed": true,
+      "expected": "mcp-init-host and router-key are removed before forwarding",
+      "actual": "removed=['-mcp-init-host', '-router-key']",
+      "reason": "Stripping the routing headers hides the hair-pin origin from the backend.",
+      "evidence": [
+        "observation.json"
+      ]
+    }
+  ]
+}
