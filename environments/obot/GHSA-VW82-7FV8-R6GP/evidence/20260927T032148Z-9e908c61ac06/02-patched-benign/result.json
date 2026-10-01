@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T032148Z-9e908c61ac06",
+  "case_id": "02-patched-benign",
+  "variant": "patched",
+  "scenario": "benign",
+  "environment_id": "obot/GHSA-VW82-7FV8-R6GP",
+  "round": 2,
+  "project": "avh-25a9042dbbb44d1d8c0a",
+  "layer": "mechanism",
+  "source_commit": "2a2ec3f23ac564b2e2fab6b09fdef4ecd05fd496",
+  "image": "sha256:5b504bd5c993ac305f31fcaa58698f293b59eba4f59315c7548aeeb43ecfb3ed",
+  "started_at": "2026-09-27T03:23:56.992695+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "every normal owner/grantee gateway request is allowed",
+      "actual": "granted_user_reaches_shared_catalog_server: expected_allowed=True allowed=True; owner_reaches_own_server_instance: expected_allowed=True allowed=True; owner_reaches_own_single_user_server: expected_allowed=True allowed=True",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "authorize-report.json"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-27T03:24:11.583575+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

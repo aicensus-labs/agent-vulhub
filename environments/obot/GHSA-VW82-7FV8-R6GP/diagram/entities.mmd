@@ -1,0 +1,38 @@
+%% obot / GHSA-VW82-7FV8-R6GP 漏洞图解 — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["攻击者侧"]
+    attacker["已认证的普通用户（非授权主体）<br/>actor · attacker_controlled"]
+  end
+  subgraph protected_platform["Obot 平台与受 ACR 保护的 MCP 资源"]
+    authenticated_user["access control rule 授权的用户<br/>client · trusted"]
+    api_server["Obot API server 的 Authorizer<br/>service · trusted"]
+    gateway_proxy["MCP 网关代理<br/>tool · trusted"]
+    upstream_mcp_server["上游 MCP server<br/>service · trusted"]
+    access_control_rules["MCP catalog 的 access control rule<br/>store · trusted"]
+    gateway_session["越权的 MCP 网关会话<br/>⚠ sink · trusted"]
+  end
+  attacker -->|"1"| api_server
+  api_server -.->|"2"| api_server
+  api_server -.->|"3"| access_control_rules
+  api_server -.->|"4"| gateway_proxy
+  gateway_proxy -.->|"5"| upstream_mcp_server
+  upstream_mcp_server -.->|"6"| gateway_session
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class attacker actor
+  class authenticated_user client
+  class api_server service
+  class gateway_proxy tool
+  class upstream_mcp_server service
+  class access_control_rules store
+  class gateway_session sink
+  class gateway_session synthetic
+  style attacker_side fill:transparent
+  style protected_platform fill:transparent
+  linkStyle 1 stroke:#c0392b,stroke-width:2px
+  linkStyle 2 stroke:#2e7d32,stroke-width:2px

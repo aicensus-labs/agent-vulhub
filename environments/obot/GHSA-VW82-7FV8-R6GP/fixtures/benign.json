@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "description": "Normal use of the MCP gateway: a user connects to the single-user MCP server instance they own, and to a catalog server their access-control rule grants them.",
+  "opens": "The gateway endpoint /mcp-connect/{mcp_id} is routed to the MCP gateway proxy.",
+  "users": {
+    "owner": {
+      "name": "owner",
+      "uid": "owner-uid",
+      "groups": ["basic", "authenticated"]
+    },
+    "granted": {
+      "name": "granted-user",
+      "uid": "granted-uid",
+      "groups": ["basic", "authenticated"]
+    }
+  },
+  "mcp_servers": [
+    {
+      "name": "ms1direct",
+      "namespace": "default",
+      "user_id": "owner-uid"
+    },
+    {
+      "name": "ms1shared",
+      "namespace": "default",
+      "mcp_catalog_id": "catalog-a",
+      "user_id": "owner-uid"
+    }
+  ],
+  "mcp_server_instances": [
+    {
+      "name": "msi1direct",
+      "namespace": "default",
+      "user_id": "owner-uid"
+    }
+  ],
+  "access_control_rules": [
+    {
+      "name": "acr1shared",
+      "namespace": "default",
+      "mcp_catalog_id": "catalog-a",
+      "subjects": [{"type": "user", "id": "granted-uid"}],
+      "resources": [{"type": "mcpServer", "id": "ms1shared"}]
+    }
+  ],
+  "cases": [
+    {
+      "id": "owner_reaches_own_server_instance",
+      "path": "/mcp-connect/msi1direct",
+      "method": "GET",
+      "user": "owner",
+      "expected_allowed": true
+    },
+    {
+      "id": "owner_reaches_own_single_user_server",
+      "path": "/mcp-connect/ms1direct",
+      "method": "GET",
+      "user": "owner",
+      "expected_allowed": true
+    },
+    {
+      "id": "granted_user_reaches_shared_catalog_server",
+      "path": "/mcp-connect/ms1shared",
+      "method": "GET",
+      "user": "granted",
+      "expected_allowed": true
+    }
+  ]
+}

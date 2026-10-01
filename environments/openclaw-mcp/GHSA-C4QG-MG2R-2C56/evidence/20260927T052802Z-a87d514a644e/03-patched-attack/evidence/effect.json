@@ -1,0 +1,32 @@
+{
+  "scenario": "attack",
+  "victim": "probe-client-a",
+  "intruder": "probe-client-b",
+  "owner_task_id": "task_5a999267-e3fa-4877-a9c1-fed3d9cfeb43",
+  "owner_task_completed": true,
+  "owner_observed_result": "OPENCLAW-LAB-ATTACK-REPLY:OPENCLAW-LAB-ATTACK-PROMPT-2f6c1a90",
+  "intruder_task_list": {
+    "isError": false,
+    "text": "{\n  \"stats\": {\n    \"total\": 0,\n    \"byStatus\": {\n      \"pending\": 0,\n      \"running\": 0,\n      \"completed\": 0,\n      \"failed\": 0,\n      \"cancelled\": 0\n    }\n  },\n  \"tasks\": []\n}"
+  },
+  "intruder_task_status": {
+    "isError": true,
+    "text": "Error: Task not found: task_5a999267-e3fa-4877-a9c1-fed3d9cfeb43"
+  },
+  "derived": {
+    "intruder_sees_owner_task": false,
+    "intruder_reads_owner_result": false,
+    "intruder_status_error": true
+  },
+  "variant": "patched",
+  "server_started": true,
+  "gateway_requests": [
+    {
+      "method": "POST",
+      "url": "/v1/chat/completions",
+      "model": "openclaw",
+      "session": "session-victim",
+      "message": "OPENCLAW-LAB-ATTACK-PROMPT-2f6c1a90"
+    }
+  ]
+}

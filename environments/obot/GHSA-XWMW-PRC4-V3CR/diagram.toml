@@ -1,0 +1,138 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram obot/GHSA-XWMW-PRC4-V3CR
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# 输入装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "obot / GHSA-XWMW-PRC4-V3CR 漏洞图解"
+summary = "Obot 的 MCP OAuth 授权码流程把受害者的真实角色分组写进 access token，而 JWT 校验只检查 issuer、完全不校验 audience，并把 token 里的 UserGroups claim 原样当作请求分组；动态客户端注册又允许把 redirect_uri 指向任意外部地址，授权流程对已登录用户没有同意步骤。于是一枚 audience 本应只指向某个 MCP 服务器的 bearer token，在 Obot 的 API 鉴权层却以受害者的完整角色分组被接受，攻击者由此得到该受害者才能访问的 API。v0.23.0 在发码前插入同意页，并让校验端按 audience 收紧分组，使同一个 token 只剩 mcp 与 authenticated 分组。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（本仓库合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "attacker"
+label = "攻击者"
+kind = "actor"
+trust = "attacker_controlled"
+role = "匿名注册 OAuth client、把 redirect_uri 指向自己控制的地址，并诱导已登录受害者完成以某个 MCP 服务器为 resource 的授权；它因此持有一枚 audience 指向该 MCP 服务器、claim 里带着受害者角色分组的 access token，再拿它去访问 Obot API。"
+
+[[entities]]
+id = "victim"
+label = "受害者角色分组"
+kind = "store"
+trust = "trusted"
+static = true
+role = "受害者在 Obot 里的真实角色分组（owner、admin、power-user-plus、power-user、basic、authenticated，即其角色掩码展开后的分组集合）。这是攻击者本来够不着的数据：只有鉴权链内部才应该把它映射成请求身份。"
+
+[[entities]]
+id = "oauth_server"
+label = "MCP OAuth 授权服务"
+kind = "service"
+trust = "trusted"
+role = "处理 /oauth/register、/oauth/authorize、/oauth/callback 与 /oauth/token。它按授权请求里的 resource 决定 token 的 audience，受影响版本还把发起授权的用户角色分组直接写进 UserGroups claim。"
+detail = "动态客户端注册对 redirect_uri 只检查非空，v0.22.1 与 v0.23.0 的这段代码完全相同。"
+
+[[entities]]
+id = "token_service"
+label = "JWT token 校验服务"
+kind = "service"
+trust = "trusted"
+role = "校验请求携带的 bearer token 并推导分组：受影响版本只用 issuer 校验签名，audience 不参与校验，UserGroups claim 被原样映射为请求分组；修复版本按 audience 区分 API 用途与 MCP 用途。"
+
+[[entities]]
+id = "protected_api"
+label = "受害者的 Obot API 权限面"
+kind = "sink"
+trust = "trusted"
+role = "以请求分组授予权限的 Obot API；拿到受害者角色分组后，攻击者可以调用该受害者才有权访问的接口。"
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["attacker"]
+note = "攻击者能控制 client 元数据、redirect_uri 与诱导链接，并持有换来的 token；它控制不了 token 里被授予的分组，只能诱导受害者让产品把分组写进去。"
+
+[[boundaries]]
+id = "obot_trust"
+label = "Obot 鉴权边界"
+members = ["victim", "oauth_server", "token_service", "protected_api"]
+note = "登录会话在这里被换成请求身份：OAuth 授权服务签发 token，JWT 校验服务再把 token 映射成分组和权限。漏洞让一枚只为某个 MCP 服务器签发的 token 带着受害者的角色分组越过这道边界。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker"
+to = "oauth_server"
+action = "匿名 POST /oauth/register 注册 client，redirect_uri 指向自己控制的地址"
+variant = "both"
+evidence = "fixtures/attack.json"
+detail = "注册端点属于未认证可访问的 anyGroup 规则；ValidateClientConfig 只要求 redirect_uris 非空，没有 scheme 或 host 白名单。"
+
+[[steps]]
+n = 2
+phase = "setup"
+from = "attacker"
+to = "oauth_server"
+action = "诱导已登录受害者发起以某个 MCP 服务器为 resource 的授权请求"
+variant = "both"
+detail = "前提是受害者在 Obot 上已有登录会话，且服务端开启了认证。"
+
+[[steps]]
+n = 3
+phase = "setup"
+from = "oauth_server"
+to = "attacker"
+action = "把授权码投递到攻击者注册的 redirect_uri，攻击者换得 audience 指向该 MCP 服务器、claim 携带受害者角色分组的 access token"
+variant = "vulnerable_only"
+detail = "受影响版本的 doAuthorizationCode 直接取 oauthAuthRequest.Spec.Resource 作为 audience、取 user.Role.Groups() 作为 UserGroups；v0.23.0 改为在发码前经过同意页，并只写入 mcp 与 authenticated 分组。"
+
+[[steps]]
+n = 4
+phase = "trigger"
+from = "attacker"
+to = "token_service"
+action = "把这枚 audience 指向 MCP 服务器的 token 当作 Obot API 的 bearer 凭据提交"
+variant = "both"
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 5
+phase = "trigger"
+from = "token_service"
+to = "token_service"
+action = "只按 issuer 校验签名：audience 不参与校验，UserGroups claim 被原样映射为请求分组"
+variant = "vulnerable_only"
+diverges = true
+detail = "DecodeToken 只传 jwt.WithIssuer(serverURL)；aud 被读出但不参与任何判断，token 因此以受害者的完整角色分组进入鉴权。"
+
+[[steps]]
+n = 6
+phase = "trigger"
+from = "token_service"
+to = "token_service"
+action = "按 audience 区分用途：aud 指向 mcp-connect 资源时只给出 mcp 与 authenticated 分组"
+variant = "patched_only"
+diverges = true
+detail = "修复提交 2d0f8c26 在 DecodeToken 中读取 claims.GetAudience()：aud 等于 serverURL 才使用 UserGroups，指向 mcp-connect 资源则只给 MCP 身份分组，缺失 aud 直接报 no audience。"
+
+[[steps]]
+n = 7
+phase = "effect"
+from = "token_service"
+to = "protected_api"
+action = "请求以受害者的完整角色分组通过鉴权，攻击者取得该受害者才能访问的 API"
+variant = "vulnerable_only"
+
+[[steps]]
+n = 8
+phase = "effect"
+from = "token_service"
+to = "protected_api"
+action = "该 token 只剩 mcp 与 authenticated 分组，受害者的高权限 API 拒绝它"
+variant = "patched_only"

@@ -1,0 +1,919 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T052802Z-a87d514a644e",
+  "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+  "layer": "mechanism",
+  "rounds": 3,
+  "started_at": "2026-09-27T05:28:02.125453+00:00",
+  "cases": [
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "01-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 1,
+      "project": "avh-adfd7f498e2b47d69e10",
+      "layer": "mechanism",
+      "source_commit": "a07a30826ab1ff5cceb43f047699008dcaf70238",
+      "image": "sha256:002b7379fd4147782b81e821a0df09d3d49f1d89a7456042f6a4447b63ff9a66",
+      "started_at": "2026-09-27T05:28:10.851340+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "The intruder connection reads the victim task id from the task list and the victim model result from the task status, without ever contacting the model.",
+          "actual": {
+            "owner_completed_with_model_reply": true,
+            "intruder_list_discloses_owner_task": true,
+            "intruder_status_discloses_owner_result": true,
+            "intruder_list_denied_or_empty": false,
+            "intruder_status_refused": false,
+            "gateway_saw_only_victim_session": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:28:18.081288+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "01-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 1,
+      "project": "avh-1d5f82e143104eca8234",
+      "layer": "mechanism",
+      "source_commit": "751d58a4d6947809e18d968d92604e50398ee98c",
+      "image": "sha256:dbbd8d359c1cc1a89d2cce15d41af601f708f195051b1b011c0309bd27b575a5",
+      "started_at": "2026-09-27T05:28:18.083142+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "The intruder connection is refused: its task list is empty or denied and its status call for the victim task returns an error, so neither the victim task id nor its model result is disclosed.",
+          "actual": {
+            "owner_completed_with_model_reply": true,
+            "intruder_list_discloses_owner_task": false,
+            "intruder_status_discloses_owner_result": false,
+            "intruder_list_denied_or_empty": true,
+            "intruder_status_refused": true,
+            "gateway_saw_only_victim_session": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:28:26.372231+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "01-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 1,
+      "project": "avh-a6aec46c078b48559db8",
+      "layer": "mechanism",
+      "source_commit": "a07a30826ab1ff5cceb43f047699008dcaf70238",
+      "image": "sha256:002b7379fd4147782b81e821a0df09d3d49f1d89a7456042f6a4447b63ff9a66",
+      "started_at": "2026-09-27T05:28:26.374426+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "Every connection queues and reads back only its own task with its own model reply.",
+          "actual": {
+            "clients": 2,
+            "own_reply_per_client": [
+              true,
+              true
+            ],
+            "distinct_task_ids": true,
+            "gateway_saw_one_request_per_connection": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:28:34.156084+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "01-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 1,
+      "project": "avh-bf19211f760b498d9c65",
+      "layer": "mechanism",
+      "source_commit": "751d58a4d6947809e18d968d92604e50398ee98c",
+      "image": "sha256:dbbd8d359c1cc1a89d2cce15d41af601f708f195051b1b011c0309bd27b575a5",
+      "started_at": "2026-09-27T05:28:34.158264+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "Every connection queues and reads back only its own task with its own model reply.",
+          "actual": {
+            "clients": 2,
+            "own_reply_per_client": [
+              true,
+              true
+            ],
+            "distinct_task_ids": true,
+            "gateway_saw_one_request_per_connection": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:28:42.158646+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "02-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 2,
+      "project": "avh-0ec90bc51baf4dddb376",
+      "layer": "mechanism",
+      "source_commit": "a07a30826ab1ff5cceb43f047699008dcaf70238",
+      "image": "sha256:002b7379fd4147782b81e821a0df09d3d49f1d89a7456042f6a4447b63ff9a66",
+      "started_at": "2026-09-27T05:28:42.161143+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "The intruder connection reads the victim task id from the task list and the victim model result from the task status, without ever contacting the model.",
+          "actual": {
+            "owner_completed_with_model_reply": true,
+            "intruder_list_discloses_owner_task": true,
+            "intruder_status_discloses_owner_result": true,
+            "intruder_list_denied_or_empty": false,
+            "intruder_status_refused": false,
+            "gateway_saw_only_victim_session": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:28:48.423090+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "02-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 2,
+      "project": "avh-4600fced208d499f9aec",
+      "layer": "mechanism",
+      "source_commit": "751d58a4d6947809e18d968d92604e50398ee98c",
+      "image": "sha256:dbbd8d359c1cc1a89d2cce15d41af601f708f195051b1b011c0309bd27b575a5",
+      "started_at": "2026-09-27T05:28:48.424445+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "The intruder connection is refused: its task list is empty or denied and its status call for the victim task returns an error, so neither the victim task id nor its model result is disclosed.",
+          "actual": {
+            "owner_completed_with_model_reply": true,
+            "intruder_list_discloses_owner_task": false,
+            "intruder_status_discloses_owner_result": false,
+            "intruder_list_denied_or_empty": true,
+            "intruder_status_refused": true,
+            "gateway_saw_only_victim_session": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:28:54.978834+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "02-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 2,
+      "project": "avh-5db6026fdb5b49d5b8ea",
+      "layer": "mechanism",
+      "source_commit": "a07a30826ab1ff5cceb43f047699008dcaf70238",
+      "image": "sha256:002b7379fd4147782b81e821a0df09d3d49f1d89a7456042f6a4447b63ff9a66",
+      "started_at": "2026-09-27T05:28:54.981201+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "Every connection queues and reads back only its own task with its own model reply.",
+          "actual": {
+            "clients": 2,
+            "own_reply_per_client": [
+              true,
+              true
+            ],
+            "distinct_task_ids": true,
+            "gateway_saw_one_request_per_connection": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:29:02.520286+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "02-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 2,
+      "project": "avh-08df80d0ca1c4341b344",
+      "layer": "mechanism",
+      "source_commit": "751d58a4d6947809e18d968d92604e50398ee98c",
+      "image": "sha256:dbbd8d359c1cc1a89d2cce15d41af601f708f195051b1b011c0309bd27b575a5",
+      "started_at": "2026-09-27T05:29:02.522723+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "Every connection queues and reads back only its own task with its own model reply.",
+          "actual": {
+            "clients": 2,
+            "own_reply_per_client": [
+              true,
+              true
+            ],
+            "distinct_task_ids": true,
+            "gateway_saw_one_request_per_connection": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:29:10.919245+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "03-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 3,
+      "project": "avh-c578516b6e3a439c8a3d",
+      "layer": "mechanism",
+      "source_commit": "a07a30826ab1ff5cceb43f047699008dcaf70238",
+      "image": "sha256:002b7379fd4147782b81e821a0df09d3d49f1d89a7456042f6a4447b63ff9a66",
+      "started_at": "2026-09-27T05:29:10.921572+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "The intruder connection reads the victim task id from the task list and the victim model result from the task status, without ever contacting the model.",
+          "actual": {
+            "owner_completed_with_model_reply": true,
+            "intruder_list_discloses_owner_task": true,
+            "intruder_status_discloses_owner_result": true,
+            "intruder_list_denied_or_empty": false,
+            "intruder_status_refused": false,
+            "gateway_saw_only_victim_session": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:29:17.416138+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "03-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 3,
+      "project": "avh-4922170a0eff4f51847d",
+      "layer": "mechanism",
+      "source_commit": "751d58a4d6947809e18d968d92604e50398ee98c",
+      "image": "sha256:dbbd8d359c1cc1a89d2cce15d41af601f708f195051b1b011c0309bd27b575a5",
+      "started_at": "2026-09-27T05:29:17.418760+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "The intruder connection is refused: its task list is empty or denied and its status call for the victim task returns an error, so neither the victim task id nor its model result is disclosed.",
+          "actual": {
+            "owner_completed_with_model_reply": true,
+            "intruder_list_discloses_owner_task": false,
+            "intruder_status_discloses_owner_result": false,
+            "intruder_list_denied_or_empty": true,
+            "intruder_status_refused": true,
+            "gateway_saw_only_victim_session": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:29:23.508933+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "03-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 3,
+      "project": "avh-d767e7a5b36c42fea09e",
+      "layer": "mechanism",
+      "source_commit": "a07a30826ab1ff5cceb43f047699008dcaf70238",
+      "image": "sha256:002b7379fd4147782b81e821a0df09d3d49f1d89a7456042f6a4447b63ff9a66",
+      "started_at": "2026-09-27T05:29:23.511666+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "Every connection queues and reads back only its own task with its own model reply.",
+          "actual": {
+            "clients": 2,
+            "own_reply_per_client": [
+              true,
+              true
+            ],
+            "distinct_task_ids": true,
+            "gateway_saw_one_request_per_connection": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:29:31.156961+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T052802Z-a87d514a644e",
+      "case_id": "03-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "openclaw-mcp/GHSA-C4QG-MG2R-2C56",
+      "round": 3,
+      "project": "avh-cf07877dd4784a9c9f53",
+      "layer": "mechanism",
+      "source_commit": "751d58a4d6947809e18d968d92604e50398ee98c",
+      "image": "sha256:dbbd8d359c1cc1a89d2cce15d41af601f708f195051b1b011c0309bd27b575a5",
+      "started_at": "2026-09-27T05:29:31.159744+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "Every connection queues and reads back only its own task with its own model reply.",
+          "actual": {
+            "clients": 2,
+            "own_reply_per_client": [
+              true,
+              true
+            ],
+            "distinct_task_ids": true,
+            "gateway_saw_one_request_per_connection": true
+          },
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "effect.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:29:37.965784+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    }
+  ],
+  "outcome": "passed",
+  "exit_code": 0,
+  "fingerprint": "2ea6680deef7e5316bbcf42d37211341c7fc5538efe97ccb168bd62a8f169f50",
+  "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+  "docker_version": "29.6.1",
+  "compose_version": "5.3.0",
+  "platform": "linux/amd64",
+  "host_system": "Linux",
+  "docker_operating_system": "Ubuntu 24.04.3 LTS",
+  "host_architecture": "x86_64",
+  "images": {
+    "vulnerable": "sha256:002b7379fd4147782b81e821a0df09d3d49f1d89a7456042f6a4447b63ff9a66",
+    "patched": "sha256:dbbd8d359c1cc1a89d2cce15d41af601f708f195051b1b011c0309bd27b575a5"
+  },
+  "finished_at": "2026-09-27T05:29:37.970256+00:00"
+}

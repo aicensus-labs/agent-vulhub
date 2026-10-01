@@ -1,0 +1,19 @@
+%% openclaw-mcp / GHSA-C4QG-MG2R-2C56 跨连接异步任务泄露 — generated from diagram.toml
+sequenceDiagram
+  participant client_a as 客户端 A（异步任务拥有者）
+  participant mcp_server as openclaw-mcp HTTP 服务进程
+  participant task_store as 进程级异步任务表
+  participant client_b as 客户端 B（攻击者控制的连接）
+  participant task_tools as 异步任务工具处理器
+  participant gateway as OpenClaw 实例接口
+  Note over client_a,mcp_server: 阶段 setup
+  client_a ->> mcp_server: 1 连接 A 调用 openclaw_chat_async 排队一个异步聊天任务
+  mcp_server ->> task_store: 2 后台处理器把 A 的输入和它取回的回复写进进程级任务表
+  Note over client_b,mcp_server: 阶段 trigger
+  client_b ->> mcp_server: 3 连接 B 调用 openclaw_task_list 枚举任务，再用 A 的 task_id 调用 openclaw_task_status
+  mcp_server ->> task_tools: 4 服务把这次调用分发给异步任务工具处理器
+  task_tools -->> task_store: 5 漏洞版只按 task_id 取值，不校验任务属于哪条连接
+  Note over task_tools,task_store: 分歧点：漏洞版与修复版在此分叉
+  task_tools -x task_store: 6 修复版带上本连接的 ownerId 查找，他人的任务与不存在的 ID 同样落空
+  Note over task_tools,client_b: 阶段 effect
+  task_tools -->> client_b: 7 连接 B 收到 A 的任务结果，跨连接数据泄露

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "variant": "patched",
+  "scenario": "benign",
+  "commit": "",
+  "cases": [
+    {
+      "id": "owner_reaches_own_server_instance",
+      "path": "/mcp-connect/msi1direct",
+      "method": "GET",
+      "user": "owner",
+      "uid": "owner-uid",
+      "expected_allowed": true,
+      "allowed": true,
+      "matches_expectation": true
+    },
+    {
+      "id": "owner_reaches_own_single_user_server",
+      "path": "/mcp-connect/ms1direct",
+      "method": "GET",
+      "user": "owner",
+      "uid": "owner-uid",
+      "expected_allowed": true,
+      "allowed": true,
+      "matches_expectation": true
+    },
+    {
+      "id": "granted_user_reaches_shared_catalog_server",
+      "path": "/mcp-connect/ms1shared",
+      "method": "GET",
+      "user": "granted",
+      "uid": "granted-uid",
+      "expected_allowed": true,
+      "allowed": true,
+      "matches_expectation": true
+    }
+  ],
+  "all_match": true
+}

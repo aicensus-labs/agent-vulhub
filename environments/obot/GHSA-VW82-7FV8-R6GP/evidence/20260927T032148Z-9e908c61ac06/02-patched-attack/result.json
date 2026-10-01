@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T032148Z-9e908c61ac06",
+  "case_id": "02-patched-attack",
+  "variant": "patched",
+  "scenario": "attack",
+  "environment_id": "obot/GHSA-VW82-7FV8-R6GP",
+  "round": 2,
+  "project": "avh-663204d743924d57985e",
+  "layer": "mechanism",
+  "source_commit": "2a2ec3f23ac564b2e2fab6b09fdef4ecd05fd496",
+  "image": "sha256:5b504bd5c993ac305f31fcaa58698f293b59eba4f59315c7548aeeb43ecfb3ed",
+  "started_at": "2026-09-27T03:23:28.795387+00:00",
+  "outcome": "passed",
+  "cleaned": true,
+  "platform": "linux/amd64",
+  "toolchain": {
+    "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+    "docker_version": "29.6.1",
+    "compose_version": "5.3.0"
+  },
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "patched_effect_blocked",
+      "passed": true,
+      "expected": "a user outside the access-control rule is denied /mcp-connect/{mcp_id} while the granted user is still allowed",
+      "actual": "authorized_user_reaches_catalog_server: expected_allowed=True allowed=True; unprivileged_user_reaches_catalog_server: expected_allowed=False allowed=False",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "authorize-report.json"
+      ]
+    }
+  ],
+  "finished_at": "2026-09-27T03:23:41.888023+00:00",
+  "logs": [
+    "0001-compose_config.stderr.log",
+    "0001-compose_config.stdout.log",
+    "0002-compose_up.stderr.log",
+    "0002-compose_up.stdout.log",
+    "0003-compose_up.stderr.log",
+    "0003-compose_up.stdout.log",
+    "0004-setup.stderr.log",
+    "0004-setup.stdout.log",
+    "0005-reproduce.stderr.log",
+    "0005-reproduce.stdout.log",
+    "0006-verify.stderr.log",
+    "0006-verify.stdout.log",
+    "0007-collect.stderr.log",
+    "0007-collect.stdout.log",
+    "0008-collect.stderr.log",
+    "0008-collect.stdout.log",
+    "0009-cleanup.stderr.log",
+    "0009-cleanup.stdout.log"
+  ]
+}

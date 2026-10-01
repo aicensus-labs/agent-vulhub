@@ -1,0 +1,64 @@
+{
+  "scenario": "benign",
+  "clients": [
+    {
+      "label": "probe-client-a",
+      "task_id": "task_1d99836f-5bf1-40fd-9afd-f5e05326d842",
+      "chat_async": {
+        "isError": false,
+        "text": "{\n  \"task_id\": \"task_1d99836f-5bf1-40fd-9afd-f5e05326d842\",\n  \"status\": \"pending\",\n  \"instance\": \"default\",\n  \"message\": \"Task queued. Use openclaw_task_status to check progress.\"\n}"
+      },
+      "task_status": {
+        "task_id": "task_1d99836f-5bf1-40fd-9afd-f5e05326d842",
+        "type": "chat",
+        "status": "completed",
+        "instance": "default",
+        "created_at": "2026-09-27T05:28:36.893Z",
+        "started_at": "2026-09-27T05:28:36.993Z",
+        "completed_at": "2026-09-27T05:28:37.024Z",
+        "result": "OPENCLAW-LAB-BENIGN-REPLY:OPENCLAW-LAB-BENIGN-A-4b1d"
+      },
+      "completed_with_own_reply": true
+    },
+    {
+      "label": "probe-client-b",
+      "task_id": "task_a737708b-c076-41f0-ab5b-f01c37525841",
+      "chat_async": {
+        "isError": false,
+        "text": "{\n  \"task_id\": \"task_a737708b-c076-41f0-ab5b-f01c37525841\",\n  \"status\": \"pending\",\n  \"instance\": \"default\",\n  \"message\": \"Task queued. Use openclaw_task_status to check progress.\"\n}"
+      },
+      "task_status": {
+        "task_id": "task_a737708b-c076-41f0-ab5b-f01c37525841",
+        "type": "chat",
+        "status": "completed",
+        "instance": "default",
+        "created_at": "2026-09-27T05:28:37.151Z",
+        "started_at": "2026-09-27T05:28:37.226Z",
+        "completed_at": "2026-09-27T05:28:37.230Z",
+        "result": "OPENCLAW-LAB-BENIGN-REPLY:OPENCLAW-LAB-BENIGN-B-9e70"
+      },
+      "completed_with_own_reply": true
+    }
+  ],
+  "derived": {
+    "all_clients_completed_with_own_reply": true
+  },
+  "variant": "patched",
+  "server_started": true,
+  "gateway_requests": [
+    {
+      "method": "POST",
+      "url": "/v1/chat/completions",
+      "model": "openclaw",
+      "session": "session-benign-a",
+      "message": "OPENCLAW-LAB-BENIGN-A-4b1d"
+    },
+    {
+      "method": "POST",
+      "url": "/v1/chat/completions",
+      "model": "openclaw",
+      "session": "session-benign-b",
+      "message": "OPENCLAW-LAB-BENIGN-B-9e70"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+schema_version = 1
+
+# Keys are paths relative to fixtures/. Include attack AND benign inputs.
+# Regenerate with: sha256sum fixtures/attack.json fixtures/benign.json
+[files]
+"attack.json" = "b71be15ebc055466666d3ec691fc663bae2c23c985cdd61d3a197be1cfefa3df"
+"benign.json" = "89be84bf0aa62466b1322983b81b311851b301fa5ff171adec37e80e1b065ad5"

@@ -1,0 +1,841 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T055453Z-0683cc3d13c8",
+  "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+  "layer": "mechanism",
+  "rounds": 3,
+  "started_at": "2026-09-27T05:54:53.669544+00:00",
+  "cases": [
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "01-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 1,
+      "project": "avh-ae043f99a8b14706aadf",
+      "layer": "mechanism",
+      "source_commit": "352570eb2a812e0e54419ba518949acdb3d8b315",
+      "image": "sha256:14d83c8a1ec48fbf9f7676ae30b8bb21734e868dd59b287169700bac150032e3",
+      "started_at": "2026-09-27T05:55:07.122813+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "On the vulnerable revision an access token minted for the MCP connect resource (/mcp-connect/<id>) is accepted by DecodeToken with the victim's full role groups instead of MCP-only identity",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:55:36.383349+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "01-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 1,
+      "project": "avh-2f0f945be5184743bb10",
+      "layer": "mechanism",
+      "source_commit": "1d4b687e66fce41dd059e1005501623e021ac27f",
+      "image": "sha256:ab14a523b1e89d6b6b17dcec4bbdaf07bba830ad00050d707fc0a692d3d055d7",
+      "started_at": "2026-09-27T05:55:36.385255+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "On the patched revision the same MCP connect audience token that still carries the victim's privileged UserGroups claim is accepted and reduced to exactly mcp+authenticated, so it no longer authenticates as the victim",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:56:15.287749+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "01-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 1,
+      "project": "avh-25670f97ebbd48ac9589",
+      "layer": "mechanism",
+      "source_commit": "352570eb2a812e0e54419ba518949acdb3d8b315",
+      "image": "sha256:14d83c8a1ec48fbf9f7676ae30b8bb21734e868dd59b287169700bac150032e3",
+      "started_at": "2026-09-27T05:56:15.288696+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A benign API-audience token is accepted on both revisions and keeps the caller's own role groups, so normal Obot API use keeps working",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:56:41.318968+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "01-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 1,
+      "project": "avh-ec9df6628103463b94bf",
+      "layer": "mechanism",
+      "source_commit": "1d4b687e66fce41dd059e1005501623e021ac27f",
+      "image": "sha256:ab14a523b1e89d6b6b17dcec4bbdaf07bba830ad00050d707fc0a692d3d055d7",
+      "started_at": "2026-09-27T05:56:41.320891+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A benign API-audience token is accepted on both revisions and keeps the caller's own role groups, so normal Obot API use keeps working",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:57:08.537583+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "02-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 2,
+      "project": "avh-1b0954f74c224b3891ad",
+      "layer": "mechanism",
+      "source_commit": "352570eb2a812e0e54419ba518949acdb3d8b315",
+      "image": "sha256:14d83c8a1ec48fbf9f7676ae30b8bb21734e868dd59b287169700bac150032e3",
+      "started_at": "2026-09-27T05:57:08.540123+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "On the vulnerable revision an access token minted for the MCP connect resource (/mcp-connect/<id>) is accepted by DecodeToken with the victim's full role groups instead of MCP-only identity",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:57:36.327531+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "02-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 2,
+      "project": "avh-1628dd5da6d64482bda2",
+      "layer": "mechanism",
+      "source_commit": "1d4b687e66fce41dd059e1005501623e021ac27f",
+      "image": "sha256:ab14a523b1e89d6b6b17dcec4bbdaf07bba830ad00050d707fc0a692d3d055d7",
+      "started_at": "2026-09-27T05:57:36.331328+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "On the patched revision the same MCP connect audience token that still carries the victim's privileged UserGroups claim is accepted and reduced to exactly mcp+authenticated, so it no longer authenticates as the victim",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:58:03.109293+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "02-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 2,
+      "project": "avh-508975323aa044968bfc",
+      "layer": "mechanism",
+      "source_commit": "352570eb2a812e0e54419ba518949acdb3d8b315",
+      "image": "sha256:14d83c8a1ec48fbf9f7676ae30b8bb21734e868dd59b287169700bac150032e3",
+      "started_at": "2026-09-27T05:58:03.113449+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A benign API-audience token is accepted on both revisions and keeps the caller's own role groups, so normal Obot API use keeps working",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:58:36.968670+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "02-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 2,
+      "project": "avh-cde6b98762ff44628486",
+      "layer": "mechanism",
+      "source_commit": "1d4b687e66fce41dd059e1005501623e021ac27f",
+      "image": "sha256:ab14a523b1e89d6b6b17dcec4bbdaf07bba830ad00050d707fc0a692d3d055d7",
+      "started_at": "2026-09-27T05:58:36.972228+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A benign API-audience token is accepted on both revisions and keeps the caller's own role groups, so normal Obot API use keeps working",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:59:04.076363+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "03-vulnerable-attack",
+      "variant": "vulnerable",
+      "scenario": "attack",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 3,
+      "project": "avh-7661f4940db2487a9a55",
+      "layer": "mechanism",
+      "source_commit": "352570eb2a812e0e54419ba518949acdb3d8b315",
+      "image": "sha256:14d83c8a1ec48fbf9f7676ae30b8bb21734e868dd59b287169700bac150032e3",
+      "started_at": "2026-09-27T05:59:04.080164+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "vulnerable_effect_observed",
+          "passed": true,
+          "expected": "On the vulnerable revision an access token minted for the MCP connect resource (/mcp-connect/<id>) is accepted by DecodeToken with the victim's full role groups instead of MCP-only identity",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:59:30.417671+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "03-patched-attack",
+      "variant": "patched",
+      "scenario": "attack",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 3,
+      "project": "avh-1a426115bb3d4004abb1",
+      "layer": "mechanism",
+      "source_commit": "1d4b687e66fce41dd059e1005501623e021ac27f",
+      "image": "sha256:ab14a523b1e89d6b6b17dcec4bbdaf07bba830ad00050d707fc0a692d3d055d7",
+      "started_at": "2026-09-27T05:59:30.421052+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "patched_effect_blocked",
+          "passed": true,
+          "expected": "On the patched revision the same MCP connect audience token that still carries the victim's privileged UserGroups claim is accepted and reduced to exactly mcp+authenticated, so it no longer authenticates as the victim",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T05:59:55.293830+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "03-vulnerable-benign",
+      "variant": "vulnerable",
+      "scenario": "benign",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 3,
+      "project": "avh-30a138829c2445ec80cb",
+      "layer": "mechanism",
+      "source_commit": "352570eb2a812e0e54419ba518949acdb3d8b315",
+      "image": "sha256:14d83c8a1ec48fbf9f7676ae30b8bb21734e868dd59b287169700bac150032e3",
+      "started_at": "2026-09-27T05:59:55.297345+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A benign API-audience token is accepted on both revisions and keeps the caller's own role groups, so normal Obot API use keeps working",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T06:00:24.215778+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "20260927T055453Z-0683cc3d13c8",
+      "case_id": "03-patched-benign",
+      "variant": "patched",
+      "scenario": "benign",
+      "environment_id": "obot/GHSA-XWMW-PRC4-V3CR",
+      "round": 3,
+      "project": "avh-9b979ba2a4124909aa34",
+      "layer": "mechanism",
+      "source_commit": "1d4b687e66fce41dd059e1005501623e021ac27f",
+      "image": "sha256:ab14a523b1e89d6b6b17dcec4bbdaf07bba830ad00050d707fc0a692d3d055d7",
+      "started_at": "2026-09-27T06:00:24.220328+00:00",
+      "outcome": "passed",
+      "cleaned": true,
+      "platform": "linux/amd64",
+      "toolchain": {
+        "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+        "docker_version": "29.6.1",
+        "compose_version": "5.3.0"
+      },
+      "exit_code": 0,
+      "checks": [
+        {
+          "id": "target_ready",
+          "passed": true,
+          "expected": "The pinned upstream mechanism completes",
+          "actual": true,
+          "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+          "evidence": [
+            "observation.json"
+          ]
+        },
+        {
+          "id": "benign_task_passed",
+          "passed": true,
+          "expected": "A benign API-audience token is accepted on both revisions and keeps the caller's own role groups, so normal Obot API use keeps working",
+          "actual": "all required effects observed in the hash-checked evidence",
+          "reason": "The verifier compares only hash-checked facts and effects.",
+          "evidence": [
+            "observation.json",
+            "mechanism.json",
+            "jwt-claims.json"
+          ]
+        }
+      ],
+      "finished_at": "2026-09-27T06:00:51.302803+00:00",
+      "logs": [
+        "0001-compose_config.stderr.log",
+        "0001-compose_config.stdout.log",
+        "0002-compose_up.stderr.log",
+        "0002-compose_up.stdout.log",
+        "0003-compose_up.stderr.log",
+        "0003-compose_up.stdout.log",
+        "0004-setup.stderr.log",
+        "0004-setup.stdout.log",
+        "0005-reproduce.stderr.log",
+        "0005-reproduce.stdout.log",
+        "0006-verify.stderr.log",
+        "0006-verify.stdout.log",
+        "0007-collect.stderr.log",
+        "0007-collect.stdout.log",
+        "0008-collect.stderr.log",
+        "0008-collect.stdout.log",
+        "0009-cleanup.stderr.log",
+        "0009-cleanup.stdout.log"
+      ]
+    }
+  ],
+  "outcome": "passed",
+  "exit_code": 0,
+  "fingerprint": "3cecfdce1a749c5849d505e49d1d2dbfe1b957c5d70284c768fd70ee96c41bd0",
+  "runner_fingerprint": "f243da0e78f48cae3130155f9ee2f2ed14b298c6e2b0a1eeaa924769685d0f56",
+  "docker_version": "29.6.1",
+  "compose_version": "5.3.0",
+  "platform": "linux/amd64",
+  "host_system": "Linux",
+  "docker_operating_system": "Ubuntu 24.04.3 LTS",
+  "host_architecture": "x86_64",
+  "images": {
+    "vulnerable": "sha256:14d83c8a1ec48fbf9f7676ae30b8bb21734e868dd59b287169700bac150032e3",
+    "patched": "sha256:ab14a523b1e89d6b6b17dcec4bbdaf07bba830ad00050d707fc0a692d3d055d7"
+  },
+  "finished_at": "2026-09-27T06:00:51.313149+00:00"
+}

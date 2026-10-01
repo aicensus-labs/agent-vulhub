@@ -1,0 +1,36 @@
+%% obot / GHSA-XWMW-PRC4-V3CR 漏洞图解 — generated from diagram.toml
+flowchart LR
+  subgraph attacker_side["攻击者侧"]
+    attacker["攻击者<br/>actor · attacker_controlled"]
+  end
+  subgraph obot_trust["Obot 鉴权边界"]
+    victim["受害者角色分组<br/>store · trusted"]
+    oauth_server["MCP OAuth 授权服务<br/>service · trusted"]
+    token_service["JWT token 校验服务<br/>service · trusted"]
+    protected_api["受害者的 Obot API 权限面<br/>sink · trusted"]
+  end
+  attacker -->|"1"| oauth_server
+  attacker -->|"2"| oauth_server
+  oauth_server -.->|"3"| attacker
+  attacker -->|"4"| token_service
+  token_service -.->|"5"| token_service
+  token_service -.->|"6"| token_service
+  token_service -.->|"7"| protected_api
+  token_service -.->|"8"| protected_api
+  classDef actor fill:transparent,stroke:#b03a6a
+  classDef client fill:transparent,stroke:#1565c0
+  classDef service fill:transparent,stroke:#5e35b1
+  classDef tool fill:transparent,stroke:#ef6c00
+  classDef sink fill:transparent,stroke:#c0392b
+  classDef store fill:transparent,stroke:#2e7d32
+  classDef synthetic stroke-dasharray: 4 2
+  class attacker actor
+  class victim store
+  class oauth_server service
+  class token_service service
+  class protected_api sink
+  style attacker_side fill:transparent
+  style obot_trust fill:transparent
+  linkStyle 4 stroke:#c0392b,stroke-width:2px
+  linkStyle 5 stroke:#2e7d32,stroke-width:2px
+  linkStyle 7 stroke:#2e7d32,stroke-width:2px

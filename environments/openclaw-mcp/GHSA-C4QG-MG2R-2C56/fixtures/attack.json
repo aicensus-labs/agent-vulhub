@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "scenario": "attack",
+  "purpose": "Connection B probes the async task queued by connection A on the same openclaw-mcp HTTP process.",
+  "gateway": {
+    "reply_prefix": "OPENCLAW-LAB-ATTACK-REPLY:"
+  },
+  "clients": [
+    {
+      "label": "probe-client-a",
+      "role": "victim",
+      "session_id": "session-victim",
+      "message": "OPENCLAW-LAB-ATTACK-PROMPT-2f6c1a90"
+    },
+    {
+      "label": "probe-client-b",
+      "role": "intruder",
+      "session_id": "session-intruder",
+      "message": ""
+    }
+  ]
+}

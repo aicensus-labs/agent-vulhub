@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "run_id": "20260927T032148Z-9e908c61ac06",
+  "case_id": "01-patched-benign",
+  "variant": "patched",
+  "scenario": "benign",
+  "outcome": "passed",
+  "checks": [
+    {
+      "id": "target_ready",
+      "passed": true,
+      "expected": "The pinned upstream mechanism completes",
+      "actual": true,
+      "reason": "The PoC records whether it loaded and invoked the pinned upstream mechanism.",
+      "evidence": [
+        "observation.json"
+      ]
+    },
+    {
+      "id": "benign_task_passed",
+      "passed": true,
+      "expected": "every normal owner/grantee gateway request is allowed",
+      "actual": "granted_user_reaches_shared_catalog_server: expected_allowed=True allowed=True; owner_reaches_own_server_instance: expected_allowed=True allowed=True; owner_reaches_own_single_user_server: expected_allowed=True allowed=True",
+      "reason": "The verifier compares only hash-checked facts and effects.",
+      "evidence": [
+        "observation.json",
+        "authorize-report.json"
+      ]
+    }
+  ]
+}

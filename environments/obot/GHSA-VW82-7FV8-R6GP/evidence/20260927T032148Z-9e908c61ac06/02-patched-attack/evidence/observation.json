@@ -1,0 +1,41 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "variant": "patched",
+  "scenario": "attack",
+  "mechanism": "pkg/api/authz Authorize(/mcp-connect/{mcp_id})",
+  "cases": [
+    {
+      "id": "authorized_user_reaches_catalog_server",
+      "path": "/mcp-connect/ms1catalog",
+      "method": "GET",
+      "uid": "authorized-uid",
+      "expected_allowed": true,
+      "allowed": true,
+      "matches_expectation": true,
+      "subtest": "PASS"
+    },
+    {
+      "id": "unprivileged_user_reaches_catalog_server",
+      "path": "/mcp-connect/ms1catalog",
+      "method": "GET",
+      "uid": "attacker-uid",
+      "expected_allowed": false,
+      "allowed": false,
+      "matches_expectation": true,
+      "subtest": "PASS"
+    }
+  ],
+  "all_match": true,
+  "source": "/lab/src/patched",
+  "commit": "",
+  "harness_exit_code": 0,
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T032148Z-9e908c61ac06",
+    "case_id": "02-patched-attack",
+    "variant": "patched",
+    "scenario": "attack"
+  }
+}

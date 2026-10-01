@@ -1,0 +1,19 @@
+%% obot / GHSA-VW82-7FV8-R6GP 漏洞图解 — generated from diagram.toml
+sequenceDiagram
+  actor attacker as 已认证的普通用户（非授权主体）
+  participant api_server as Obot API server 的 Authorizer
+  participant access_control_rules as MCP catalog 的 access control rule
+  participant gateway_proxy as MCP 网关代理
+  participant upstream_mcp_server as 上游 MCP server
+  participant gateway_session as 越权的 MCP 网关会话
+  participant authenticated_user as access control rule 授权的用户
+  Note over attacker,api_server: 阶段 setup
+  attacker ->> api_server: 1 已认证的普通用户请求 GET /mcp-connect/ms1catalog
+  Note over api_server: 阶段 trigger
+  api_server -->> api_server: 2 Authorizer 被 staticRules[anyGroup] 的 /mcp-connect/ 子树模式放行
+  Note over api_server: 分歧点：漏洞版与修复版在此分叉
+  api_server -x access_control_rules: 3 修复版没有静态放行，请求落到 evaluateResources 的 checkMCPID 判定
+  Note over api_server,gateway_proxy: 阶段 effect
+  api_server -->> gateway_proxy: 4 放行的请求被交给 MCP 网关代理
+  gateway_proxy -->> upstream_mcp_server: 5 网关用平台保存的凭据把请求代理到上游 MCP server
+  upstream_mcp_server -->> gateway_session: 6 越权用户取得通往该 server 的网关访问

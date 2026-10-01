@@ -1,0 +1,46 @@
+{
+  "target_ready": true,
+  "execution_status": "completed",
+  "variant": "patched",
+  "scenario": "benign",
+  "expected_upstream_commit": "1d4b687e66fce41dd059e1005501623e021ac27f",
+  "source_revision": "patched",
+  "source_revision_matches_variant": true,
+  "persistent_source_sha256": "84f8f7fc68deba99cd0a8716b671d65e5ddbeb2e566e37febf173a95d7ad3da7",
+  "input": "benign.json",
+  "server_url": "https://obot.example.com",
+  "source_tree": "installed tree /lab/upstream",
+  "upstream_commit": "1d4b687e66fce41dd059e1005501623e021ac27f",
+  "go_version": "go version go1.26.6 linux/amd64",
+  "driver_returncode": 0,
+  "driver_stdout": "=== RUN   TestAVHAudienceConfusionMechanism\n    zz_avh_audience_confusion_test.go:118: requested audience=https://obot.example.com decoded groups=[owner admin power-user-plus power-user basic authenticated]\n--- PASS: TestAVHAudienceConfusionMechanism (0.00s)\nPASS\nok  \tgithub.com/obot-platform/obot/pkg/jwt/persistent\t0.046s\n",
+  "driver_stderr": "",
+  "token_issued": true,
+  "decode_error": "",
+  "requested_audience": "https://obot.example.com",
+  "decoded_audience": "https://obot.example.com",
+  "decoded_groups": [
+    "owner",
+    "admin",
+    "power-user-plus",
+    "power-user",
+    "basic",
+    "authenticated"
+  ],
+  "caller_groups": [
+    "owner",
+    "admin",
+    "power-user-plus",
+    "power-user",
+    "basic",
+    "authenticated"
+  ],
+  "schema_version": 1,
+  "context": {
+    "schema_version": 1,
+    "run_id": "20260927T055453Z-0683cc3d13c8",
+    "case_id": "01-patched-benign",
+    "variant": "patched",
+    "scenario": "benign"
+  }
+}

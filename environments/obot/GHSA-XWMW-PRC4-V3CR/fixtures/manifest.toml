@@ -1,0 +1,7 @@
+schema_version = 1
+
+# SHA-256 of every file under fixtures/ except manifest.toml and README.md.
+# Keys are paths relative to fixtures/.
+[files]
+"attack.json" = "f049b7318964eba8881ed6a6c13573223ac7778782b87674e30081cc2173ca9c"
+"benign.json" = "6dff2a38f3f09dbf9efc99234d5eb193290d33b2db023fd6cae18a35c9933761"

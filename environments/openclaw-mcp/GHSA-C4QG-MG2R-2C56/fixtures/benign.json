@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "scenario": "benign",
+  "purpose": "Two independent connections each queue and read their own async chat task.",
+  "gateway": {
+    "reply_prefix": "OPENCLAW-LAB-BENIGN-REPLY:"
+  },
+  "clients": [
+    {
+      "label": "probe-client-a",
+      "role": "owner",
+      "session_id": "session-benign-a",
+      "message": "OPENCLAW-LAB-BENIGN-A-4b1d"
+    },
+    {
+      "label": "probe-client-b",
+      "role": "owner",
+      "session_id": "session-benign-b",
+      "message": "OPENCLAW-LAB-BENIGN-B-9e70"
+    }
+  ]
+}

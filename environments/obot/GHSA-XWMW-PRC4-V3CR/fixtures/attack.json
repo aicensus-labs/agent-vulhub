@@ -1,0 +1,29 @@
+{
+  "case": "mcp-oauth-audience-confusion",
+  "scenario": "attack",
+  "server_url": "https://obot.example.com",
+  "audience": "https://obot.example.com/mcp-connect/victim-mcp-server",
+  "user_id": "1001",
+  "user_name": "victim-owner",
+  "user_email": "victim-owner@example.invalid",
+  "user_groups": [
+    "owner",
+    "admin",
+    "power-user-plus",
+    "power-user",
+    "basic",
+    "authenticated"
+  ],
+  "oauth_context": {
+    "registration_endpoint": "https://obot.example.com/oauth/register",
+    "authorize_endpoint": "https://obot.example.com/oauth/authorize",
+    "token_endpoint": "https://obot.example.com/oauth/token",
+    "client_name": "demo-attacker-client",
+    "redirect_uris": [
+      "https://attacker.example/oauth/callback"
+    ],
+    "grant_type": "authorization_code",
+    "response_type": "code",
+    "resource": "https://obot.example.com/mcp-connect/victim-mcp-server"
+  }
+}

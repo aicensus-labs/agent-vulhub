@@ -1,0 +1,18 @@
+{
+  "case": "obot-api-audience-baseline",
+  "scenario": "benign",
+  "server_url": "https://obot.example.com",
+  "audience": "https://obot.example.com",
+  "user_id": "1001",
+  "user_name": "victim-owner",
+  "user_email": "victim-owner@example.invalid",
+  "user_groups": [
+    "owner",
+    "admin",
+    "power-user-plus",
+    "power-user",
+    "basic",
+    "authenticated"
+  ],
+  "note": "Normal Obot API access: the audience is the server itself, so the caller's own groups must survive token validation in both revisions."
+}

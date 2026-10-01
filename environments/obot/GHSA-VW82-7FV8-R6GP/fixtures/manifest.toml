@@ -1,0 +1,7 @@
+schema_version = 1
+
+# Keys are paths relative to fixtures/. Include attack AND benign inputs.
+[files]
+"attack.json" = "cb341acccf29555d4889aca2ada5dc56d45daa530fd17dc6f4a45dfa47f30581"
+"benign.json" = "36b5e21f57487325d7d565491bfe94c0d4929b73b5d6b8adab22955ec22b26f0"
+"harness/zz_ghsa_vw82_harness_test.go" = "40e36cb994cb4533c7b9866e7de7c0565b6b1bbc9e6ab50cce66b1ffed0db046"

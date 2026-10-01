@@ -1,0 +1,147 @@
+# 漏洞图解的单一来源。编辑本文件后运行：
+#   python3 -m runner diagram obot/GHSA-VW82-7FV8-R6GP
+# 生成 diagram/mechanism.mmd、diagram/entities.mmd 和 README.zh-cn.md 中的图解区块。
+# 字段、枚举和校验规则见 docs/diagram-contract.md。
+#
+# 图只描述漏洞本身：攻击者可控输入、受影响的上游组件、被调用的工具、被读写的存储，
+# 以及受控效果落点。不要写复现工具链（runner、verify.py、结果卷、容器编排、协议替身、
+# fixture 装载），它们不属于漏洞的触发过程。
+schema_version = 1
+title = "obot / GHSA-VW82-7FV8-R6GP 漏洞图解"
+summary = "Obot 的 /mcp-connect/{mcp_id} 网关端点被静态授权规则整体放行，Authorizer 在抵达 evaluateResources 的 checkMCPID 之前就直接返回 true，UI 兜底对同一路径也返回 true，于是任何已认证的普通用户都能连接任意已注册的 MCP server。修复版删除了该静态规则并把 /mcp-connect/ 从 UI 兜底中排除，请求因此落到 access control rule 判定，越权用户被拒绝。漏洞效果是请求以平台保存的凭据被代理到上游 MCP server。"
+
+# 漏洞涉及的每个主体都必须在这里出现，并且必须有 role 说明。
+# 可选字段：source（上游文件或 fixtures/ 相对路径）、static = true（是漏洞前提但不参与任何消息步骤）、
+# synthetic = true（本仓库合成的替身或无害效果载体，图中标 ⚠）。
+[[entities]]
+id = "attacker"
+label = "已认证的普通用户（非授权主体）"
+kind = "actor"
+trust = "attacker_controlled"
+source = "fixtures/attack.json"
+role = "攻击者只控制一件事：带上自己的 Basic 用户会话凭证，请求 /mcp-connect/ms1catalog。它不在该 server 的 access control rule 主体中，本来无权连接。"
+
+[[entities]]
+id = "authenticated_user"
+label = "access control rule 授权的用户"
+kind = "client"
+trust = "trusted"
+source = "fixtures/benign.json"
+static = true
+role = "授权用户对应 fixtures/benign.json 里的 owner 与 granted 身份，正常任务中他们连接自己拥有的实例或 ACR 授予的 server，修复版必须继续允许。"
+
+[[entities]]
+id = "api_server"
+label = "Obot API server 的 Authorizer"
+kind = "service"
+trust = "trusted"
+source = "fixtures/harness/zz_ghsa_vw82_harness_test.go"
+role = "Authorize 是唯一的判决点：v0.21.0 的 staticRules[anyGroup] 含子树模式 /mcp-connect/，第一段循环命中即返回 true，早于 authorizeAPIResources；即便没有这条规则，只否掉 /debug 与 /api 的 checkUI 也会在末尾对 /mcp-connect/ 返回 true。"
+
+[[entities]]
+id = "gateway_proxy"
+label = "MCP 网关代理"
+kind = "tool"
+trust = "trusted"
+role = "网关 handler.Proxy 调用 ensureServerIsDeployed 与 ServerForActionWithConnectID，用平台存储的 OAuth/API 凭据构造上游配置并反向代理，过程中没有用户级权限判断。"
+
+[[entities]]
+id = "upstream_mcp_server"
+label = "上游 MCP server"
+kind = "service"
+trust = "trusted"
+source = "fixtures/attack.json"
+role = "真正的受保护资源：只有 ACR 主体能连的 MCP server。越权请求以平台凭据的身份打到它，暴露范围等于这些凭据能触达的一切。"
+
+[[entities]]
+id = "access_control_rules"
+label = "MCP catalog 的 access control rule"
+kind = "store"
+trust = "trusted"
+source = "fixtures/attack.json"
+role = "catalog-a 中的 ACR 只把 ms1catalog 授予 authorized-uid，是 checkMCPID 用来判定越权的持久化数据；漏洞版从不让这段判定执行。"
+
+[[entities]]
+id = "gateway_session"
+label = "越权的 MCP 网关会话"
+kind = "sink"
+trust = "trusted"
+synthetic = true
+role = "漏洞生效后落在攻击者手里的受控效果标记：被拒绝的请求实际拿到了通往上游 server 的网关访问。这里不接真实外部 server，只记录 Authorize 的放行结论。"
+
+# 信任边界会渲染成 flowchart 的子图；一个主体最多属于一个边界。
+[[boundaries]]
+id = "attacker_side"
+label = "攻击者侧"
+members = ["attacker"]
+note = "攻击者能控制的只有自己的用户会话与目标 mcp_id；它既不能读 ACR，也不能改服务端存储，只能发出一次请求。"
+
+[[boundaries]]
+id = "protected_platform"
+label = "Obot 平台与受 ACR 保护的 MCP 资源"
+members = ["authenticated_user", "api_server", "gateway_proxy", "upstream_mcp_server", "access_control_rules", "gateway_session"]
+note = "这道边界由 Authorizer 与 ACR 共同把守：只有 ACR 主体才能连到 catalog-a 的 server。静态规则先把 /mcp-connect/ 整体放行，UI 兜底再放行一次，边界因此在 handler 之前就失效。"
+
+# 触发过程按 n 连续编号，只覆盖漏洞本身的链路。至少一步 diverges = true 表示漏洞版与修复版
+# 的分叉点，且该步 variant 不能是 both。
+[[steps]]
+n = 1
+phase = "setup"
+from = "attacker"
+to = "api_server"
+action = "已认证的普通用户请求 GET /mcp-connect/ms1catalog"
+detail = "用户不在 ms1catalog 的 ACR 主体中；ms1catalog 是 catalog-a 里的 MCPServer，ACR 只授予 authorized-uid。"
+variant = "both"
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 2
+phase = "trigger"
+from = "api_server"
+to = "api_server"
+action = "Authorizer 被 staticRules[anyGroup] 的 /mcp-connect/ 子树模式放行"
+detail = "v0.21.0 的 Authorize 第一段循环对 anyGroup 规则做 Handler 匹配，命中即 return true，authorizeAPIResources 与 checkMCPID 从未执行。"
+variant = "vulnerable_only"
+diverges = true
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 3
+phase = "trigger"
+from = "api_server"
+to = "access_control_rules"
+action = "修复版没有静态放行，请求落到 evaluateResources 的 checkMCPID 判定"
+detail = "v0.21.1 删除该静态规则，并让 checkUI 对 /mcp-connect/ 返回 false，UserHasAccessToMCPServerInCatalog 对非 ACR 主体返回 false。"
+variant = "patched_only"
+diverges = true
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 4
+phase = "effect"
+from = "api_server"
+to = "gateway_proxy"
+action = "放行的请求被交给 MCP 网关代理"
+detail = "只有漏洞版会走到这里；代理不再做任何用户级权限判断。"
+variant = "vulnerable_only"
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 5
+phase = "effect"
+from = "gateway_proxy"
+to = "upstream_mcp_server"
+action = "网关用平台保存的凭据把请求代理到上游 MCP server"
+detail = "上游只认平台凭据，于是越权用户拿到该 server 的全部工具与资源。"
+variant = "vulnerable_only"
+evidence = "fixtures/attack.json"
+
+[[steps]]
+n = 6
+phase = "effect"
+from = "upstream_mcp_server"
+to = "gateway_session"
+action = "越权用户取得通往该 server 的网关访问"
+detail = "受控效果落点；不代表真实外部 server 被攻陷。"
+variant = "vulnerable_only"
+evidence = "fixtures/attack.json"
