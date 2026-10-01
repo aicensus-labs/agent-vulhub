@@ -9,6 +9,8 @@ import shutil
 import tempfile
 import unittest
 from unittest.mock import patch
+import ipaddress
+import subprocess
 
 from runner.cli import ROOT, main, read_toml, scaffold
 from runner.agent_poc import CandidateSpec
@@ -18,7 +20,8 @@ from runner.lifecycle import promote, ready_check, refresh
 from runner.protocol import (CASES, check_fixtures, digest, fingerprint, validate_report,
                              validate_verdict, write_json)
 from runner.runtime import (RunError, _candidate_container_command,
-                             _verifier_container_command, reproduce)
+                             _verifier_container_command, allocate_subnet,
+                             apply_network_subnet, fallback_pool, reproduce)
 
 
 def facts_and_verdict(folder, context, passed=True):
@@ -313,6 +316,130 @@ class ComposePolicyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_compose(config, images, exceptions)
         validate_compose(config, images, exceptions, True)
+
+    def test_declared_subnet_needs_the_subnet_exception(self):
+        config, images = self.config()
+        config["networks"]["lab"]["ipam"] = {"config": [{"subnet": "10.200.0.0/24"}]}
+        exceptions = [{"rule": "network.lab.subnet", "reason": "host pools exhausted"}]
+        with self.assertRaisesRegex(ValueError, "network.lab.subnet"):
+            validate_compose(config, images)
+        with self.assertRaisesRegex(ValueError, "network.lab.subnet"):
+            validate_compose(config, images, exceptions)
+        validate_compose(config, images, exceptions, True)
+
+    def test_empty_ipam_from_compose_config_stays_accepted(self):
+        # `docker compose config` always emits an empty ipam mapping; it must not require
+        # the exception.
+        config, images = self.config()
+        config["networks"]["lab"]["ipam"] = {}
+        validate_compose(config, images)
+
+    def test_subnet_allocation_skips_host_networks(self):
+        used = [ipaddress.ip_network("10.200.0.0/24"), ipaddress.ip_network("10.200.1.0/24")]
+        with patch("runner.runtime.host_subnets", return_value=used):
+            chosen = allocate_subnet("10.200.0.0/16", "avh-0000")
+        self.assertNotIn(chosen, used)
+        self.assertEqual(chosen.prefixlen, 24)
+        self.assertTrue(chosen.subnet_of(ipaddress.ip_network("10.200.0.0/16")))
+
+    def test_subnet_pool_must_hold_a_slash_24(self):
+        with self.assertRaisesRegex(ValueError, "IPv4 network of /16 or larger"):
+            allocate_subnet("10.200.0.0/20", "avh-0000")
+        with self.assertRaisesRegex(ValueError, "IPv4 network of /16 or larger"):
+            allocate_subnet("2001:db8::/32", "avh-0000")
+
+    def test_network_pool_is_injected_for_the_run(self):
+        config = {"name": "avh-test", "networks": {"lab": {"name": "avh-test_lab",
+                  "ipam": {}, "internal": True}}}
+        metadata = {"runtime": {"network_pool": "10.200.0.0/16"}}
+        with patch("runner.runtime.host_subnets", return_value=[]):
+            apply_network_subnet(config, metadata, "avh-test")
+        subnet = ipaddress.ip_network(
+            config["networks"]["lab"]["ipam"]["config"][0]["subnet"], strict=True)
+        self.assertEqual(subnet.prefixlen, 24)
+        self.assertTrue(subnet.subnet_of(ipaddress.ip_network("10.200.0.0/16")))
+
+    def test_slash_16_pool_still_spreads_across_projects(self):
+        """A /16 holds exactly 256 /24s; the spread must not be skipped at that size."""
+        projects = ["avh-" + f"{index:04d}" for index in range(24)]
+        with patch("runner.runtime.host_subnets", return_value=[]):
+            chosen = {project: allocate_subnet("10.200.0.0/16", project) for project in projects}
+        self.assertEqual(len(set(chosen.values())), len(projects))
+
+    def test_host_pool_exhaustion_needs_no_recipe_declaration(self):
+        """Regression: every environment had to declare a pool to survive a busy host.
+
+        Docker's own default pools are finite and a shared host exhausts them, so
+        compose could not create the lab network and every case died in compose_up.
+        Requiring `runtime.network_pool` made that host detail part of every recipe.
+        The tool layer now allocates on its own.
+        """
+        config = {"name": "avh-test", "networks": {"lab": {"name": "avh-test_lab",
+                  "ipam": {}, "internal": True}}}
+        # The two default ranges Docker would otherwise try are both taken.
+        exhausted = [ipaddress.ip_network(f"172.{n}.0.0/16") for n in range(17, 32)]
+        exhausted += [ipaddress.ip_network(f"192.168.{n}.0/20") for n in range(0, 256, 16)]
+        with patch("runner.runtime.host_subnets", return_value=exhausted):
+            apply_network_subnet(config, {"runtime": {}}, "avh-test")
+        subnet = ipaddress.ip_network(
+            config["networks"]["lab"]["ipam"]["config"][0]["subnet"], strict=True)
+        self.assertEqual(subnet.prefixlen, 24)
+        self.assertTrue(subnet.subnet_of(ipaddress.ip_network("10.0.0.0/8")))
+        self.assertFalse(any(subnet.overlaps(other) for other in exhausted))
+
+    def test_tool_allocated_subnet_needs_no_exception(self):
+        """The exception guards recipe-declared subnets, not the tool's own allocation."""
+        config, images = self.config()
+        config["networks"]["lab"]["ipam"] = {"config": [{"subnet": "10.50.50.0/24"}]}
+        with self.assertRaisesRegex(ValueError, "network.lab.subnet"):
+            validate_compose(config, images)
+        # Same populated ipam, but it came from apply_network_subnet.
+        validate_compose(config, images, (), False, tool_allocated=True)
+
+    def test_fallback_allocation_terminates_when_blocks_are_taken(self):
+        """The scan is bounded and still finds a free /16 behind occupied ones."""
+        used = [ipaddress.ip_network(f"10.{n}.0.0/16") for n in range(0, 40)]
+        with patch("runner.runtime.host_subnets", return_value=used):
+            block = fallback_pool("avh-0000", used)
+        self.assertTrue(block.subnet_of(ipaddress.ip_network("10.0.0.0/8")))
+        self.assertFalse(any(block.overlaps(other) for other in used))
+
+    def test_host_scan_survives_a_network_vanishing_mid_scan(self):
+        """Concurrent cases remove networks while we scan them.
+
+        `docker network ls` lists a name, another case tears its project down, and
+        `docker network inspect` then exits non-zero. That race is host plumbing, not
+        the mechanism, so the scan must retry instead of failing the whole case with
+        `invalid_evidence`.
+        """
+        from runner import runtime
+
+        real_run = subprocess.run
+        calls = {"n": 0}
+
+        def flaky(command, *args, **kwargs):
+            if command[:3] == ["docker", "network", "inspect"]:
+                calls["n"] += 1
+                if calls["n"] == 1:
+                    return subprocess.CompletedProcess(command, 1, "", "no such network")
+                return subprocess.CompletedProcess(command, 0, "10.9.9.0/24 ", "")
+            if command[:3] == ["docker", "network", "ls"]:
+                return subprocess.CompletedProcess(command, 0, "net-a\nnet-b\n", "")
+            return real_run(command, *args, **kwargs)
+
+        with patch.object(runtime, "_HOST_SUBNETS_CACHE", None), \
+                patch("runner.runtime.subprocess.run", side_effect=flaky):
+            subnets = runtime.host_subnets()
+        self.assertEqual(subnets, [ipaddress.ip_network("10.9.9.0/24")])
+        self.assertGreaterEqual(calls["n"], 2)
+
+    def test_host_scan_cache_is_dropped_between_cases(self):
+        """Each case tears its network down, so a cached scan goes stale."""
+        from runner import runtime
+
+        with patch.object(runtime, "_HOST_SUBNETS_CACHE", [ipaddress.ip_network("10.1.0.0/24")]):
+            runtime.invalidate_host_subnets()
+            self.assertIsNone(runtime._HOST_SUBNETS_CACHE)
 
 
 if __name__ == "__main__":

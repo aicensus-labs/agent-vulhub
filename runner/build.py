@@ -114,7 +114,9 @@ def build_images(root, directory, metadata, commands, offline=False):
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, target)
         (context / "inputs").mkdir(exist_ok=True)
-        shutil.copyfile(root / "runner" / "lab_support.py", context / "lab_support.py")
+        # lab_support.py is runner tooling, not per-registry data: a staging root
+        # reached through AVH_ROOT has no runner/ directory of its own.
+        shutil.copyfile(Path(__file__).resolve().parent / "lab_support.py", context / "lab_support.py")
         for name, source in inputs.items():
             shutil.copyfile(source, context / "inputs" / name)
         for variant in ("vulnerable", "patched"):

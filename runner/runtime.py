@@ -1,6 +1,8 @@
 """Docker orchestration with bounded commands and per-case evidence directories."""
 
 from datetime import datetime, timezone
+import hashlib
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -11,13 +13,24 @@ import uuid
 
 from .compose import validate_compose
 from .protocol import (CASES, IMAGE, IMAGE_ID, SCHEMA, check_fixtures, digest, fingerprint,
-                       read_json, runner_fingerprint, validate_verdict, write_json)
+                       input_binding as protocol_input_binding, read_json, runner_fingerprint,
+                       validate_verdict, write_json)
 
 
 class RunError(Exception):
     def __init__(self, phase, actual, code=3, status="infrastructure_error", expected="command completes successfully"):
         super().__init__(actual)
         self.phase, self.actual, self.code, self.status, self.expected = phase, actual, code, status, expected
+
+
+# Docker's default address pools (172.17.0.0/16 onward, then 192.168.0.0/16) are finite
+# and a busy host exhausts them, after which compose fails to create the lab network.
+# There is no declaring `network_pool` per environment because the shortage is a property
+# of the host: it would force every recipe to carry host detail and to be re-authored
+# whenever a host runs out. The tool layer allocates from this range instead.
+FALLBACK_RANGE = ipaddress.ip_network("10.0.0.0/8")
+FALLBACK_SCAN_LIMIT = 64
+_HOST_SUBNETS_CACHE = None
 
 
 def utc():
@@ -73,7 +86,7 @@ class Commands:
 def compose_env(images):
     # Do not interpolate host secrets, COMPOSE_FILE, profiles or .env into experiments.
     env = {k: v for k, v in os.environ.items() if k in {
-        "PATH", "HOME", "DOCKER_HOST", "DOCKER_CONTEXT", "DOCKER_CONFIG",
+        "PATH", "HOME", "DOCKER_HOST", "DOCKER_CONTEXT", "DOCKER_CONFIG", "BUILDX_CONFIG",
         "DOCKER_TLS_VERIFY", "DOCKER_CERT_PATH", "XDG_RUNTIME_DIR"}}
     env.update({"VULNERABLE_IMAGE": images["vulnerable"], "PATCHED_IMAGE": images["patched"],
                 "COMPOSE_DISABLE_ENV_FILE": "true"})
@@ -121,21 +134,161 @@ def harness(metadata):
 
 
 def input_binding(root, directory, metadata):
-    # Published image references are outputs, so cannot participate in their own build label.
+    # Published image references are outputs, so cannot participate in their own
+    # build label. protocol.input_binding then hashes only the build inputs, so a
+    # host-side runner change no longer invalidates published digests.
     material = json.loads(json.dumps(metadata))
     for variant in ("vulnerable", "patched"):
         material[variant]["image"] = ""
-    return fingerprint(root, directory, material)
+    return protocol_input_binding(root, directory, material)
 
 
-def inspect_config(commands, directory, images, project, metadata, allow_exceptions):
+def invalidate_host_subnets():
+    """Forget the scanned host subnets.
+
+    The scan is cached because a case inspects the config more than once, but the host
+    changes between cases: each one tears its compose network down again. Reusing a stale
+    scan would report subnets that no longer exist as taken.
+    """
+    global _HOST_SUBNETS_CACHE
+    _HOST_SUBNETS_CACHE = None
+
+
+def host_subnets(attempts=4):
+    """Existing Docker bridge subnets, so an allocated pool cannot collide with the host.
+
+    Concurrent cases create and remove their compose networks while this scan runs, so a
+    name listed by `docker network ls` can be gone by the time `inspect` resolves it and
+    the whole batch fails on a race that has nothing to do with the mechanism. Names that
+    vanished are dropped and the scan is retried; only a scan that cannot see anything is
+    an error.
+    """
+    global _HOST_SUBNETS_CACHE
+    if _HOST_SUBNETS_CACHE is not None:
+        return _HOST_SUBNETS_CACHE
+    last = ""
+    for _ in range(max(1, attempts)):
+        result = subprocess.run(["docker", "network", "ls", "-q"], capture_output=True, text=True, timeout=60)
+        if result.returncode != 0:
+            raise ValueError("Cannot list Docker networks to verify the declared subnet pool")
+        names = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        if not names:
+            _HOST_SUBNETS_CACHE = []
+            return _HOST_SUBNETS_CACHE
+        inspect = subprocess.run(["docker", "network", "inspect", *names, "--format",
+                                  "{{range .IPAM.Config}}{{.Subnet}} {{end}}"],
+                                 capture_output=True, text=True, timeout=120)
+        if inspect.returncode != 0:
+            last = (inspect.stderr or "").strip()
+            continue
+        # A successful inspect can still have skipped a network that disappeared mid-scan;
+        # whatever it did report is a lower bound on what is in use, which is the safe
+        # direction for allocation (we may skip a subnet that is actually free).
+        subnets = []
+        for token in inspect.stdout.split():
+            try:
+                subnets.append(ipaddress.ip_network(token, strict=False))
+            except ValueError:
+                continue
+        _HOST_SUBNETS_CACHE = subnets
+        return subnets
+    raise ValueError(f"Cannot inspect Docker networks to verify the declared subnet pool: {last[:200]}")
+
+
+def allocate_subnet(pool, project, used=None):
+    """Pick one /24 deterministically from a pool, rejecting host collisions."""
+    network = ipaddress.ip_network(pool, strict=True)
+    if network.version != 4 or network.prefixlen > 16:
+        raise ValueError("runtime.network_pool must be an IPv4 network of /16 or larger")
+    if used is None:
+        used = host_subnets()
+    candidates = list(network.subnets(new_prefix=24))
+    # Rotate by a project-derived offset so concurrent projects do not all probe the same
+    # prefix first. A /16 pool holds exactly 256 /24s, so the rotation must apply when the
+    # pool is no larger than the scan window; gating it on `> 256` silently disabled the
+    # spread and made every project pick the same subnet. The offset is taken modulo the
+    # pool size because project IDs are case-unique random UUIDs, so distinct projects get
+    # distinct offsets until the pool is exhausted rather than colliding by hash.
+    if candidates:
+        offset = project_offset(project, len(candidates))
+        candidates = (candidates[offset:] + candidates[:offset])[:256]
+    for candidate in candidates:
+        if any(candidate.overlaps(other) for other in used):
+            continue
+        return candidate
+    raise ValueError(f"No free /24 remains in declared pool {pool}")
+
+
+def project_offset(project, count):
+    """A stable offset into a pool, derived from the case-unique project id."""
+    try:
+        return int(project.rsplit("-", 1)[-1], 16) % count
+    except ValueError:
+        return int(hashlib.sha256(project.encode()).hexdigest(), 16) % count
+
+
+def _metadata_pool(metadata):
+    return (metadata.get("runtime", {}) or {}).get("network_pool")
+
+
+def fallback_pool(project, used):
+    """Find a /16 the tool layer can hand out when no pool is declared.
+
+    Docker's own default address pools (172.17.0.0/16 onward, and 192.168.0.0/16)
+    are exhausted on a busy host, and compose then fails with "could not find an
+    available, non-overlapping IPv4 address pool". That is a property of the host,
+    not of any individual environment, so every environment would otherwise have to
+    discover it and declare ``runtime.network_pool`` by hand. Searching here keeps
+    the recipe portable and keeps host detail out of the registry.
+    """
+    blocks = list(FALLBACK_RANGE.subnets(new_prefix=16))
+    if not blocks:
+        raise ValueError(f"Fallback range {FALLBACK_RANGE} holds no /16")
+    offset = project_offset(project, len(blocks))
+    ordered = (blocks[offset:] + blocks[:offset])[:FALLBACK_SCAN_LIMIT]
+    for block in ordered:
+        candidates = list(block.subnets(new_prefix=24))
+        rotated = candidates[project_offset(project, len(candidates)):] + \
+            candidates[:project_offset(project, len(candidates))]
+        for candidate in rotated:
+            if not any(candidate.overlaps(other) for other in used):
+                return block
+    raise ValueError(f"No free /16 for {project} in fallback range {FALLBACK_RANGE}")
+
+
+def apply_network_subnet(config, metadata, project):
+    """Inject a subnet into the normalized config before it is persisted.
+
+    A declared ``runtime.network_pool`` wins. Otherwise the tool layer allocates one,
+    so an environment never depends on the host having a free Docker default pool.
+    """
+    used = host_subnets()
+    pool = _metadata_pool(metadata)
+    if pool:
+        subnet = allocate_subnet(pool, project, used)
+    else:
+        subnet = allocate_subnet(str(fallback_pool(project, used)), project, used)
+    for name, network in config.get("networks", {}).items():
+        if network.get("name", f"{project}_{name}") != f"{project}_{name}":
+            continue
+        network["ipam"] = {"config": [{"subnet": str(subnet)}]}
+    return config
+
+
+def inspect_config(commands, directory, images, project, metadata, allow_exceptions,
+                   inject_subnet=False):
     env = compose_env(images)
     base = ["docker", "compose", "--project-directory", str(directory), "--env-file", os.devnull,
             "-p", project, "-f", str(directory / "compose.yaml")]
     _, content = commands.run(base + ["--profile", "vulnerable", "--profile", "patched",
                                     "config", "--no-env-resolution", "--format", "json"], "compose_config", env=env)
     config = json.loads(content)
-    validate_compose(config, images, metadata.get("runtime", {}).get("exceptions", []), allow_exceptions)
+    # Preflight (no injection) still requires the exception for a subnet the recipe
+    # declares itself; when we inject, the subnet is the tool layer's own allocation.
+    validate_compose(config, images, metadata.get("runtime", {}).get("exceptions", []),
+                     allow_exceptions, tool_allocated=inject_subnet)
+    if inject_subnet:
+        apply_network_subnet(config, metadata, project)
     return config
 
 
@@ -214,6 +367,7 @@ def _prepare_candidate_container(child, container):
 
 def run_case(commands, directory, metadata, images, report, number, variant, scenario, args,
              candidate=None, layer="mechanism"):
+    invalidate_host_subnets()
     case_id = f"{number:02d}-{variant}-{scenario}"
     output = commands.output / case_id
     output.mkdir()
@@ -238,7 +392,8 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
     candidate_container = None
     verifier_container = None
     try:
-        config = inspect_config(child, directory, images, project, metadata, args.allow_exceptions)
+        config = inspect_config(child, directory, images, project, metadata, args.allow_exceptions,
+                                inject_subnet=True)
         target = config["services"][variant]
         mode = metadata["runtime"].get("mode", "oneshot")
         if mode not in {"oneshot", "service"}:
