@@ -1,5 +1,7 @@
 # Agent Vulhub
 
+[English](README.en.md)
+
 面向 Agent/MCP 软件的漏洞复现环境集合。每个环境固定受影响版本和修复版本，并提供 Docker 配置、复现脚本、验证器和测试输入，用于在隔离环境中检查漏洞触发路径和修复行为。
 
 > [!WARNING]
