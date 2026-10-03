@@ -1,73 +1,81 @@
 # Agent Vulhub
 
-面向 Agent/MCP 生态的 CVE/GHSA 机制复现环境集合。每个环境包含固定的上游源码、Docker 配置、PoC 和独立验证器，用于在隔离环境中复核漏洞触发路径与修复对照。
+面向 Agent/MCP 软件的漏洞复现环境集合。每个环境固定受影响版本和修复版本，并提供 Docker 配置、复现脚本、验证器和测试输入，用于在隔离环境中检查漏洞触发路径和修复行为。
 
 > [!WARNING]
-> 本项目与官方 Vulhub 无隶属关系。当前所有环境均为 `draft`，实验结果只代表记录的平台和固定材料，不能视为生产安全结论。
+> 本项目与官方 Vulhub 无关。PoC 仅用于授权测试和安全研究，请在一次性 Linux 环境中运行，不要使用生产凭据或连接生产服务。当前环境均为 `draft`，复现结果不等同于完整安全评估。
 
-## 当前状态
+## 项目状态
 
-| 指标 | 数量 |
+截至当前仓库快照：
+
+| 项目 | 数量 |
 | --- | ---: |
-| 已收录环境 | 276 |
-| 机制验收通过 | 275 |
+| 收录环境 | 276 |
+| 机制检查通过 | 275 |
 | 尚未运行 | 1 |
-| `ready` 环境 | 0 |
-| 已发布 GHCR 镜像 | 0 |
 
-“机制验收通过”不等于 `ready`：`ready` 还要求固定的可分发镜像、至少三轮完整验收和维护者审阅。验证使用容器内的 synthetic 效果和修复对照；Docker smoke 只验证工具链，不构成漏洞复现证明。
+## 环境内容
 
-其中本轮纳入的 322 个 AgentSec 候选有 237 个完成四场景三轮机制验收，85 个因没有可构造的修复对照、平台不匹配或因果性不足保留为 `not_run`；具体原因记录在各环境的 `metadata.toml`。
+环境按产品和漏洞编号组织：
+
+```text
+environments/<product>/<CVE-or-GHSA>/
+├── metadata.toml       # 版本、来源和验证状态
+├── Dockerfile          # 漏洞版和修复版镜像构建配方
+├── compose.yaml        # 本地运行配置
+├── reproduce.py        # 复现入口
+├── verify.py           # 独立验证器
+└── fixtures/            # 固定输入和测试材料
+```
+
+源码版本、基础镜像和构建依赖记录在 `metadata.toml` 中。默认从固定输入本地构建，不依赖预构建镜像；首次构建需要联网，之后可以使用 `--offline` 复用缓存。
 
 ## 快速开始
 
-索引和静态检查只需要 Python 3.11+。完整复现需要 Linux amd64 原生 Docker 和支持 Compose 的插件。
+静态检查需要 Python 3.11+。完整复现需要 Linux amd64、Docker Engine 和 Compose 插件。
 
 ```sh
+git clone https://github.com/aicensus-labs/agent-vulhub.git
+cd agent-vulhub
+
 python3 -m runner list
 python3 -m runner check
 python3 -m runner lint
-python3 -m unittest discover -s tests -v
 ```
 
-运行一个已完成机制验收的环境：
+运行一个环境：
 
 ```sh
 python3 -m runner reproduce mcp-filesystem/CVE-2025-53109 --build --rounds 1
 ```
 
-### 复现方式：本地构建
+需要重复验收时，将 `--rounds` 调整为 `3`。离线运行可以追加 `--offline`，前提是所需输入已经在本地缓存。
 
-**复现性来自固定的构建输入，不依赖我们发布镜像。** 每个环境的 `metadata.toml` 固定了源码完整 commit SHA，`build.inputs` 中每一项都记录 URL 与 SHA-256，基础镜像固定 digest。`--build` 会校验这些输入、从仓库内 Dockerfile 构建漏洞版和修复版镜像，再分别运行攻击和正常任务。
+## 仓库导航
 
-因此使用者可以自行构建并独立验证来源，无需信任任何预构建镜像。首次构建需要联网下载已固定的输入，之后可加 `--offline` 复用 `.cache/sha256/` 中的缓存。
+- [环境索引](docs/environments.md)：按产品和 CVE/GHSA 浏览环境
+- [环境注册表](environments.toml)：机器可读的环境清单
+- [复现工作流](docs/reproduction-workflow.md)：构建、运行和验收步骤
+- [环境执行协议](docs/environment-contract.md)：输入、隔离、证据和状态约定
+- [贡献指南](CONTRIBUTING.md)：新增或修改环境的要求
+- [漏洞图解契约](docs/diagram-contract.md)：机制图字段和校验规则
+- [设计决策](docs/adr/)：工具链和仓库行为的记录
 
-已发布镜像（如有）只是省去构建的便利路径，不是复现的前提；见 [ADR-0004](docs/adr/0004-reproducible-immutable-images.md)。完整验收流程见[复现与图解工作流](docs/reproduction-workflow.md)。
+## 贡献
 
-## 环境
+请先阅读[贡献指南](CONTRIBUTING.md)，再创建环境或提交修复。环境应保留上游来源、版本、许可证信息和固定哈希，并提供可独立检查的复现证据。
 
-- [环境索引](docs/environments.md)：按产品和 CVE/GHSA 浏览全部环境
-- [原始环境注册表](environments.toml)：机器可读的唯一索引
-- [漏洞环境目录](environments/)：每个环境的配方、PoC、验证器和 fixtures
+提交前运行：
 
-## 文档
+```sh
+python3 -m runner check
+python3 -m runner lint
+python3 -m unittest discover -s tests -v
+```
 
-- [环境执行协议](docs/environment-contract.md)：输入固定、隔离、证据和状态定义
-- [新增环境](CONTRIBUTING.md)：收录、验收和提交要求
-- [漏洞图解契约](docs/diagram-contract.md)：机制图的来源和校验规则
-- [AgentSec 候选自动化流水线](docs/agentsec-reproduction-factory.md)：从 AgentSec 数据库抽取 `agent_unique` 候选，生成 staging 草稿、图解与六阶段验收编排
-- [Agent-PoC 评测设计](docs/adr/0019-agent-generated-poc-evaluation.md)：实验性 Agent 生成 PoC 流程
-- [安全能力基准对照](docs/agent-security-benchmarks.md)：CyberGym / SEC-bench / ExploitGym / ExploitBench 的任务、数据集与判定机制
-- [Agent/MCP 漏洞来源清单](docs/agent-vuln-sources.md)：可用的漏洞库、检索通路与策展清单盘点
-- [同类复现数据库对比](docs/reproducible-vuln-databases-comparison.md)：ARVO / CVE-Factory / 靶场等同类项目对比与差异分析
-- [设计决策](docs/adr/)：仓库工具链和验证规则的 ADR
+## 安全与许可
 
-## 安全边界
+漏洞环境应在隔离的、可丢弃的主机或虚拟机中运行。涉及宿主机文件、权限提升、网络访问或逃逸的案例，不要直接在日常工作站上执行。
 
-漏洞环境默认使用容器隔离，只允许受控的 synthetic 效果。涉及宿主逃逸、额外网络、权限或挂载的案例必须使用独立实验 VM，并在元数据中记录例外。不要在真实主机凭据或生产环境上运行 PoC。
-
-仓库当前尚未声明开源许可证。在许可证明确之前，不应默认将本仓库内容视为可自由再分发；各环境引用的上游源码和材料仍以其原始许可证为准。
-
-## 参与贡献
-
-欢迎提交新的环境、修复现有复现或改进工具链。请先阅读[贡献指南](CONTRIBUTING.md)和[环境执行协议](docs/environment-contract.md)，并保留上游来源、版本和许可证信息。
+本仓库目前没有项目级开源许可证。许可证明确前，不应默认复制、修改或再分发仓库内容；环境中引用的第三方源码和依赖仍受其各自许可证约束。
