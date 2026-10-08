@@ -1,6 +1,6 @@
 # 环境索引
 
-本页提供面向读者的环境列表；机器可读的唯一索引是 [`environments.toml`](../environments.toml)。当前共收录 276 个环境，全部为 `draft`；其中 275 个机制验收通过，1 个保留为 `not_run`。`passed` 只表示机制层结果，不代表环境已经 `ready`。本轮从 322 个 AgentSec 候选中纳入了 237 个已通过环境；另外 85 个仍保留在本机 staging，暂未纳入提交。
+本页提供面向读者的环境列表；机器可读的唯一索引是 [`environments.toml`](../environments.toml)。当前共收录 276 个环境，全部为 `draft`；其中 276 个机制验收通过，没有 `not_run` 环境。`passed` 只表示机制层结果，不代表环境已经 `ready`。本轮从 322 个 AgentSec 候选中纳入了 237 个已通过环境；另外 85 个仍保留在本机 staging，暂未纳入提交。
 
 | 环境 | 漏洞标识 | 机制状态 |
 | --- | --- | --- |
@@ -41,7 +41,7 @@
 | [praisonai](../environments/praisonai/CVE-2026-57129/) | `CVE-2026-57129` | `passed` |
 | [praisonai](../environments/praisonai/CVE-2026-61428/) | `CVE-2026-61428` | `passed` |
 | [praisonai](../environments/praisonai/CVE-2026-61439/) | `CVE-2026-61439` | `passed` |
-| [praisonai](../environments/praisonai/CVE-2026-61445/) | `CVE-2026-61445` | `not_run` |
+| [praisonai](../environments/praisonai/CVE-2026-61445/) | `CVE-2026-61445` | `passed` |
 | [vtcode](../environments/vtcode/GHSA-WQGW-CRR5-CR2P/) | `GHSA-WQGW-CRR5-CR2P` | `passed` |
 | [3de5f50d167a878f7530f57ed018d508](../environments/3de5f50d167a878f7530f57ed018d508/CVE-2026-19244/) | `CVE-2026-19244` | `passed` |
 | [agenticmail](../environments/agenticmail/CVE-2026-57495/) | `CVE-2026-57495` | `passed` |
