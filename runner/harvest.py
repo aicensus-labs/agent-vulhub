@@ -55,7 +55,11 @@ IDENTIFIER = re.compile(
     r"(?:CVE-[0-9]{4}-[0-9]{4,}|GHSA-[0-9A-Za-z]{4}-[0-9A-Za-z]{4}-[0-9A-Za-z]{4,})",
     re.I,
 )
-REPOSITORY = re.compile(r"github\.com/([^/\s]+)/([^/\s#?]+)", re.I)
+# Only ``github.com`` itself hosts project ``owner/repo`` paths. The negative
+# lookbehind excludes subdomains (``gist.github.com/<user>/<gist-id>``,
+# ``api.github.com/...``) and ``xxxgithub.com`` lookalikes, which would
+# otherwise be mistaken for project repositories.
+REPOSITORY = re.compile(r"(?<![\w.])github\.com/([^/\s]+)/([^/\s#?]+)", re.I)
 SLUG = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 
 
