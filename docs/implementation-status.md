@@ -1,5 +1,15 @@
 # 首版实现与验证记录
 
+## praisonai/CVE-2026-61445 本地修复对照（2026-10-08）
+
+- 官方 `v4.6.78` 归档的 `aicoder.py:177` 缺少一个右括号，导致原 patched 镜像无法导入。
+- 保持官方归档不变，新增独立且按 SHA-256 固定的 `praisonai-v4.6.78-aicoder-syntax-repair.patch`，
+  仅在 patched 构建中应用这一行语法修复；vulnerable 构建不应用。README 和 metadata
+  明确记录这是派生对照构建，不是官方重新发布的 `v4.6.78`。
+- 使用真实 AICoder 完成三轮四场景验收，12/12 case 通过；修正补丁 hunk 后再次构建并复验，当前证据归档在
+  `environments/praisonai/CVE-2026-61445/evidence/20261008T084307Z-a13ac036f815/report.json`。
+  机制状态由 `not_run` 更新为 `passed`，生命周期仍为 `draft`。
+
 ## claude-code-action/CVE-2026-47751 配方实现（2026-09-24）
 
 - 该环境原为 `not_run`，完成四场景三轮验收，**12/12 case 通过**（`results/claude-code-action/CVE-2026-47751/20260924T033418Z-0fcca1ebaaab/report.json`），状态转为 `passed`。**未通过环境从 2 个减为 1 个**。

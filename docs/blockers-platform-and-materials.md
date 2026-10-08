@@ -67,7 +67,7 @@ vendor 归档。
 `mcp-server-kubernetes` 与 `n8n` 引入 Node 22.14.0，11 个 Python 环境通过
 pip 25.1.1 wheel 自举安装。这些改动均已重建并完成四场景三轮重新验收。
 
-## praisonai/CVE-2026-61445（上游补丁版无法 import）
+## praisonai/CVE-2026-61445（已解除；历史 blocker 记录）
 
 固定的修复版 v4.6.78（tag `v4.6.78`，commit `393de394087e3badc79acfec490323bcc99638bd`）
 在 `src/praisonai/praisonai/ui/components/aicoder.py` 第 177 行有未闭合括号：
@@ -95,10 +95,14 @@ release tag，那是不够的）：该文件共有 11 个提交。v4.6.78 之前
 依赖也在固定树里**，但同一个未闭合括号让整个模块无法 import，两半一起不可达。另外
 `write_to_file` 自身始终没有校验，守卫在调用方，所以修复无法与那个编译不过的文件分离。
 
-修复它等于修改上游源码，`docs/environment-contract.md` 不允许；而且这里的改动会落在**被测函数
-本身**，而非脚手架，证据将取决于维护者对作者意图的判断，而不是已发布的产物。
-结论：该环境在找到可用的补丁对照前保持 `not_run`；若上游日后发布修好第 177 行的 4.6.x
-版本，应重新检查。
+原始判断认为必须等待官方重新发布可运行的 4.6.x。2026-10-08 经维护者确认后，环境改用
+独立、固定 SHA-256 的 `praisonai-v4.6.78-aicoder-syntax-repair.patch`：官方 v4.6.78
+归档保持不变，只有 patched 构建在镜像构建阶段应用这一行语法修复，漏洞版不应用。
+这是本仓库的派生对照构建，不是官方重新发布或逐字节相同的 v4.6.78。
+
+三轮四场景验收已通过 12/12 case；漏洞版攻击越界写入，patched 版攻击被真实 AICoder
+拒绝，两版 benign 均成功。报告归档于
+`environments/praisonai/CVE-2026-61445/evidence/20261008T084307Z-a13ac036f815/report.json`。
 
 ## ready 与 GHCR 发布（2026-09-24：凭据已解开，试点已 ready）
 
