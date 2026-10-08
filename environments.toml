@@ -157,8 +157,8 @@ id = "vtcode/GHSA-WQGW-CRR5-CR2P"
 path = "environments/vtcode/GHSA-WQGW-CRR5-CR2P"
 
 [[environments]]
-id = "3de5f50d167a878f7530f57ed018d508/CVE-2026-19244"
-path = "environments/3de5f50d167a878f7530f57ed018d508/CVE-2026-19244"
+id = "nanobot/CVE-2026-19244"
+path = "environments/nanobot/CVE-2026-19244"
 
 [[environments]]
 id = "agenticmail/CVE-2026-57495"
@@ -1103,3 +1103,343 @@ path = "environments/zed/CVE-2025-55012"
 [[environments]]
 id = "zed/CVE-2025-68433"
 path = "environments/zed/CVE-2025-68433"
+
+[[environments]]
+id = "91a7f955143099e1747424707dfad0f9/CVE-2026-10212"
+path = "environments/91a7f955143099e1747424707dfad0f9/CVE-2026-10212"
+
+[[environments]]
+id = "agno-up-to-and-including-2-5-8/CVE-2026-37003"
+path = "environments/agno-up-to-and-including-2-5-8/CVE-2026-37003"
+
+[[environments]]
+id = "ai-agent-automation/CVE-2026-54520"
+path = "environments/ai-agent-automation/CVE-2026-54520"
+
+[[environments]]
+id = "arbitrary-file-write-by-prompt-injection/CVE-2024-5827"
+path = "environments/arbitrary-file-write-by-prompt-injection/CVE-2024-5827"
+
+[[environments]]
+id = "claude-code/CVE-2025-54794"
+path = "environments/claude-code/CVE-2025-54794"
+
+[[environments]]
+id = "claude-code/CVE-2025-54795"
+path = "environments/claude-code/CVE-2025-54795"
+
+[[environments]]
+id = "claude-code/CVE-2025-55284"
+path = "environments/claude-code/CVE-2025-55284"
+
+[[environments]]
+id = "claude-code/CVE-2025-58764"
+path = "environments/claude-code/CVE-2025-58764"
+
+[[environments]]
+id = "claude-code/CVE-2025-59536"
+path = "environments/claude-code/CVE-2025-59536"
+
+[[environments]]
+id = "claude-code/CVE-2025-59829"
+path = "environments/claude-code/CVE-2025-59829"
+
+[[environments]]
+id = "claude-code/CVE-2025-65099"
+path = "environments/claude-code/CVE-2025-65099"
+
+[[environments]]
+id = "claude-code/CVE-2026-21852"
+path = "environments/claude-code/CVE-2026-21852"
+
+[[environments]]
+id = "claude-code/CVE-2026-24887"
+path = "environments/claude-code/CVE-2026-24887"
+
+[[environments]]
+id = "claude-code/CVE-2026-25722"
+path = "environments/claude-code/CVE-2026-25722"
+
+[[environments]]
+id = "claude-code/CVE-2026-25723"
+path = "environments/claude-code/CVE-2026-25723"
+
+[[environments]]
+id = "claude-code/CVE-2026-25724"
+path = "environments/claude-code/CVE-2026-25724"
+
+[[environments]]
+id = "claude-code/CVE-2026-25725"
+path = "environments/claude-code/CVE-2026-25725"
+
+[[environments]]
+id = "claude-code/CVE-2026-33068"
+path = "environments/claude-code/CVE-2026-33068"
+
+[[environments]]
+id = "claude-code/CVE-2026-39861"
+path = "environments/claude-code/CVE-2026-39861"
+
+[[environments]]
+id = "claude-code/CVE-2026-40068"
+path = "environments/claude-code/CVE-2026-40068"
+
+[[environments]]
+id = "claude-code/CVE-2026-54316"
+path = "environments/claude-code/CVE-2026-54316"
+
+[[environments]]
+id = "claude-code/CVE-2026-55607"
+path = "environments/claude-code/CVE-2026-55607"
+
+[[environments]]
+id = "context7/CVE-2026-75130"
+path = "environments/context7/CVE-2026-75130"
+
+[[environments]]
+id = "continue/CVE-2026-76072"
+path = "environments/continue/CVE-2026-76072"
+
+[[environments]]
+id = "copilot-cli/CVE-2026-29783"
+path = "environments/copilot-cli/CVE-2026-29783"
+
+[[environments]]
+id = "copilot-cli/CVE-2026-45033"
+path = "environments/copilot-cli/CVE-2026-45033"
+
+[[environments]]
+id = "cursor/CVE-2024-48919"
+path = "environments/cursor/CVE-2024-48919"
+
+[[environments]]
+id = "cursor/CVE-2025-49150"
+path = "environments/cursor/CVE-2025-49150"
+
+[[environments]]
+id = "cursor/CVE-2025-54130"
+path = "environments/cursor/CVE-2025-54130"
+
+[[environments]]
+id = "cursor/CVE-2025-54131"
+path = "environments/cursor/CVE-2025-54131"
+
+[[environments]]
+id = "cursor/CVE-2025-54132"
+path = "environments/cursor/CVE-2025-54132"
+
+[[environments]]
+id = "cursor/CVE-2025-54135"
+path = "environments/cursor/CVE-2025-54135"
+
+[[environments]]
+id = "cursor/CVE-2025-54136"
+path = "environments/cursor/CVE-2025-54136"
+
+[[environments]]
+id = "cursor/CVE-2025-59944"
+path = "environments/cursor/CVE-2025-59944"
+
+[[environments]]
+id = "cursor/CVE-2025-61589"
+path = "environments/cursor/CVE-2025-61589"
+
+[[environments]]
+id = "cursor/CVE-2025-61591"
+path = "environments/cursor/CVE-2025-61591"
+
+[[environments]]
+id = "cursor/CVE-2025-61592"
+path = "environments/cursor/CVE-2025-61592"
+
+[[environments]]
+id = "cursor/CVE-2025-61593"
+path = "environments/cursor/CVE-2025-61593"
+
+[[environments]]
+id = "cursor/CVE-2025-64106"
+path = "environments/cursor/CVE-2025-64106"
+
+[[environments]]
+id = "cursor/CVE-2025-64107"
+path = "environments/cursor/CVE-2025-64107"
+
+[[environments]]
+id = "cursor/CVE-2025-64109"
+path = "environments/cursor/CVE-2025-64109"
+
+[[environments]]
+id = "cursor/CVE-2025-64110"
+path = "environments/cursor/CVE-2025-64110"
+
+[[environments]]
+id = "cursor/CVE-2026-22708"
+path = "environments/cursor/CVE-2026-22708"
+
+[[environments]]
+id = "cursor/CVE-2026-26268"
+path = "environments/cursor/CVE-2026-26268"
+
+[[environments]]
+id = "cursor/CVE-2026-31854"
+path = "environments/cursor/CVE-2026-31854"
+
+[[environments]]
+id = "cursor/CVE-2026-48124"
+path = "environments/cursor/CVE-2026-48124"
+
+[[environments]]
+id = "cursor/CVE-2026-50548"
+path = "environments/cursor/CVE-2026-50548"
+
+[[environments]]
+id = "cursor/CVE-2026-50549"
+path = "environments/cursor/CVE-2026-50549"
+
+[[environments]]
+id = "cursor/CVE-2026-61613"
+path = "environments/cursor/CVE-2026-61613"
+
+[[environments]]
+id = "cursor/CVE-2026-73217"
+path = "environments/cursor/CVE-2026-73217"
+
+[[environments]]
+id = "cursor/CVE-2026-73218"
+path = "environments/cursor/CVE-2026-73218"
+
+[[environments]]
+id = "data-exfiltration-vulnerability-exists/CVE-2025-34072"
+path = "environments/data-exfiltration-vulnerability-exists/CVE-2025-34072"
+
+[[environments]]
+id = "ibm-financial-transaction-manager-ftm-for-redhat/CVE-2026-18875"
+path = "environments/ibm-financial-transaction-manager-ftm-for-redhat/CVE-2026-18875"
+
+[[environments]]
+id = "in-binary-husky-gpt-academic-version-3-83/CVE-2024-10950"
+path = "environments/in-binary-husky-gpt-academic-version-3-83/CVE-2024-10950"
+
+[[environments]]
+id = "in-splunk-mcp-server-app-versions-below-0-2-4/CVE-2025-20381"
+path = "environments/in-splunk-mcp-server-app-versions-below-0-2-4/CVE-2025-20381"
+
+[[environments]]
+id = "in-the-latest-version-of-vanna-ai-vanna/CVE-2024-5826"
+path = "environments/in-the-latest-version-of-vanna-ai-vanna/CVE-2024-5826"
+
+[[environments]]
+id = "in-the-manim-plugin-of-binary-husky-gpt-academic/CVE-2024-10954"
+path = "environments/in-the-manim-plugin-of-binary-husky-gpt-academic/CVE-2024-10954"
+
+[[environments]]
+id = "in-versions/CVE-2025-3579"
+path = "environments/in-versions/CVE-2025-3579"
+
+[[environments]]
+id = "issue/CVE-2024-7110"
+path = "environments/issue/CVE-2024-7110"
+
+[[environments]]
+id = "kysely/CVE-2026-33060"
+path = "environments/kysely/CVE-2026-33060"
+
+[[environments]]
+id = "langchain-chatchat-0-3-1/CVE-2026-30617"
+path = "environments/langchain-chatchat-0-3-1/CVE-2026-30617"
+
+[[environments]]
+id = "langchainjs/CVE-2024-7042"
+path = "environments/langchainjs/CVE-2024-7042"
+
+[[environments]]
+id = "llm-tool-calling-cves/CVE-2026-30304"
+path = "environments/llm-tool-calling-cves/CVE-2026-30304"
+
+[[environments]]
+id = "llm-tool-calling-cves/CVE-2026-30306"
+path = "environments/llm-tool-calling-cves/CVE-2026-30306"
+
+[[environments]]
+id = "llm-tool-calling-cves/CVE-2026-30307"
+path = "environments/llm-tool-calling-cves/CVE-2026-30307"
+
+[[environments]]
+id = "llm-tool-calling-cves/CVE-2026-30308"
+path = "environments/llm-tool-calling-cves/CVE-2026-30308"
+
+[[environments]]
+id = "llm-tool-calling-cves/CVE-2026-30310"
+path = "environments/llm-tool-calling-cves/CVE-2026-30310"
+
+[[environments]]
+id = "local-file-read-lfi-by-prompt-injection/CVE-2024-5753"
+path = "environments/local-file-read-lfi-by-prompt-injection/CVE-2024-5753"
+
+[[environments]]
+id = "local-file-read-lfi-by-prompt-injection/CVE-2024-8055"
+path = "environments/local-file-read-lfi-by-prompt-injection/CVE-2024-8055"
+
+[[environments]]
+id = "mem0/CVE-2026-31245"
+path = "environments/mem0/CVE-2026-31245"
+
+[[environments]]
+id = "memory-graph/CVE-2026-19285"
+path = "environments/memory-graph/CVE-2026-19285"
+
+[[environments]]
+id = "nexus-mcp/CVE-2026-94031"
+path = "environments/nexus-mcp/CVE-2026-94031"
+
+[[environments]]
+id = "nnunet/CVE-2026-44246"
+path = "environments/nnunet/CVE-2026-44246"
+
+[[environments]]
+id = "openai-codex-desktop-app-for-macos-rendered-remo/CVE-2026-14898"
+path = "environments/openai-codex-desktop-app-for-macos-rendered-remo/CVE-2026-14898"
+
+[[environments]]
+id = "oss/CVE-2026-65056"
+path = "environments/oss/CVE-2026-65056"
+
+[[environments]]
+id = "oss/CVE-2026-65698"
+path = "environments/oss/CVE-2026-65698"
+
+[[environments]]
+id = "path-traversal-vulnerability/CVE-2025-62353"
+path = "environments/path-traversal-vulnerability/CVE-2025-62353"
+
+[[environments]]
+id = "prompt-injection/CVE-2024-8099"
+path = "environments/prompt-injection/CVE-2024-8099"
+
+[[environments]]
+id = "prompt-injection-vulnerability/CVE-2026-30615"
+path = "environments/prompt-injection-vulnerability/CVE-2026-30615"
+
+[[environments]]
+id = "superagi/CVE-2024-21552"
+path = "environments/superagi/CVE-2024-21552"
+
+[[environments]]
+id = "vanna-library-uses-a-prompt-function-to-present/CVE-2024-5565"
+path = "environments/vanna-library-uses-a-prompt-function-to-present/CVE-2024-5565"
+
+[[environments]]
+id = "vllm/CVE-2026-54234"
+path = "environments/vllm/CVE-2026-54234"
+
+[[environments]]
+id = "vu-212479/CVE-2026-90999"
+path = "environments/vu-212479/CVE-2026-90999"
+
+[[environments]]
+id = "vulnerability/CVE-2026-37006"
+path = "environments/vulnerability/CVE-2026-37006"
+
+[[environments]]
+id = "warp/CVE-2026-48721"
+path = "environments/warp/CVE-2026-48721"

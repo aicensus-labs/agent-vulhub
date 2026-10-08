@@ -13,9 +13,9 @@ As of the current repository snapshot:
 
 | Item | Count |
 | --- | ---: |
-| Environments | 276 |
-| Mechanism checks passed | 275 |
-| Not run | 1 |
+| Environments | 361 |
+| Mechanism checks passed | 276 |
+| Not run | 85 |
 
 ## Environment Contents
 

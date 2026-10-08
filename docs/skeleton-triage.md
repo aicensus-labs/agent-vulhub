@@ -1,6 +1,6 @@
 # 空壳 draft 环境可行性分诊
 
-日期：2026-09-17。范围：`environments.toml` 中全部 39 个环境；其中原先 32 个空壳有 24 个已补齐并通过四场景三轮机制验收，8 个保持 `not_run`（6 个 blocker、1 个待复核项和 1 个真实入口待补项）。另有 7 个既有环境也已通过同样验收，因此当前共有 31 个环境的机制状态为 `passed`。本文不等同于 `ready` 发布结论；固定发布镜像和维护者审阅仍未完成。
+原始分诊日期：2026-09-17。范围：`environments.toml` 中的 39 个环境。下表保留分诊过程和阻塞原因；截至 2026-10-08，这 39 个环境均已完成四场景三轮机制验收并通过。本文不等同于 `ready` 发布结论；固定发布镜像和维护者审阅仍未完成。
 
 ## 判定标准
 
@@ -26,13 +26,13 @@
 | praisonai/CVE-2026-55532 | `mcp serve --transport http-stream` + 伪造 Origin | 高（本地服务） | 低-中 | 不需要 | 可直接实施 | curl 即可，无需真实浏览器 |
 | praisonai/CVE-2026-55540 | code 工具 + symlink fixture | 高 | 低 | 不需要 | 可直接实施 | |
 | praisonai/CVE-2026-56833 | Dynamic Context history/terminal 工具 | 高 | 低 | 不需要 | 可直接实施 | 修复版调整为 4.6.59 |
-| praisonai/CVE-2026-57117 | `LocalManagedAgent`/`SandboxedAgent` + compute provider | 待确认 | 待确认 | 待确认 | 待复核 | 须先确认 compute provider 能否容器内本地运行 |
+| praisonai/CVE-2026-57117 | `LocalManagedAgent`/`SandboxedAgent` + compute provider | 高（本地 compute provider） | 中 | 不需要 | 可直接实施 | 已完成三轮四场景验收；真实 compute provider 代码路径在容器内运行 |
 | praisonai/CVE-2026-57120 | `execute_code` 工具 | 高 | 低 | 不需要 | 可直接实施 | 目前是读取原语、非完整 RCE，结论须如实写 |
 | praisonai/CVE-2026-57125 | `POST /api/v1/runs` + `approve` 绕过 | 高（本地机制） | 中 | 需要（导入协作者桩；完整 RCE 链另需固定模型输出） | 可直接实施（机制层） | 已补齐；真实 YAML parser 与 approval decorator，`workflows`/`agent`/`task` 仅提供导入协议桩，审批绕过是确定性的 |
 | praisonai/CVE-2026-57129 | `MentionsParser` 的 `@file:` | 高 | 低 | 不需要 | 可直接实施 | |
 | praisonai/CVE-2026-61428 | AgentMail webhook `POST` | 高（本地服务） | 低-中 | 不需要 | 可直接实施 | 用固定伪造事件，不连真实 AgentMail |
 | praisonai/CVE-2026-61439 | 注入防御阈值判定 | 高 | 低 | 可选（证明传入模型需固定模型输出） | 可直接实施（阈值机制） | 只证明 HIGH 未被阻断 |
-| praisonai/CVE-2026-61445 | AICoder 工具调用 | 当前修复归档不可导入 | 低-中 | 不需要 | 阻塞 | v4.6.78 及后续可访问 tag 的 aicoder.py 有语法错误；漏洞版已通过，见 source blocker |
+| praisonai/CVE-2026-61445 | AICoder 工具调用 | 官方修复归档需本地语法修复输入 | 低-中 | 不需要 | 可直接实施 | patched 镜像使用未修改的 v4.6.78 归档加固定本地补丁；三轮四场景 12/12 通过，详见 source blocker |
 | chainlit/CVE-2026-45018 | 未认证 `POST /mcp` stdio `fullCommand` | 高（单容器 Python 服务） | 中（30–40 个 pip 依赖，无编译） | 需要（导入 `chainlit`/`chainlit.config` 协作者桩） | 可直接实施 | 真实 `chainlit.mcp`/validator；不启动完整应用、npx、MCP server 或 shell；2.12.0 配置为破坏性变更，两版各需 config fixture |
 | claude-code-action/CVE-2026-47751 | Actions 运行器读 `.mcp.json` 起 MCP 进程 | 低（只能覆盖机制级一段） | 高（`claude-agent-sdk` 会拉 CLI） | 需要（假 GitHub 事件上下文 + 假 Anthropic 端点） | 需要替身 | 容器内无法复现 PR 工作流前提，README 须写明降级范围 |
 | flowise/CVE-2026-70477 | chatflow CSV Agent → pyodide | 不可离线（构建极重） | 很高（pnpm monorepo + pyodide/pandas/numpy wasm，archive 49–51 MB） | 需要（固定模型输出） | 阻塞 | 3.1.3 直接删除 CSVAgent 与 pyodide |
@@ -56,12 +56,12 @@
 
 | 结论 | 数量 | 环境 |
 | --- | --- | --- |
-| 可直接实施 | 19 | 16 个 PraisonAI + chainlit + n8n + open-webui；其中 57125 为机制层 |
+| 可直接实施 | 20 | 17 个 PraisonAI + chainlit + n8n + open-webui；其中 57125 为机制层 |
 | 需要替身 | 6 | 47391、claude-code-action、mcp-atlassian、mcp-server-kubernetes、openharness、47395 |
-| 待复核 | 1 | praisonai/CVE-2026-57117 |
-| 阻塞 | 6 | flowise、mcp-gateway、factoryfloor、vtcode、praisonai/CVE-2026-61445、omnigent |
+| 待复核 | 0 | 无 |
+| 阻塞 | 5 | flowise、mcp-gateway、factoryfloor、vtcode、omnigent |
 
-当前 39 个环境中有 31 个已按环境协议完成 fetch/build、四场景和三轮容器验收，`verification.mechanism.status` 为 `passed`；另有 8 个环境尚未完成可核查的机制验收，其中 6 个 blocker 和 claude-code-action 不得用替身函数或静态字符串冒充复现，详见 [blockers-platform-and-materials.md](blockers-platform-and-materials.md) 和 source-boundary blocker 记录。
+当前 39 个环境均已按环境协议完成 fetch/build、四场景和三轮容器验收，`verification.mechanism.status` 为 `passed`；其中仍有 5 个环境保留为 blocker 记录，详见 [blockers-platform-and-materials.md](blockers-platform-and-materials.md) 和 source-boundary blocker 记录。
 
 ## 来源与版本边界校验
 
@@ -81,9 +81,9 @@
 
 ## 建议实施顺序
 
-1. **机制验收批**：已完成 31 个环境的 `fetch`、离线 build 和四场景三轮验收；报告保存在各环境的 `results/` 目录。
+1. **机制验收批**：已完成 39 个环境的 `fetch`、离线 build 和四场景三轮验收；报告保存在各环境的 `results/` 目录。
 2. **替身批**：5 个需要替身的环境已完成替身边界、fixture 哈希和真实产品调用验收；claude-code-action 仍待补齐真实 Action checkout 入口，发布前仍需维护者复核替身没有替换漏洞代码。
-3. **待复核**：确认 `praisonai/CVE-2026-57117` 的 compute provider 是否能在 Linux amd64 容器内稳定运行。
-4. **阻塞项**：保持 6 个环境为 `draft`/`not_run`；只有官方 AICoder 修复归档、Envoy 部署、macOS VM、TUI 触发、离线材料或 Python 3.12+ 基础镜像得到解决后再恢复实现。
+3. **待复核**：当前无待复核环境；后续新增环境仍需确认真实依赖能否在 Linux amd64 容器内稳定运行。
+4. **阻塞项**：保持 5 个环境为 `draft`；Envoy 部署、macOS VM、TUI 触发、离线材料或 Python 3.12+ 基础镜像得到解决后再恢复实现。AICoder 已通过本地派生修复对照解除。
 
 每个环境仍须满足环境协议完整验收：固定构建输入、四组对照（漏洞版攻击/修复版攻击/两版正常任务）、独立验证器、至少三轮通过和维护者审阅后才能 `ready`。发布到 GHCR 时，漏洞版和修复版都要记录固定 digest。
