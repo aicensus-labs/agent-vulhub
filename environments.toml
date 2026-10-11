@@ -1443,3 +1443,7 @@ path = "environments/vulnerability/CVE-2026-37006"
 [[environments]]
 id = "warp/CVE-2026-48721"
 path = "environments/warp/CVE-2026-48721"
+
+[[environments]]
+id = "astron-rpa/CVE-2026-108159"
+path = "environments/astron-rpa/CVE-2026-108159"
