@@ -266,6 +266,7 @@ class ExecutionTests(unittest.TestCase):
         self.metadata["verification"]["mechanism"].update(
             status="passed", evidence=["results/test-run/report.json"])
         adapter = self.metadata["verification"]["agent_poc"]
+        adapter["task_description"] = "Synthetic reviewed task description"
         adapter.update(adapter_status="accepted", verified_at="2099-01-01",
                        evidence=["evidence/adapter-review.json"], notes="Synthetic acceptance")
         original_description = adapter["task_description"]
