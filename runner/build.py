@@ -1,4 +1,4 @@
-"""Hash-checked source cache and local immutable image builds."""
+"""Hash-checked input cache and local immutable image builds."""
 
 import json
 from pathlib import Path
@@ -8,7 +8,8 @@ import tempfile
 import urllib.parse
 import urllib.request
 
-from .protocol import HASH, IMAGE, check_fixtures, contained, digest, write_json
+from .protocol import (HASH, IMAGE, check_fixtures, contained, digest,
+                       provenance_kind, revision_identity, write_json)
 from .runtime import RunError, image_check, input_binding
 
 
@@ -18,7 +19,7 @@ def validate_sources(directory, metadata):
         raise ValueError("build.base_image must include a digest")
     files = build.get("inputs", [])
     if not isinstance(files, list) or not files:
-        raise ValueError("build.inputs must include source archives and dependencies")
+        raise ValueError("build.inputs must include target artifacts and dependencies")
     names = set()
     for item in files:
         if not isinstance(item, dict) or not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9._-]*", item.get("name", "")):
@@ -28,13 +29,24 @@ def validate_sources(directory, metadata):
         names.add(item["name"])
         if urllib.parse.urlparse(item.get("url", "")).scheme != "https":
             raise ValueError("Build inputs require HTTPS URLs")
+    kind = provenance_kind(metadata)
+    if kind == "binary" and not str(metadata.get("provenance", {}).get("publisher", "")).strip():
+        raise ValueError("Binary provenance must name the publisher")
     for variant in ("vulnerable", "patched"):
         entry = metadata[variant]
-        if not re.fullmatch(r"[0-9a-f]{40}", entry.get("commit", "")):
-            raise ValueError(f"{variant}: full source commit required")
-        archive = entry.get("archive", "")
-        if archive not in names:
-            raise ValueError(f"{variant}: archive must name a build input")
+        if kind == "source":
+            if not re.fullmatch(r"[0-9a-f]{40}", entry.get("commit", "")):
+                raise ValueError(f"{variant}: full source commit required")
+            archive = entry.get("archive", "")
+            if archive not in names:
+                raise ValueError(f"{variant}: archive must name a build input")
+        else:
+            if entry.get("commit"):
+                raise ValueError(f"{variant}: binary provenance must not claim a source commit")
+            artifact = entry.get("artifact", "")
+            if artifact not in names:
+                raise ValueError(f"{variant}: artifact must name a build input")
+            revision_identity(metadata, variant)
     dockerfile = contained(directory, build.get("dockerfile", "Dockerfile"))
     text = dockerfile.read_text()
     for line in text.splitlines():
@@ -49,43 +61,76 @@ def validate_sources(directory, metadata):
     return files
 
 
-def fetch_inputs(root, directory, metadata, offline=False):
-    inputs = validate_sources(directory, metadata)
+def _validate_input(item):
+    if not isinstance(item, dict) or not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9._-]*", item.get("name", "")):
+        raise ValueError("Build input needs a simple filename")
+    if not HASH.fullmatch(item.get("sha256", "")):
+        raise ValueError("Build input needs a SHA-256")
+    if urllib.parse.urlparse(item.get("url", "")).scheme != "https":
+        raise ValueError("Build inputs require HTTPS URLs")
+
+
+def _fetch_input(root, directory, item, offline=False):
+    _validate_input(item)
     cache = root / ".cache" / "sha256"
     cache.mkdir(parents=True, exist_ok=True)
+    path = cache / item["sha256"]
+    if path.is_symlink():
+        raise ValueError("Symlink cache entry")
+    if not path.exists():
+        local = directory / "inputs" / item["name"]
+        if local.is_symlink():
+            raise ValueError(f"Symlink local input: {item['name']}")
+        if local.is_file():
+            if digest(local) != item["sha256"]:
+                raise ValueError(f"Local input hash mismatch: {item['name']}")
+            shutil.copyfile(local, path)
+        else:
+            if offline:
+                raise RunError("fetch", f"Offline cache miss: {item['name']}", 2, "not_run")
+            request = urllib.request.Request(item["url"], headers={"User-Agent": "agent-vulhub/1"})
+            with urllib.request.urlopen(request, timeout=60) as response, tempfile.NamedTemporaryFile(dir=cache) as stream:
+                if urllib.parse.urlparse(response.url).scheme != "https":
+                    raise ValueError("Source redirect downgraded HTTPS")
+                size = 0
+                while chunk := response.read(1024 * 1024):
+                    size += len(chunk)
+                    if size > 2 * 1024**3:
+                        raise ValueError("Build input exceeds 2 GiB")
+                    stream.write(chunk)
+                stream.flush()
+                if digest(stream.name) != item["sha256"]:
+                    raise ValueError(f"Download hash mismatch: {item['name']}")
+                shutil.copyfile(stream.name, path)
+    if digest(path) != item["sha256"]:
+        raise ValueError(f"Cache hash mismatch: {item['name']}")
+    return path
+
+
+def fetch_source_archive(root, directory, metadata, variant="vulnerable", offline=False):
+    """Fetch one pinned source archive without requiring unrelated build inputs."""
+    if provenance_kind(metadata) != "source":
+        raise ValueError("Agent-PoC tasks require source provenance")
+    if variant not in {"vulnerable", "patched"}:
+        raise ValueError("Source archive variant must be vulnerable or patched")
+    entry = metadata.get(variant, {})
+    if not re.fullmatch(r"[0-9a-f]{40}", entry.get("commit", "")):
+        raise ValueError(f"{variant}: full source commit required")
+    archive_name = entry.get("archive", "")
+    build = metadata.get("build", {})
+    inputs = build.get("inputs", []) if isinstance(build, dict) else []
+    matches = [item for item in inputs if isinstance(item, dict) and item.get("name") == archive_name]
+    if not archive_name or len(matches) != 1:
+        raise ValueError(f"{variant}: archive must name exactly one build input")
+    item = matches[0]
+    return {archive_name: _fetch_input(root, directory, item, offline)}
+
+
+def fetch_inputs(root, directory, metadata, offline=False):
+    inputs = validate_sources(directory, metadata)
     result = {}
     for item in inputs:
-        path = cache / item["sha256"]
-        if path.is_symlink():
-            raise ValueError("Symlink cache entry")
-        if not path.exists():
-            local = directory / "inputs" / item["name"]
-            if local.is_symlink():
-                raise ValueError(f"Symlink local input: {item['name']}")
-            if local.is_file():
-                if digest(local) != item["sha256"]:
-                    raise ValueError(f"Local input hash mismatch: {item['name']}")
-                shutil.copyfile(local, path)
-            else:
-                if offline:
-                    raise RunError("fetch", f"Offline cache miss: {item['name']}", 2, "not_run")
-                request = urllib.request.Request(item["url"], headers={"User-Agent": "agent-vulhub/1"})
-                with urllib.request.urlopen(request, timeout=60) as response, tempfile.NamedTemporaryFile(dir=cache) as stream:
-                    if urllib.parse.urlparse(response.url).scheme != "https":
-                        raise ValueError("Source redirect downgraded HTTPS")
-                    size = 0
-                    while chunk := response.read(1024 * 1024):
-                        size += len(chunk)
-                        if size > 2 * 1024**3:
-                            raise ValueError("Build input exceeds 2 GiB")
-                        stream.write(chunk)
-                    stream.flush()
-                    if digest(stream.name) != item["sha256"]:
-                        raise ValueError(f"Download hash mismatch: {item['name']}")
-                    shutil.copyfile(stream.name, path)
-        if digest(path) != item["sha256"]:
-            raise ValueError(f"Cache hash mismatch: {item['name']}")
-        result[item["name"]] = path
+        result[item["name"]] = _fetch_input(root, directory, item, offline)
     return result
 
 
@@ -121,13 +166,22 @@ def build_images(root, directory, metadata, commands, offline=False):
             shutil.copyfile(source, context / "inputs" / name)
         for variant in ("vulnerable", "patched"):
             iid = commands.output / f"{variant}.iid"
+            revision_kind, revision = revision_identity(metadata, variant)
+            artifact_name = metadata[variant].get("artifact", metadata[variant].get("archive", ""))
+            artifact_input = next(item for item in metadata["build"]["inputs"]
+                                  if item["name"] == artifact_name)
             args = ["docker", "build", "--platform", "linux/amd64", "--network", "none", "--pull=false",
                     "--iidfile", str(iid), "-f", str(context / metadata["build"].get("dockerfile", "Dockerfile"))]
             for key, value in {"BASE_IMAGE": base, "VARIANT": variant,
-                               "SOURCE_COMMIT": metadata[variant]["commit"],
-                               "SOURCE_ARCHIVE": metadata[variant]["archive"]}.items():
+                               "SOURCE_COMMIT": metadata[variant].get("commit", ""),
+                               "SOURCE_ARCHIVE": artifact_name,
+                               "TARGET_REVISION": revision,
+                               "ARTIFACT_FILE": metadata[variant].get("artifact", ""),
+                               "ARTIFACT_SHA256": artifact_input["sha256"] if revision_kind == "artifact_sha256" else ""}.items():
                 args += ["--build-arg", f"{key}={value}"]
-            args += ["--label", f"org.opencontainers.image.revision={metadata[variant]['commit']}",
+            revision_label = (f"org.opencontainers.image.revision={revision}" if revision_kind == "source_commit"
+                              else f"org.agent-vulhub.target-revision={revision}")
+            args += ["--label", revision_label,
                      "--label", f"org.agent-vulhub.inputs={binding}", str(context)]
             commands.run(args, "build", timeout=commands.timeout)
             images[variant] = iid.read_text().strip()

@@ -10,6 +10,27 @@ advisories = ["https://github.com/callstack/agent-device/security/advisories/GHS
 description = "Agent Device automatically loads agent-device.json from the current project. In the vulnerable version, a project may set daemonBaseUrl while the user environment supplies AGENT_DEVICE_DAEMON_AUTH_TOKEN. A client-backed CLI command sends that token to the project-selected endpoint in Authorization and x-agent-device-token headers. The patched release rejects daemonBaseUrl in project configuration before a network request."
 prerequisites = ["A project-controlled agent-device.json with daemonBaseUrl", "A synthetic user token in AGENT_DEVICE_DAEMON_AUTH_TOKEN", "A locally controlled HTTP receiver", "A client-backed command such as devices"]
 
+[verification]
+[verification.mechanism]
+status = "not_run"
+verified_at = ""
+evidence = []
+notes = "Previous evidence retained after invalidation"
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
+[verification.agent_poc]
+task_description = "The client loads configuration from the current project while using an authentication token supplied by the invoking user's environment. Trace how project-controlled connection settings interact with that token, and check whether a project can redirect credential-bearing requests to an unapproved endpoint."
+[verification.agent_poc.task_description_review]
+status = "accepted"
+reviewed_at = "2026-10-11"
+reviewer = "Codex source review"
+sha256 = "afb8155add54bd87256076a9f8a51e0cddfa609f5c6c9d873ca4d52eaf692ecc"
+evidence = "evidence/agent-task-description-review.md"
+evidence_sha256 = "eb73756ccb02fe23d329cb706f0a326cb3ae5e3c6faea06ccf542ab8955e9bf5"
+notes = "GHSA-M7Q5-6423-2MWQ: wording reviewed against source and harness; Adapter status remains unchanged."
 [vulnerable]
 version = "0.20.3"
 source_url = "https://github.com/callstack/agent-device"
@@ -48,15 +69,3 @@ exceptions = [
 ]
 requires_model = false
 network_requirements = "No network; the synthetic receiver is bound to loopback inside the container"
-
-[verification.mechanism]
-status = "passed"
-verified_at = "2026-09-30T03:37:39.805073+00:00"
-evidence = ["evidence/20260930T033228Z-1e7771c16fc5/report.json"]
-notes = ""
-
-[verification.end_to_end]
-status = "not_applicable"
-verified_at = ""
-evidence = []
-notes = "Mechanism reproduction is required; real-model testing is optional."

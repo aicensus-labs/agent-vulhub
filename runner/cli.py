@@ -1,4 +1,4 @@
-"""Register, build, reproduce, and review isolated CVE environments."""
+"""Register, build, reproduce, retain evidence, and review isolated CVE environments."""
 
 import argparse
 import json
@@ -83,6 +83,31 @@ def validate_metadata(data: dict, environment_id: str) -> None:
         raise RegistryError(
             f"{environment_id}: severity must be one of {sorted(SEVERITIES)}"
         )
+    provenance = data.get("provenance", {})
+    if not isinstance(provenance, dict) or provenance.get("kind", "source") not in {"source", "binary"}:
+        raise RegistryError(f"{environment_id}: provenance.kind must be source or binary")
+    provenance_kind = provenance.get("kind", "source")
+    if provenance_kind == "binary" and not str(provenance.get("publisher", "")).strip():
+        raise RegistryError(f"{environment_id}: binary provenance needs a publisher")
+    build_metadata = data.get("build", {})
+    inputs = build_metadata.get("inputs", []) if isinstance(build_metadata, dict) else []
+    if not isinstance(inputs, list):
+        inputs = []
+    if provenance_kind == "binary":
+        for variant in ("vulnerable", "patched"):
+            entry = data.get(variant, {})
+            if not isinstance(entry, dict):
+                raise RegistryError(f"{environment_id}: {variant} must be a table")
+            if entry.get("commit"):
+                raise RegistryError(f"{environment_id}: binary {variant} must not claim a source commit")
+            artifact = entry.get("artifact", "")
+            if artifact:
+                matches = [item for item in inputs if isinstance(item, dict) and item.get("name") == artifact]
+                if (len(matches) != 1 or not re.fullmatch(r"[0-9a-f]{64}",
+                                                          str(matches[0].get("sha256", "")))
+                        or not str(matches[0].get("url", "")).startswith("https://")):
+                    raise RegistryError(
+                        f"{environment_id}: binary {variant} artifact must name one HTTPS SHA-256-pinned build input")
     runtime = data.get("runtime", {})
     if not isinstance(runtime, dict) or runtime.get("harness", "python3") not in {"python3", "node"}:
         raise RegistryError(f"{environment_id}: runtime.harness must be python3 or node")
@@ -100,10 +125,32 @@ def validate_metadata(data: dict, environment_id: str) -> None:
     adapter = verification.get("agent_poc", {})
     if not isinstance(adapter, dict) or adapter.get("status", "not_run") not in STATUSES:
         raise RegistryError(f"{environment_id}: invalid verification.agent_poc.status")
+    if "task_description" in adapter and not isinstance(adapter["task_description"], str):
+        raise RegistryError(f"{environment_id}: verification.agent_poc.task_description must be a string")
+    if adapter.get("candidate_format", "command") not in {
+            "command", "mcp_tool_inputs", "mcp_path_inputs", "mcp_tool_plan_inputs",
+            "http_request_inputs"}:
+        raise RegistryError(f"{environment_id}: unsupported verification.agent_poc.candidate_format")
+    description_review = adapter.get("task_description_review")
+    if description_review is not None:
+        if not isinstance(description_review, dict) or description_review.get("status") not in {"not_run", "accepted"}:
+            raise RegistryError(f"{environment_id}: invalid task_description_review status")
+        if description_review.get("status") == "accepted":
+            required_review_fields = ("reviewed_at", "reviewer", "sha256", "evidence",
+                                     "evidence_sha256", "notes")
+            if any(not str(description_review.get(field, "")).strip() for field in required_review_fields):
+                raise RegistryError(f"{environment_id}: accepted task_description_review needs date, reviewer, hash, evidence and notes")
+            if not re.fullmatch(r"[0-9a-f]{64}", str(description_review.get("sha256", ""))):
+                raise RegistryError(f"{environment_id}: task_description_review.sha256 must be a SHA-256")
+            if not re.fullmatch(r"[0-9a-f]{64}", str(description_review.get("evidence_sha256", ""))):
+                raise RegistryError(f"{environment_id}: task_description_review.evidence_sha256 must be a SHA-256")
     if adapter.get("adapter_status", "not_run") not in {"not_run", "accepted"}:
         raise RegistryError(f"{environment_id}: invalid verification.agent_poc.adapter_status")
     if adapter.get("adapter_status") == "accepted" and not (adapter.get("verified_at") and adapter.get("evidence") and adapter.get("notes")):
         raise RegistryError(f"{environment_id}: accepted Agent-PoC Adapter needs date, evidence and notes")
+    if (adapter.get("adapter_status") == "accepted" and
+            not re.fullmatch(r"[0-9a-f]{64}", str(adapter.get("task_sha256", "")))):
+        raise RegistryError(f"{environment_id}: accepted Agent-PoC Adapter needs a Level 1 task SHA-256")
     if data["lifecycle"] == "ready":
         if not data.get("advisories") or not data.get("title") or str(data["title"]).startswith("TODO"):
             raise RegistryError(f"{environment_id}: ready environment needs title and advisories")
@@ -121,8 +168,16 @@ def validate_metadata(data: dict, environment_id: str) -> None:
             version = data.get(variant, {})
             if not isinstance(version, dict) or not version.get("version") or not version.get("source_url"):
                 raise RegistryError(f"{environment_id}: {variant} needs version and source_url")
-            if not COMMIT.fullmatch(str(version.get("commit", ""))):
-                raise RegistryError(f"{environment_id}: {variant} needs a pinned commit")
+            if provenance_kind == "source":
+                if not COMMIT.fullmatch(str(version.get("commit", ""))):
+                    raise RegistryError(f"{environment_id}: {variant} needs a pinned commit")
+            else:
+                artifact = version.get("artifact", "")
+                matches = [item for item in inputs if isinstance(item, dict) and item.get("name") == artifact]
+                if (not artifact or len(matches) != 1
+                        or not re.fullmatch(r"[0-9a-f]{64}", str(matches[0].get("sha256", "")))
+                        or not str(matches[0].get("url", "")).startswith("https://")):
+                    raise RegistryError(f"{environment_id}: {variant} needs an HTTPS SHA-256-pinned artifact")
             image = str(version.get("image", "")).strip()
             if image and not IMAGE.fullmatch(image):
                 raise RegistryError(f"{environment_id}: {variant} image must be an immutable digest reference")
@@ -242,6 +297,19 @@ def check(root: Path) -> list[dict]:
             raise RegistryError(f"{entry['id']}: {error}") from error
         ready_check(root, directory, data)
         check_evidence(root, directory, data)
+        description_review = data.get("verification", {}).get("agent_poc", {}).get("task_description_review", {})
+        if description_review.get("status") == "accepted":
+            from .agent_poc import AgentPocError, validate_task_description_review
+            try:
+                validate_task_description_review(directory, data)
+            except AgentPocError as error:
+                raise RegistryError(f"{entry['id']}: {error}") from error
+        if data.get("verification", {}).get("agent_poc", {}).get("adapter_status") == "accepted":
+            from .agent_poc import AgentPocError, validate_adapter_admission
+            try:
+                validate_adapter_admission(root, directory, data)
+            except AgentPocError as error:
+                raise RegistryError(f"{entry['id']}: {error}") from error
         _check_research_results(root, entry["id"])
     for path in (root / "environments").glob("*/*/metadata.toml"):
         if path.parent.relative_to(root).as_posix() not in indexed:
@@ -360,28 +428,38 @@ def main(argv: list[str] | None = None) -> int:
     diagram_command.add_argument("--all", action="store_true", dest="every", help="Render every environment that has diagram.toml")
     diagram_command.add_argument("--check", action="store_true", help="Report drift without writing")
     diagram_command.add_argument("--missing", action="store_true", help="List environments without diagram.toml")
-    for name in ("fetch", "build", "reproduce", "agent-evaluate", "promote", "publish"):
+    manifest_command = commands.add_parser(
+        "agent-manifest", help="Write the fingerprint-bound manifest of admitted Agent-PoC samples")
+    manifest_command.add_argument("--output", type=Path, required=True)
+    for name in ("fetch", "build", "reproduce", "agent-evaluate", "agent-control",
+                 "archive", "agent-control-archive", "promote", "publish"):
         command = commands.add_parser(name)
         command.add_argument("environment")
-        if name in {"fetch", "build", "reproduce", "agent-evaluate"}:
+        if name in {"fetch", "build", "reproduce", "agent-evaluate", "agent-control"}:
             command.add_argument("--offline", action="store_true")
-        if name in {"build", "reproduce", "agent-evaluate", "publish"}:
+        if name in {"build", "reproduce", "agent-evaluate", "agent-control", "publish"}:
             command.add_argument("--timeout", type=positive_int, default=300)
-        if name in {"reproduce", "agent-evaluate"}:
+        if name in {"reproduce", "agent-evaluate", "agent-control"}:
             source = command.add_mutually_exclusive_group()
             source.add_argument("--build", action="store_true", help="Build pinned source locally before execution")
             source.add_argument("--images", help="Use a local build.json manifest")
-            command.add_argument("--rounds", type=positive_int, default=1)
+            command.add_argument("--rounds", type=positive_int, default=3 if name == "agent-control" else 1)
             command.add_argument("--keep-on-failure", action="store_true")
             command.add_argument("--allow-exceptions", action="store_true", help="Apply only explicitly documented isolation exceptions")
             if name == "reproduce":
                 command.add_argument("--scenario", choices=("all", "vulnerable", "patched", "benign"), default="all")
-        if name == "agent-evaluate":
+        if name in {"agent-evaluate", "agent-control"}:
             command.add_argument("--task-dir", required=True)
             command.add_argument("--candidate", required=True)
             command.add_argument("--agent-meta", help="JSON provenance for the Agent/model/toolchain (no secrets)")
-        if name == "promote":
+        if name == "agent-control":
+            command.add_argument("--role", choices=("positive", "negative"), required=True)
+        if name in {"archive", "promote"}:
             command.add_argument("--report", required=True)
+        if name == "agent-control-archive":
+            command.add_argument("--task-dir", required=True)
+            command.add_argument("--report", required=True)
+        if name == "promote":
             command.add_argument("--reviewer", action="append", required=True)
             command.add_argument("--reviewed", action="store_true", required=True,
                                  help="Attest that evidence, source, safety and redaction were reviewed")
@@ -390,6 +468,14 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--repository", required=True, help="ghcr.io/owner/package")
     args = parser.parse_args(argv)
     try:
+        if args.command == "agent-manifest":
+            entries = check(ROOT)
+            from .dataset import build_agent_manifest
+            from .protocol import write_json
+            manifest = build_agent_manifest(ROOT, entries)
+            write_json(args.output, manifest)
+            print(f"Agent-PoC manifest: {args.output} ({manifest['sample_count']} sample(s))")
+            return 0
         if args.command == "batch":
             from . import batch as batch_module
             if args.action == "queue":
@@ -551,7 +637,7 @@ def main(argv: list[str] | None = None) -> int:
             for entry in load_registry(ROOT):
                 directory = ROOT / entry["path"]
                 if refresh(ROOT, directory, read_toml(directory / "metadata.toml")):
-                    print(f"Downgraded: {entry['id']}")
+                    print(f"Invalidated stale verification: {entry['id']}")
             return 0
         if args.command == "lint":
             from .runtime import Commands, inspect_config
@@ -589,10 +675,11 @@ def main(argv: list[str] | None = None) -> int:
             outcome = prune(args.repository, apply_changes=args.apply, timeout=args.timeout)
             print(json.dumps(outcome, indent=2))
             return 0
-        if args.command in {"fetch", "build", "reproduce", "agent-evaluate", "promote", "publish"}:
-            from .runtime import Commands, agent_evaluate, preflight, reproduce, utc
+        if args.command in {"fetch", "build", "reproduce", "agent-evaluate", "agent-control",
+                            "archive", "agent-control-archive", "promote", "publish"}:
+            from .runtime import Commands, agent_control, agent_evaluate, preflight, reproduce, utc
             from .build import build_images, fetch_inputs
-            from .lifecycle import promote, refresh
+            from .lifecycle import archive_draft, promote, refresh
             from .protocol import write_json
             import uuid
             split_id(args.environment)
@@ -605,6 +692,8 @@ def main(argv: list[str] | None = None) -> int:
             validate_metadata(data, args.environment)
             if args.command == "agent-evaluate":
                 return agent_evaluate(ROOT, directory, data, args)
+            if args.command == "agent-control":
+                return agent_control(ROOT, directory, data, args)
             if args.command == "reproduce":
                 return reproduce(ROOT, directory, data, args)
             if args.command == "fetch":
@@ -621,6 +710,18 @@ def main(argv: list[str] | None = None) -> int:
                     write_json(output / "failure.json", {"phase": "build", "actual": str(error), "time": utc()})
                     raise
                 print(output / "build.json")
+            elif args.command == "archive":
+                if data.get("lifecycle") != "draft":
+                    raise RegistryError("runner archive only retains evidence for draft environments")
+                from .build import validate_sources
+                validate_sources(directory, data)
+                print(f"Evidence archived; lifecycle remains draft: "
+                      f"{archive_draft(ROOT, directory, data, args.report)}")
+            elif args.command == "agent-control-archive":
+                from .agent_poc import archive_adapter_control
+                archived = archive_adapter_control(
+                    ROOT, directory, data, Path(args.report), Path(args.task_dir))
+                print(f"Adapter control evidence archived: {archived.relative_to(directory)}")
             elif args.command == "publish":
                 from .publish import publish
                 output = ROOT / "results" / args.environment / ("publish-" + uuid.uuid4().hex[:12])
@@ -652,7 +753,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     except (OSError, ValueError, KeyError, TypeError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
-        return 2 if args.command in {"fetch", "build", "reproduce", "agent-task", "agent-evaluate", "promote", "publish"} else 1
+        return 2 if args.command in {"fetch", "build", "reproduce", "agent-task", "agent-evaluate",
+                                    "agent-control", "archive", "agent-control-archive", "promote",
+                                    "agent-manifest", "publish"} else 1
     except Exception as error:
         from .runtime import RunError
         if not isinstance(error, RunError):

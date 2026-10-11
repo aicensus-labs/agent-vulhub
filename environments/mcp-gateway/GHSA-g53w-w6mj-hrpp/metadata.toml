@@ -10,6 +10,17 @@ advisories = ["https://github.com/Kuadrant/mcp-gateway/security/advisories/GHSA-
 description = "An unauthenticated router initialize path trusts the mcp-init-host header after only a shared router-key check. It can bypass the gateway JWT session validator and rewrite the upstream :authority header, forwarding requests to registered backends without the broker's signed capability filter."
 prerequisites = ["Pinned MCP Gateway 0.6.0 source", "Pinned MCP Gateway 0.7.0 source", "Access to the unauthenticated router hair-pin path"]
 
+[verification]
+[verification.mechanism]
+status = "not_run"
+verified_at = ""
+evidence = []
+notes = "Previous evidence retained after invalidation"
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
 [vulnerable]
 version = "0.6.0"
 source_url = "https://github.com/Kuadrant/mcp-gateway/tree/9799d0a704862455f3ba22721bd097242fd8fdf3"
@@ -45,15 +56,3 @@ harness = "python3"
 exceptions = []
 requires_model = false
 network_requirements = "No network is used by this draft; source archives are fetched by the runner before container execution"
-
-[verification.mechanism]
-status = "passed"
-verified_at = "2026-09-30T03:54:20.618120+00:00"
-evidence = ["evidence/20260930T034900Z-65f53faf88c1/report.json"]
-notes = ""
-
-[verification.end_to_end]
-status = "not_applicable"
-verified_at = ""
-evidence = []
-notes = "Mechanism reproduction is required; real-model testing is optional."

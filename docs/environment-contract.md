@@ -1,16 +1,20 @@
 # 环境与执行协议 v1
 
-已确认设计的执行规范。当前索引包含 39 个真实上游源码环境，均为 `draft`；模板和合成工具测试不代表漏洞已复现。`mechanism` 层和 Agent-PoC 任务/候选编排命令已经实现，但尚无环境完成 Agent-PoC Adapter 的验收；因此 Agent-PoC runner 的执行结果不能替代机制验收。
+已确认设计的执行规范。源码环境、闭源发布物环境、模板和合成工具测试必须区分；模板和工具测试不代表漏洞已复现。`mechanism` 层和 Agent-PoC 任务/候选编排命令已经实现，但尚无环境完成 Agent-PoC Adapter 的验收；因此 Agent-PoC runner 的执行结果不能替代机制验收。
 
 ## 固定源码与构建
 
-环境 ID 为 `<product>/<CVE-ID>` 或 `<product>/<GHSA-ID>`，目录和索引沿用原布局。两个变体分别记录完整上游 commit、版本、源码 URL、`archive`（build.inputs 的名称）和已发布镜像 digest。完整安装上游版本，允许直接调用内部函数，不能抽取或重写漏洞函数代替产品。
+环境 ID 为 `<product>/<CVE-ID>` 或 `<product>/<GHSA-ID>`，目录和索引沿用原布局。默认 `provenance.kind = "source"`：两个变体记录完整上游 commit、版本、源码 URL、`archive`（build.inputs 的名称）和已发布镜像 digest。完整安装上游版本，允许直接调用内部函数，不能抽取或重写漏洞函数代替产品。
 
-`build.base_image` 固定 digest；`build.inputs` 每项包含简单文件名 `name`、HTTPS `url`、`sha256`。源码归档、语言依赖和系统软件包通过清单校验，缓存到 `.cache/sha256/`。构建器把它们放进临时上下文 `inputs/`，Docker build 使用 `--network none`，配方必须离线安装。`--offline` 还禁止下载和拉取，缺缓存明确失败；基础镜像也必须已缓存。
+闭源产品可声明 `provenance.kind = "binary"`，复现对象是厂商发布物，不声称源码级复现。`[provenance]` 必须记录 `publisher`；两个变体记录版本、厂商发布来源 URL 和 `artifact`（build.inputs 中的文件名），不得填写不可访问或虚构的源码 commit。每个产物和运行依赖都要由 HTTPS URL 与 SHA-256 固定；有厂商签名/attestation 时，配方还应验证它。构建镜像的 target identity 是 `sha256:<artifact hash>`，会写入 `org.agent-vulhub.target-revision` 标签并进入每条结果报告。
 
-Dockerfile 使用 `ARG BASE_IMAGE`、`FROM ${BASE_IMAGE}`，接收 `VARIANT`、`SOURCE_COMMIT`、`SOURCE_ARCHIVE`。首版配方使用同一固定基础镜像，拒绝 ADD 和匿名 VOLUME；依赖是否完整、安装是否忠于上游仍由维护者审阅。构建器写入 revision 和实验输入指纹 label，运行前核对。
+二进制配方仍使用固定 base image 和禁网构建。runner 把 `ARTIFACT_FILE`、`ARTIFACT_SHA256`、`TARGET_REVISION` 作为 build args 传给配方；配方负责按产品格式安装发布物并保留真实产品路径。机制 PoC 可直接调用发布包内部入口，但不能复制/重写判定逻辑。`agent-task` 与 `agent-evaluate` 只支持源码 provenance；二进制闭源对象保留在复现环境，不纳入源码型 Agent-PoC 成绩。只有云端当前服务、拿不到固定漏洞版/修复版发布物时，不能建立可复核的本地对照，应记录阻塞并保持 `not_run`。
 
-GHCR 正式镜像用 `image@sha256:...`；本地源码构建用 Docker 返回的不可变 image ID `sha256:...`，保存在 build.json。未发布镜像的环境可以留空 `image`，其复现性由固定源码、构建输入哈希、基础镜像 digest 和验收证据保证。若发布镜像，漏洞版和修复版都必须填写固定的可分发镜像 digest。这与 ADR-0004 一致；本地 image ID 不冒充仓库摘要，相同输入也不承诺逐字节相同产物。
+`build.base_image` 固定 digest；`build.inputs` 每项包含简单文件名 `name`、HTTPS `url`、`sha256`。源码归档或二进制发布物、语言依赖和系统软件包通过清单校验，缓存到 `.cache/sha256/`。构建器把它们放进临时上下文 `inputs/`，Docker build 使用 `--network none`，配方必须离线安装。`--offline` 还禁止下载和拉取，缺缓存明确失败；基础镜像也必须已缓存。
+
+Dockerfile 使用 `ARG BASE_IMAGE`、`FROM ${BASE_IMAGE}`，源码配方接收 `VARIANT`、`SOURCE_COMMIT`、`SOURCE_ARCHIVE`；二进制配方另接收 `ARTIFACT_FILE`、`ARTIFACT_SHA256`、`TARGET_REVISION`。首版配方使用同一固定基础镜像，拒绝 ADD 和匿名 VOLUME；依赖是否完整、安装是否忠于上游仍由维护者审阅。构建器写入 target revision 和实验输入指纹 label，运行前核对。当前执行 runner 仅支持原生 Linux amd64；需要 macOS、Windows、GUI 或系统级集成的闭源产品，在对应原生 runner 支持前保持 `not_run`，不能用 Linux 客户端替代其平台机制。
+
+GHCR 正式镜像用 `image@sha256:...`；本地构建用 Docker 返回的不可变 image ID `sha256:...`，保存在 build.json。未发布镜像的环境可以留空 `image`，其复现性由固定源码或发布物、构建输入哈希、基础镜像 digest 和验收证据保证。若发布镜像，漏洞版和修复版都必须填写固定的可分发镜像 digest。这与 ADR-0004 一致；本地 image ID 不冒充仓库摘要，相同输入也不承诺逐字节相同产物。
 
 ## 标准入口
 
@@ -36,11 +40,11 @@ python3 -m runner promote <product>/<CVE-ID> --report <report.json> --reviewer <
 python3 -m runner refresh
 ```
 
-默认 reproduce 使用元数据镜像，`--build` 选择完整源码构建；两条路径均受支持。`--scenario vulnerable|patched|benign` 用于局部调试，局部通过不满足晋升。`--timeout` 为单测试执行总期限（秒），构建、拉取另有命令超时，清理独立限时。下载设 socket 超时和 2 GiB 单文件上限，无自动重试。
+默认 reproduce 使用元数据镜像，`--build` 按 provenance 构建源码或闭源发布物；两条路径均受支持。`--scenario vulnerable|patched|benign` 用于局部调试，局部通过不满足晋升。`--timeout` 为单测试执行总期限（秒），构建、拉取另有命令超时，清理独立限时。下载设 socket 超时和 2 GiB 单文件上限，无自动重试。
 
 check 纯文件静态校验，不调用 Docker；lint 使用 Compose CLI 的 JSON 解析，不拉取、不构建、不运行环境。draft 模板可保留占位字段，不得宣称通过。
 
-除字段与文件校验外，`check` 还会核对 `verification.mechanism.status = "passed"` 的环境所引用的证据：每条 evidence 必须存在、必须属于本环境，且其 `fingerprint` 必须与当前工作树一致，否则报 `stale for the current inputs`。这是纯 JSON 比对（不启动容器、不执行 PoC），目的是让失效证据在 `check` 阶段就暴露，而不是等到 `promote` 才被拒绝——此前 `ready_check` 只检查已经是 `ready` 的环境，draft 可以长期携带过期证据继续声称通过。注意 evidence 路径记录为**相对仓库根**，与 fixtures、Dockerfile 的相对环境目录不同。
+除字段与文件校验外，`check` 还会核对 `verification.mechanism.status = "passed"` 的环境所引用的证据：每条 evidence 必须存在、必须属于本环境，且其 `fingerprint` 必须与当前工作树一致，否则报 `stale for the current inputs`。对标记 Adapter `accepted` 的环境，`check` 和 `agent-evaluate` 还会静态核验当前机制矩阵、三轮正负 Adapter 控制、环境与 runner 指纹、审阅日期及控制报告哈希；失效或不完整时不得运行候选。以上检查只读文件，不启动容器或执行 PoC。注意 evidence 路径记录为**相对环境目录**。
 
 ## 漏洞图解
 
@@ -68,25 +72,44 @@ python3 -m runner diagram --missing                     # 列出还没有图解�
 默认 Level 1 任务包由统一 task packager 生成，只公开：
 
 - vulnerable 版本的完整源码树，以及构建/运行所需的公开材料；
-- agent-facing 漏洞描述；
+- 单独审阅的 `verification.agent_poc.task_description`；
 - 环境显式声明为公开的 fixture 和候选提交 manifest；
 - 环境 Adapter 提供的稳定目标接口说明。
 
 patched 源码、patched 镜像、patch diff、reference PoC、`verify.py`、预期 verdict、隐藏 fixture 和内部 canary 逻辑必须留在评测器一侧。Level 0/2/3 的可见材料遵循 ADR-0019 的难度定义；任务包必须记录可见文件清单和哈希，防止生成过程中的隐式泄漏。
 
+### Agent 提示等级
+
+按 [ADR-0021](adr/0021-agent-facing-prompt-levels.md) 区分测评目标：
+
+- **Level 0：源码发现。** 只给 vulnerable 源码、通用目标范围和候选提交约定，不给漏洞描述。Agent 需要从源码中发现问题并构造 PoC。
+- **Level 1：描述辅助复现。** 给相同源码和候选约定，另加单独审阅的 `verification.agent_poc.task_description`。可说明近似位置、漏洞类型、根因线索、必要输入约束和高层影响；它测的是根据线索复现，不是自主发现。
+
+Level 1 描述的审阅记录保存在 `verification.agent_poc.task_description_review`，至少绑定 `status = "accepted"`、审阅日期、审阅者、描述文件 SHA-256、审阅材料路径及其 SHA-256 和说明。`agent-task`、`agent-control` 与 `agent-evaluate` 都拒绝缺失或过期的审阅；描述改动后必须重新审阅。
+
+任务 README 只说明目标和候选接口，不写实例专属的目标文件名、生成 fixture 路径或触发序列。任务描述和公开 manifest 不得直接给出最终候选输入、CVE/GHSA 编号、advisory URL、上游 commit、canary 或评分器预期 verdict。任务包自身不得暴露 `environment_id` 或源码 commit；任务哈希继续绑定可见文件和候选格式。公开源码本身仍可能让 Agent 推断出产品或漏洞身份，这不是 task packager 能保证消除的信息。
+
+如果候选接口隐藏了 Agent 生成有效 PoC 所需的目标值，Adapter 必须提供可探索的接口；否则该样本先留在试点结果中，不能进入 Level 0/1 正式成绩。Level 0 与 Level 1 的分数、任务哈希和模型 provenance 分开记录。
+
 源码归档可以按 commit 和 SHA-256 在多个环境之间复用，但漏洞描述、修复对照、fixture 和任务身份不可混淆。任务校验必须把任务中的 vulnerable 源码树与评测器一侧按 metadata 哈希校验过的 vulnerable 归档对照，不能只相信任务目录自行重算的 manifest。patched 源码或不可变 patched 镜像是候选评测的必需隐藏输入；Level 1 不得发给 Agent。
 
 ### 候选接口与四场景
 
-候选目录必须包含版本化 manifest 和声明的入口。runner 拒绝绝对路径、`..`、符号链接、越界文件和超出大小/时间限制的候选，并在四场景开始前冻结一份只读快照；每个场景把同一快照复制到一次性的 sibling candidate container 的 `/candidate`。候选容器只共享目标容器的网络命名空间和受控 `/lab/results` volume，任务包和宿主文件不会挂载给候选。产品源码、fixtures 和评测器路径对候选用户不可写；候选的约定输出接口是本轮受控结果目录，临时目录中的内容不属于证据。Level 1 的隐藏边界针对任务包和提交前 Agent；候选进程运行在选定的产品镜像内，可能读取该镜像的产品运行时内容，因此候选执行不是对抗性代码的保密沙箱。候选通过 `/lab/results/agent-context.json` 或 `AVH_AGENT_CONTEXT` 获取公开上下文，其中不含 `variant`；私有 `context.json` 只在候选完成后由 runner 注入验证阶段。runner 不向候选公开评测器路径。
+候选目录必须包含版本化 manifest 和声明的入口。runner 拒绝绝对路径、`..`、符号链接、越界文件和超出大小/时间限制的候选，并在四场景开始前冻结一份只读快照；每个场景把同一快照复制到一次性的 sibling candidate container 的 `/candidate`。候选容器只共享目标容器的网络命名空间，并在独立的 16 MiB 临时 `/lab/results` 文件系统中写输出；候选不能直接读写目标结果 volume、任务包或宿主文件。候选退出后，runner 忽略候选自带的 facts、verdict 和 context，拒绝符号链接、超过 8 MiB、4096 个条目或 32 层目录的输出，再把原始候选文件复制到验证器专用的 `candidate-output/` 并重建 facts。CPU、内存、进程数和执行时间均有限制。产品源码、fixtures 和评测器路径对候选用户不可写；临时目录中的内容不属于证据。Level 1 的隐藏边界针对任务包和提交前 Agent；候选进程运行在选定的产品镜像内，可能读取该镜像的产品运行时内容，因此候选执行不是对抗性代码的保密沙箱。候选通过 `/lab/results/agent-context.json` 或 `AVH_AGENT_CONTEXT` 获取公开上下文，其中不含 `variant`；私有 `context.json` 只在候选完成后由 runner 注入验证阶段。runner 不向候选公开评测器路径。
 
-候选执行前 runner 会移除候选镜像中的 `/inputs` 和 `/lab` 顶层评测脚本，并把评测目录设为候选用户不可写；候选结束后强制删除候选容器及其派生进程，再收集结果。验证器使用同一不可变产品镜像启动独立的 `--network none --rm` 容器，只通过受控结果 volume 读写证据，不从候选容器或宿主可写路径加载脚本。该处理避免常规镜像布局意外泄漏修复归档或验证脚本，但候选执行仍不是对恶意候选的密码学保密沙箱；不能把 Agent-PoC runner 当作安全沙箱。
+候选执行前 runner 会移除候选镜像中的 `/inputs` 和 `/lab` 顶层评测脚本，并把评测目录设为候选用户不可写；候选结束后强制删除候选容器及其派生进程，再收集结果。验证器使用同一不可变产品镜像启动独立的 `--network none --rm` 容器，只通过目标结果 volume 读取产品证据和 runner 重建的 facts；候选文件位于 `candidate-output/`，按不可信输入处理。验证器不从候选容器或宿主可写路径加载脚本。该处理避免常规镜像布局意外泄漏修复归档或验证脚本，但候选执行仍不是对恶意候选的密码学保密沙箱；不能把 Agent-PoC runner 当作安全沙箱。
 
 同一个候选 artifact 和同一组公开输入分别执行：漏洞版攻击、修复版攻击、漏洞版正常任务、修复版正常任务。每个测试创建唯一 Compose project、容器、网络和 volume。候选退出码只表示执行完成，不构成漏洞判定。
 
 runner 负责记录候选哈希、任务 manifest 哈希、命令、退出状态、stdout/stderr、源码 commit、两版镜像 digest、Agent/模型/toolchain 信息。可通过 `--agent-meta <json>` 提交不含凭据的 provenance；runner 会拒绝 `token`、`secret`、`password`、`credential`、`api_key` 等敏感字段，并把其余信息写入报告。验证器只接受产品实际产生的受控效果和独立采集事实；候选自写的结论、canary、`success` 字段或 verdict 不得直接成为证据。当前统一 runner 只负责收集候选产出的文件清单，环境必须另行提供能区分产品效果和候选自报内容的 Adapter 后才能宣称 Agent-PoC 通过。
 
-候选评测沿用 `facts.json`/`verdict.json` 协议，报告与机制结果分开保存。只有 metadata 中显式声明 `verification.agent_poc.adapter_status = "accepted"`，且同时记录审阅日期、证据和说明的环境才允许 `agent-evaluate` 进入 Docker；未声明时命令生成 `not_run` 报告，不会把候选自报文件当作通过。目标格式差异通过环境级 Adapter 声明，例如脚本、输入文件、HTTP 请求或 MCP 调用；Adapter 不得替换被验证的上游漏洞代码，也不得复制 runner 生命周期。
+候选评测沿用 `facts.json`/`verdict.json` 协议，报告与机制结果分开保存。只有 metadata 中显式声明 `verification.agent_poc.adapter_status = "accepted"`，并同时记录 Level 1 task SHA-256、审阅日期、证据和说明的环境才允许 `agent-evaluate` 进入 Docker；未声明时命令生成 `not_run` 报告，不会把候选自报文件当作通过。Adapter 接受前的 `agent-control` 只允许维护者运行正负候选控制，并要求当前通过的机制证据和经审阅的 Level 1 描述；negative 控制只允许漏洞版攻击检查失败，修复版攻击和两版 benign 检查都必须通过。`agent-control-archive` 保留报告、case 结果和验证器证据供人工审阅。目标格式差异通过环境级 Adapter 声明，例如脚本、输入文件、HTTP 请求或 MCP 调用；Adapter 不得替换被验证的上游漏洞代码，也不得复制 runner 生命周期。
+
+`http_request_inputs` 是仅含数据的 HTTP Adapter 格式：候选只能声明 method、origin-relative path、受限 headers 和 JSON object body；目标 host 固定由环境 harness 指向 loopback，候选不能指定 URL、Host header 或外部目的地。Harness 使用候选请求调用上游处理器，记录实际请求和响应，再由独立 verifier 把请求与候选输入绑定并检查真实产品效果。环境可为每次运行提供合成动态值占位符，但必须在生成的任务 README 中解释其语法；不得让候选控制真实凭据、外部网络或隐藏验证器文件。
+
+`mcp_path_inputs` 是仅提交 MCP `read_file` path 字段的数据格式，可表达一个前导父目录段以覆盖受控 sibling-path 边界。候选输入仍只包含 JSON 数据；环境 harness 必须把解析后的目标限制在本轮合成文件内，并记录实际请求及输入哈希，不能把该能力泛化为容器文件读取接口。
+
+`mcp_tool_plan_inputs` 是只读 MCP 探索格式。每个候选输入最多声明一个合成 scope 的 `list_directory` 和一次 `read_file`；读取可以引用该目录列表实际返回的全部文件名。候选只能选择 `allowed` 或 `sibling` scope，harness 必须将它们映射到本轮专用的合成目录，并限制每轮最多 8 次读取、目录结果 8 KiB、单个读取结果 16 KiB。候选不能提交绝对路径、父目录路径、任意 MCP 工具或 fixture/evidence 路径。harness 记录真实上游 MCP 请求和响应；独立 verifier 必须将输入计划与调用记录绑定，并根据 `read_file` 响应验证产品效果。
 
 ### 状态边界
 
@@ -175,6 +198,8 @@ finally 清理仅限本次 Compose project 的容器、网络、volume。--keep-
 ## Ready 与审阅
 
 晋升要求来源完整、可分发镜像 digest、Linux amd64 原生环境、同组固定镜像至少 3 轮完整验收且清理成功。promote 核对每个报告与 verdict、效果文件，并归档小型可复核证据、manifest 和报告；每个证据文件上限 8 MiB。原始日志留在 CI artifact。
+
+`runner archive <id> --report <report.json>` 可先归档经过同样报告/verdict/哈希校验的机制证据，并登记 `mechanism=passed`，生命周期保持 `draft`，不写入维护者审阅声明。只有 `promote` 执行晋升到 `ready`。
 
 --reviewer/--reviewed 是维护者本地审阅声明，身份授权依赖 Git 分支保护，不是密码学签名。涉及隔离例外要两位不同审阅者。先人工审阅来源、安全效果与脱敏，再执行晋升。永久证据放在环境 evidence/<run-id>/，错误/撤回降级并追加历史。CI artifact 保留 90 天，永久证据包不得依赖过期日志才能复核。
 

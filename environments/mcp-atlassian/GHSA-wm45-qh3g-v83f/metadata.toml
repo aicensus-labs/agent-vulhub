@@ -10,6 +10,17 @@ advisories = ["https://github.com/sooperset/mcp-atlassian/security/advisories/GH
 description = "The attachment-upload tools accept a client-supplied file_path and open it on the server host. On a remote HTTP or SSE deployment, a client can read arbitrary server-readable files and exfiltrate them as Atlassian attachments, including secrets from /proc/self/environ."
 prerequisites = ["Pinned mcp-atlassian 0.21.0 source", "Pinned mcp-atlassian 0.22.0 source", "A remote MCP transport with attachment upload enabled"]
 
+[verification]
+[verification.mechanism]
+status = "not_run"
+verified_at = ""
+evidence = []
+notes = "Previous evidence retained after invalidation"
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
 [vulnerable]
 version = "0.21.0"
 source_url = "https://github.com/sooperset/mcp-atlassian/tree/c450a161ec630dd57f44a2b15d977debae19eba5"
@@ -48,15 +59,3 @@ exceptions = [
 ]
 requires_model = false
 network_requirements = "No network is used by this draft; source archives are fetched by the runner before container execution"
-
-[verification.mechanism]
-status = "passed"
-verified_at = "2026-09-30T03:48:29.842029+00:00"
-evidence = ["evidence/20260930T034619Z-a6d8dc76f135/report.json"]
-notes = ""
-
-[verification.end_to_end]
-status = "not_applicable"
-verified_at = ""
-evidence = []
-notes = "Mechanism reproduction is required; real-model testing is optional."

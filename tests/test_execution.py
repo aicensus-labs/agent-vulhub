@@ -8,20 +8,20 @@ from pathlib import Path
 import shutil
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 import ipaddress
 import subprocess
 
-from runner.cli import ROOT, main, read_toml, scaffold
+from runner.cli import ROOT, check, main, read_toml, scaffold
 from runner.agent_poc import CandidateSpec
-from runner.build import fetch_inputs
+from runner.build import build_images, fetch_inputs, validate_sources
 from runner.compose import validate_compose
 from runner.lifecycle import promote, ready_check, refresh
-from runner.protocol import (CASES, check_fixtures, digest, fingerprint, validate_report,
-                             validate_verdict, write_json)
-from runner.runtime import (RunError, _candidate_container_command,
+from runner.protocol import (CASES, check_fixtures, digest, fingerprint, revision_identity,
+                             validate_report, validate_verdict, write_json, write_metadata)
+from runner.runtime import (RunError, _candidate_container_command, _collect_candidate_facts,
                              _verifier_container_command, allocate_subnet,
-                             apply_network_subnet, fallback_pool, reproduce)
+                             apply_network_subnet, fallback_pool, reproduce, run_case)
 
 
 def facts_and_verdict(folder, context, passed=True):
@@ -72,9 +72,14 @@ class ExecutionTests(unittest.TestCase):
                            "variant": variant, "scenario": scenario}
                 folder = output / context["case_id"]
                 verdict = facts_and_verdict(folder / "evidence", context)
+                revision_kind, revision = revision_identity(self.metadata, variant)
                 case = {**context, "round": number, "project": context["case_id"], "outcome": "passed",
-                        "exit_code": 0, "source_commit": "a" * 40,
+                        "exit_code": 0, "revision_kind": revision_kind, "target_revision": revision,
                         "cleaned": True, "image": "test@sha256:" + "a" * 64, "checks": verdict["checks"]}
+                if revision_kind == "source_commit":
+                    case["source_commit"] = revision
+                else:
+                    case["artifact_sha256"] = revision.removeprefix("sha256:")
                 report["cases"].append(case)
                 write_json(folder / "result.json", case)
         write_json(output / "report.json", report)
@@ -148,6 +153,64 @@ class ExecutionTests(unittest.TestCase):
         cache.write_bytes(b"test source")
         self.assertEqual(fetch_inputs(self.root, self.directory, self.metadata, offline=True), {"source.tar": cache})
 
+    def test_binary_build_requires_artifact_inputs_without_source_commits(self):
+        self.metadata["provenance"] = {"kind": "binary", "publisher": "Synthetic Vendor"}
+        self.metadata["build"].update(base_image="base@sha256:" + "a" * 64,
+            inputs=[{"name": "vulnerable.pkg", "url": "https://example.invalid/vulnerable.pkg",
+                     "sha256": "1" * 64},
+                    {"name": "patched.pkg", "url": "https://example.invalid/patched.pkg",
+                     "sha256": "2" * 64}])
+        for variant in ("vulnerable", "patched"):
+            self.metadata[variant].pop("commit")
+            self.metadata[variant].pop("archive")
+            self.metadata[variant]["artifact"] = variant + ".pkg"
+        self.assertEqual(validate_sources(self.directory, self.metadata), self.metadata["build"]["inputs"])
+
+        self.metadata["patched"]["artifact"] = "missing.pkg"
+        with self.assertRaisesRegex(ValueError, "artifact must name a build input"):
+            validate_sources(self.directory, self.metadata)
+
+    def test_binary_build_passes_artifact_identity_to_dockerfile(self):
+        self.metadata["provenance"] = {"kind": "binary", "publisher": "Synthetic Vendor"}
+        self.metadata["build"].update(base_image="base@sha256:" + "a" * 64,
+            inputs=[{"name": "vulnerable.pkg", "url": "https://example.invalid/vulnerable.pkg",
+                     "sha256": hashlib.sha256(b"vulnerable").hexdigest()},
+                    {"name": "patched.pkg", "url": "https://example.invalid/patched.pkg",
+                     "sha256": hashlib.sha256(b"patched").hexdigest()}])
+        for variant, payload in (("vulnerable", b"vulnerable"), ("patched", b"patched")):
+            self.metadata[variant].pop("commit")
+            self.metadata[variant].pop("archive")
+            self.metadata[variant]["artifact"] = variant + ".pkg"
+            cache_file = self.root / ".cache/sha256" / hashlib.sha256(payload).hexdigest()
+            cache_file.parent.mkdir(parents=True, exist_ok=True)
+            cache_file.write_bytes(payload)
+
+        output = self.root / "build-output"
+        output.mkdir()
+        commands = Mock()
+        commands.output = output
+        commands.timeout = 60
+        builds = []
+
+        def run(args, phase, **kwargs):
+            if args[:2] == ["docker", "build"]:
+                builds.append(args)
+                Path(args[args.index("--iidfile") + 1]).write_text("sha256:" + "b" * 64)
+            return "", ""
+
+        commands.run.side_effect = run
+        with patch("runner.build.image_check"):
+            build_images(self.root, self.directory, self.metadata, commands, offline=True)
+
+        self.assertEqual(len(builds), 2)
+        for args, sha in zip(builds, (hashlib.sha256(b"vulnerable").hexdigest(),
+                                      hashlib.sha256(b"patched").hexdigest())):
+            build_args = {args[index + 1].split("=", 1)[0]: args[index + 1].split("=", 1)[1]
+                          for index, value in enumerate(args[:-1]) if value == "--build-arg"}
+            self.assertEqual(build_args["ARTIFACT_SHA256"], sha)
+            self.assertEqual(build_args["TARGET_REVISION"], "sha256:" + sha)
+            self.assertIn(f"org.agent-vulhub.target-revision=sha256:{sha}", args)
+
     def test_unknown_environment_never_calls_docker(self):
         with patch("runner.cli.ROOT", self.root), patch("runner.runtime.preflight") as docker:
             self.assertEqual(main(["reproduce", "unknown/CVE-2099-99999"]), 2)
@@ -182,6 +245,97 @@ class ExecutionTests(unittest.TestCase):
         self.assertEqual(self.metadata["verification"]["mechanism"]["status"], "not_run")
         self.assertTrue((self.directory / "evidence/test-run/report.json").exists())
         self.assertTrue(list((self.directory / "evidence/history").glob("*.json")))
+
+    def test_refresh_invalidates_stale_draft_evidence_and_preserves_history(self):
+        output, report = self.report()
+        report["fingerprint"] = "0" * 64
+        write_json(output / "report.json", report)
+        self.metadata["verification"]["mechanism"].update(
+            status="passed", evidence=["results/test-run/report.json"])
+        write_metadata(self.directory / "metadata.toml", self.metadata)
+
+        self.assertTrue(refresh(self.root, self.directory, self.metadata))
+        self.assertEqual(self.metadata["lifecycle"], "draft")
+        self.assertEqual(self.metadata["verification"]["mechanism"]["status"], "not_run")
+        self.assertEqual(self.metadata["verification"]["mechanism"]["evidence"], [])
+        self.assertTrue((output / "report.json").is_file())
+        self.assertTrue(list((self.directory / "evidence/history").glob("*.json")))
+
+    def test_refresh_invalidates_stale_adapter_without_dropping_current_mechanism(self):
+        output, _ = self.report()
+        self.metadata["verification"]["mechanism"].update(
+            status="passed", evidence=["results/test-run/report.json"])
+        adapter = self.metadata["verification"]["agent_poc"]
+        adapter.update(adapter_status="accepted", verified_at="2099-01-01",
+                       evidence=["evidence/adapter-review.json"], notes="Synthetic acceptance")
+        original_description = adapter["task_description"]
+        original_review = copy.deepcopy(adapter.get("task_description_review"))
+
+        with patch("runner.agent_poc.validate_adapter_admission", side_effect=ValueError("stale controls")):
+            self.assertTrue(refresh(self.root, self.directory, self.metadata))
+
+        self.assertEqual(self.metadata["verification"]["mechanism"]["status"], "passed")
+        self.assertEqual(adapter["adapter_status"], "not_run")
+        self.assertEqual(adapter["evidence"], [])
+        self.assertEqual(adapter["task_description"], original_description)
+        self.assertEqual(adapter.get("task_description_review"), original_review)
+
+    def test_archive_command_records_passed_evidence_without_ready_promotion(self):
+        self.metadata["provenance"] = {"kind": "binary", "publisher": "Synthetic Vendor"}
+        self.metadata["build"].update(
+            base_image="python:3.12-slim@sha256:" + "a" * 64,
+            inputs=[
+                {"name": "vulnerable.pkg", "url": "https://example.invalid/vulnerable.pkg",
+                 "sha256": "1" * 64},
+                {"name": "patched.pkg", "url": "https://example.invalid/patched.pkg",
+                 "sha256": "2" * 64},
+            ],
+        )
+        for variant in ("vulnerable", "patched"):
+            self.metadata[variant].pop("commit")
+            self.metadata[variant].pop("archive")
+            self.metadata[variant].update(
+                version="1.0.0",
+                source_url="https://example.invalid/" + variant,
+                artifact=variant + ".pkg",
+            )
+        write_metadata(self.directory / "metadata.toml", self.metadata)
+        output, _ = self.report()
+
+        with patch("runner.cli.ROOT", self.root):
+            result = main([
+                "archive", self.metadata["id"], "--report", str(output / "report.json")])
+
+        self.assertEqual(result, 0)
+        retained = read_toml(self.directory / "metadata.toml")
+        self.assertEqual(retained["lifecycle"], "draft")
+        self.assertEqual(retained["verification"]["mechanism"]["status"], "passed")
+        self.assertEqual(
+            retained["verification"]["mechanism"]["evidence"],
+            ["evidence/test-run/report.json"],
+        )
+        self.assertTrue((self.directory / "evidence/test-run/manifest.json").is_file())
+        self.assertNotIn("review", retained)
+        self.assertEqual(len(check(self.root)), 1)
+
+    def test_binary_report_and_promotion_bind_to_release_hashes(self):
+        self.metadata["provenance"] = {"kind": "binary", "publisher": "Synthetic Vendor"}
+        self.metadata["build"]["inputs"] = []
+        for index, variant in enumerate(("vulnerable", "patched"), start=1):
+            name = variant + ".pkg"
+            self.metadata[variant].update(version="1.0.0", source_url=f"https://example.invalid/{variant}",
+                                          artifact=name)
+            self.metadata[variant].pop("commit")
+            self.metadata[variant].pop("archive")
+            self.metadata["build"]["inputs"].append({
+                "name": name, "url": f"https://example.invalid/{name}", "sha256": str(index) * 64})
+
+        output, report = self.report()
+        self.assertEqual(report["cases"][0]["revision_kind"], "artifact_sha256")
+        self.assertEqual(report["cases"][0]["target_revision"], "sha256:" + "1" * 64)
+        validate_report(report, report["fingerprint"])
+        promote(self.root, self.directory, self.metadata, output / "report.json", ["maintainer"])
+        ready_check(self.root, self.directory, self.metadata)
 
     def test_agent_poc_report_cannot_promote_as_mechanism(self):
         output, report = self.report()
@@ -233,18 +387,205 @@ class ExecutionTests(unittest.TestCase):
                              layer="agent_poc", task=task)
         self.assertEqual(code, 2)
         docker.assert_not_called()
-        report = json.loads(next((self.root / "results").rglob("report.json")).read_text())
+        report_path = next((self.root / "results" / self.metadata["id"] / "agent-poc").rglob("report.json"))
+        report = json.loads(report_path.read_text())
         self.assertEqual(report["failure"]["phase"], "agent_adapter")
+
+    def test_adapter_control_requires_mechanism_evidence_before_docker(self):
+        args = Namespace(rounds=3, timeout=10, build=False, images=None, offline=True,
+                         allow_exceptions=False, keep_on_failure=False)
+        candidate = CandidateSpec(self.root, ("python3", "/candidate/poc.py"), 10, 1024,
+                                  "a" * 64, "b" * 64)
+        task = {"task_sha256": "c" * 64, "difficulty": 1}
+        with patch("runner.runtime.preflight") as docker:
+            code = reproduce(self.root, self.directory, self.metadata, args, candidate=candidate,
+                             layer="agent_poc", task=task, control_role="positive")
+        self.assertEqual(code, 2)
+        docker.assert_not_called()
+        report_path = next((self.root / "results" / self.metadata["id"] / "agent-poc").rglob("report.json"))
+        report = json.loads(report_path.read_text())
+        self.assertEqual(report["adapter_control_role"], "positive")
+        self.assertIn("current passed mechanism evidence", report["failure"]["actual"])
+
+    def test_agent_evaluation_rejects_accepted_adapter_without_current_evidence(self):
+        args = Namespace(rounds=1, timeout=10, build=False, images=None, offline=True,
+                         allow_exceptions=False, scenario="all", keep_on_failure=False)
+        candidate = CandidateSpec(self.root, ("python3", "/candidate/poc.py"), 10, 1024, "a" * 64, "b" * 64)
+        task = {"task_sha256": "c" * 64, "difficulty": 1}
+        metadata = copy.deepcopy(self.metadata)
+        metadata["verification"]["agent_poc"].update(
+            adapter_status="accepted", verified_at="2099-01-01T00:00:00Z",
+            task_sha256=task["task_sha256"],
+            evidence=["evidence/missing-review.md"], notes="Synthetic stale acceptance.")
+        with patch("runner.runtime.preflight") as docker:
+            code = reproduce(self.root, self.directory, metadata, args, candidate=candidate,
+                             layer="agent_poc", task=task)
+        self.assertEqual(code, 2)
+        docker.assert_not_called()
+        report_path = next((self.root / "results" / metadata["id"] / "agent-poc").rglob("report.json"))
+        report = json.loads(report_path.read_text())
+        self.assertEqual(report["failure"]["phase"], "agent_adapter")
+        self.assertIn("current passed mechanism evidence", report["failure"]["actual"])
+
+    def test_agent_evaluation_rejects_task_not_bound_to_accepted_adapter(self):
+        args = Namespace(rounds=1, timeout=10, build=False, images=None, offline=True,
+                         allow_exceptions=False, scenario="all", keep_on_failure=False)
+        candidate = CandidateSpec(self.root, ("python3", "/candidate/poc.py"), 10, 1024,
+                                  "a" * 64, "b" * 64)
+        metadata = copy.deepcopy(self.metadata)
+        metadata["verification"]["agent_poc"].update(
+            adapter_status="accepted", task_sha256="d" * 64)
+        task = {"task_sha256": "c" * 64, "difficulty": 1}
+        with patch("runner.agent_poc.validate_adapter_admission") as admission, \
+                patch("runner.runtime.preflight") as docker:
+            code = reproduce(self.root, self.directory, metadata, args, candidate=candidate,
+                             layer="agent_poc", task=task)
+        self.assertEqual(code, 2)
+        admission.assert_not_called()
+        docker.assert_not_called()
+        report_path = next((self.root / "results" / metadata["id"] / "agent-poc").rglob("report.json"))
+        report = json.loads(report_path.read_text())
+        self.assertEqual(report["failure"]["phase"], "agent_adapter")
+        self.assertIn("exact task_sha256", report["failure"]["actual"])
+
+    def test_agent_evaluation_rejects_level_zero_task_even_if_hash_matches(self):
+        args = Namespace(rounds=1, timeout=10, build=False, images=None, offline=True,
+                         allow_exceptions=False, scenario="all", keep_on_failure=False)
+        candidate = CandidateSpec(self.root, ("python3", "/candidate/poc.py"), 10, 1024,
+                                  "a" * 64, "b" * 64)
+        metadata = copy.deepcopy(self.metadata)
+        metadata["verification"]["agent_poc"].update(
+            adapter_status="accepted", task_sha256="d" * 64)
+        task = {"task_sha256": "d" * 64, "difficulty": 0}
+        with patch("runner.agent_poc.validate_adapter_admission") as admission, \
+                patch("runner.runtime.preflight") as docker:
+            code = reproduce(self.root, self.directory, metadata, args, candidate=candidate,
+                             layer="agent_poc", task=task)
+        self.assertEqual(code, 2)
+        admission.assert_not_called()
+        docker.assert_not_called()
+        report_path = next((self.root / "results" / metadata["id"] / "agent-poc").rglob("report.json"))
+        report = json.loads(report_path.read_text())
+        self.assertEqual(report["failure"]["phase"], "agent_adapter")
+        self.assertIn("Level 1 task package", report["failure"]["actual"])
+
+    def test_mcp_input_candidate_runs_through_trusted_harness(self):
+        output = self.root / "mcp-case"
+        output.mkdir()
+        candidate_dir = self.root / "mcp-candidate"
+        candidate_dir.mkdir()
+        (candidate_dir / "attack.json").write_text('{"path":"linked-marker.txt"}\n')
+        (candidate_dir / "benign.json").write_text('{"path":"benign.txt"}\n')
+        candidate = CandidateSpec(candidate_dir, (), 30, 1024, "a" * 64, "b" * 64,
+                                  format="mcp_tool_inputs",
+                                  files=(("attack", "attack.json"), ("benign", "benign.json")))
+        config = {"services": {"vulnerable": {"volumes": [
+            {"source": "results", "target": "/lab/results"}]}},
+            "volumes": {"results": {}}}
+        child = Mock()
+        calls = []
+
+        def run(command, phase, **kwargs):
+            calls.append((command, phase))
+            if command[:2] == ["docker", "inspect"]:
+                project = command[-1].removesuffix("-target")
+                return 0, json.dumps([{"Config": {"Labels": {
+                    "com.docker.compose.project": project}}}])
+            return 0, ""
+
+        child.run.side_effect = run
+        parent = Mock()
+        parent.output = output
+        parent.timeout = 30
+        metadata = copy.deepcopy(self.metadata)
+        metadata["runtime"].update(mode="oneshot", harness="node")
+        report = {"run_id": "test-run", "platform": "linux/amd64",
+                  "runner_fingerprint": "runner", "docker_version": "docker",
+                  "compose_version": "compose"}
+        images = {variant: "test@sha256:" + "a" * 64 for variant in ("vulnerable", "patched")}
+        args = Namespace(timeout=30, allow_exceptions=False, keep_on_failure=False)
+        passed = {"outcome": "passed", "checks": []}
+
+        with patch("runner.runtime.Commands", return_value=child):
+            with patch("runner.runtime.inspect_config", return_value=config):
+                with patch("runner.runtime.validate_verdict", return_value=passed):
+                    result = run_case(parent, self.directory, metadata, images, report, 1,
+                                      "vulnerable", "attack", args, candidate=candidate, layer="agent_poc")
+
+        self.assertEqual(result["outcome"], "passed")
+        harness_calls = [command for command, phase in calls if phase == "reproduce"]
+        self.assertEqual(len(harness_calls), 1)
+        self.assertRegex(harness_calls[0][2], r"avh-[a-f0-9]+-target")
+        self.assertIn("/lab/reproduce.py", harness_calls[0])
+        self.assertNotIn("--user", harness_calls[0])
+        self.assertNotIn("AVH_AGENT_CONTEXT", harness_calls[0])
+        self.assertTrue(any(command[-1].endswith(":/lab/results/candidate-input.json")
+                            for command, _ in calls if command[:2] == ["docker", "cp"]))
+        self.assertFalse(any(command[:2] == ["docker", "run"] and "-d" in command
+                             for command, _ in calls))
+
+    def test_mcp_path_candidate_runs_through_trusted_harness(self):
+        output = self.root / "mcp-path-case"
+        output.mkdir()
+        candidate_dir = self.root / "mcp-path-candidate"
+        candidate_dir.mkdir()
+        (candidate_dir / "attack.json").write_text('{"path":"../project2/marker.txt"}\n')
+        (candidate_dir / "benign.json").write_text('{"path":"benign.txt"}\n')
+        candidate = CandidateSpec(candidate_dir, (), 30, 1024, "a" * 64, "b" * 64,
+                                  format="mcp_path_inputs",
+                                  files=(("attack", "attack.json"), ("benign", "benign.json")))
+        config = {"services": {"vulnerable": {"volumes": [
+            {"source": "results", "target": "/lab/results"}]}},
+            "volumes": {"results": {}}}
+        child = Mock()
+        calls = []
+
+        def run(command, phase, **kwargs):
+            calls.append((command, phase))
+            if command[:2] == ["docker", "inspect"]:
+                project = command[-1].removesuffix("-target")
+                return 0, json.dumps([{"Config": {"Labels": {
+                    "com.docker.compose.project": project}}}])
+            return 0, ""
+
+        child.run.side_effect = run
+        parent = Mock()
+        parent.output = output
+        parent.timeout = 30
+        metadata = copy.deepcopy(self.metadata)
+        metadata["runtime"].update(mode="oneshot", harness="node")
+        report = {"run_id": "test-run", "platform": "linux/amd64",
+                  "runner_fingerprint": "runner", "docker_version": "docker",
+                  "compose_version": "compose"}
+        images = {variant: "test@sha256:" + "a" * 64 for variant in ("vulnerable", "patched")}
+        args = Namespace(timeout=30, allow_exceptions=False, keep_on_failure=False)
+        passed = {"outcome": "passed", "checks": []}
+
+        with patch("runner.runtime.Commands", return_value=child):
+            with patch("runner.runtime.inspect_config", return_value=config):
+                with patch("runner.runtime.validate_verdict", return_value=passed):
+                    result = run_case(parent, self.directory, metadata, images, report, 1,
+                                      "vulnerable", "attack", args, candidate=candidate, layer="agent_poc")
+
+        self.assertEqual(result["outcome"], "passed")
+        harness_calls = [command for command, phase in calls if phase == "reproduce"]
+        self.assertEqual(len(harness_calls), 1)
+        self.assertIn("/lab/reproduce.py", harness_calls[0])
+        self.assertTrue(any(command[-1].endswith(":/lab/results/candidate-input.json")
+                            for command, _ in calls if command[:2] == ["docker", "cp"]))
 
     def test_agent_candidate_and_verifier_use_separate_containers(self):
         config = {"services": {"vulnerable": {"volumes": [
             {"source": "results", "target": "/lab/results"}]}},
                   "volumes": {"results": {}}}
         candidate_name, candidate = _candidate_container_command(
-            "image@sha256:" + "a" * 64, "target-container", "project", config, "vulnerable")
+            "image@sha256:" + "a" * 64, "target-container", "project")
         self.assertEqual(candidate_name, "project-candidate")
         self.assertIn("container:target-container", candidate)
-        self.assertIn("type=volume,source=project_results,target=/lab/results", candidate)
+        self.assertTrue(any(arg.startswith("type=tmpfs,destination=/lab/results,tmpfs-size=16777216")
+                            for arg in candidate))
+        self.assertIn("--memory", candidate)
+        self.assertIn("--cpus", candidate)
         self.assertNotIn("/lab/verify.py", candidate)
 
         verifier_name, verifier = _verifier_container_command(
@@ -255,6 +596,60 @@ class ExecutionTests(unittest.TestCase):
         self.assertIn("none", verifier)
         self.assertIn("/lab/verify.py", verifier)
         self.assertNotIn("container:target-container", verifier)
+
+    def test_candidate_facts_are_rebuilt_and_output_is_copied_to_verifier_namespace(self):
+        output = self.root / "candidate-case"
+        output.mkdir()
+        context = {"schema_version": 1, "run_id": "run", "case_id": "01-vulnerable-attack",
+                   "variant": "vulnerable", "scenario": "attack", "layer": "agent_poc"}
+        child = Mock()
+
+        def run(command, phase, **kwargs):
+            if phase == "candidate_collect":
+                collected = Path(command[-1])
+                (collected / "facts.json").write_text('{"execution_status":"completed","evidence":[]}\n')
+                (collected / "verdict.json").write_text('{"outcome":"passed"}\n')
+                (collected / "context.json").write_text('{"variant":"patched"}\n')
+                (collected / "observation.json").write_text('{"candidate_claim":"success"}\n')
+            return 0, ""
+
+        child.run.side_effect = run
+        _collect_candidate_facts(child, "candidate", "target", output, context)
+
+        facts = json.loads((output / "candidate-evidence/facts.json").read_text())
+        self.assertEqual(facts, {**context, "execution_status": "completed", "evidence": [
+            {"path": "candidate-output/observation.json",
+             "sha256": digest(output / "candidate-artifacts/observation.json")} ]})
+        self.assertEqual((output / "candidate-artifacts/observation.json").read_text(),
+                         '{"candidate_claim":"success"}\n')
+        commands = [call.args[0] for call in child.run.call_args_list]
+        self.assertTrue(any(command[-1] == "/lab/results/candidate-output" and "mkdir" in command
+                            for command in commands))
+        self.assertTrue(any(command[-1].endswith(":/lab/results/facts.json") for command in commands))
+
+    def test_candidate_output_rejects_symlinks_and_oversize_files(self):
+        context = {"schema_version": 1, "run_id": "run", "case_id": "01-vulnerable-attack",
+                   "variant": "vulnerable", "scenario": "attack", "layer": "agent_poc"}
+
+        for filename, prepare in (
+                ("symlink", lambda path: path.symlink_to(self.root / "outside")),
+                ("oversize", lambda path: path.write_bytes(b"x" * (8 * 1024 * 1024 + 1)))):
+            with self.subTest(filename=filename):
+                output = self.root / ("candidate-" + filename)
+                output.mkdir()
+                child = Mock()
+
+                def run(command, phase, **kwargs):
+                    if phase == "candidate_collect":
+                        Path(command[-1]).mkdir(exist_ok=True)
+                        prepare(Path(command[-1]) / filename)
+                    return 0, ""
+
+                child.run.side_effect = run
+                expected = "invalid evidence path" if filename == "symlink" else "exceeds 8 MiB"
+                with self.assertRaisesRegex(ValueError, expected):
+                    _collect_candidate_facts(child, "candidate", "target", output, context)
+                self.assertFalse(any(call.args[1] == "candidate_setup" for call in child.run.call_args_list))
 
 
 class ComposePolicyTests(unittest.TestCase):

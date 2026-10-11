@@ -175,6 +175,45 @@ class RegistryTests(unittest.TestCase):
         data = self._ready_candidate()
         validate_metadata(data, data["id"])
 
+    def _ready_binary_candidate(self):
+        data = self._ready_candidate()
+        data["provenance"] = {"kind": "binary", "publisher": "Synthetic Vendor"}
+        data["build"]["inputs"] = []
+        for index, variant in enumerate(("vulnerable", "patched"), start=1):
+            name = f"{variant}.pkg"
+            sha = str(index) * 64
+            data[variant].pop("commit")
+            data[variant]["artifact"] = name
+            data["build"]["inputs"].append({
+                "name": name, "url": f"https://example.invalid/{name}", "sha256": sha})
+        return data
+
+    def test_ready_accepts_binary_release_artifact_identities(self):
+        data = self._ready_binary_candidate()
+        validate_metadata(data, data["id"])
+
+        from runner.protocol import revision_identity
+        self.assertEqual(revision_identity(data, "vulnerable"), ("artifact_sha256", "sha256:" + "1" * 64))
+
+    def test_claude_code_case_uses_the_binary_release_contract(self):
+        directory = ROOT / "environments/claude-code/CVE-2025-64755"
+        data = read_toml(directory / "metadata.toml")
+        validate_metadata(data, data["id"])
+
+        from runner.build import validate_sources
+        self.assertEqual(validate_sources(directory, data), data["build"]["inputs"])
+
+    def test_binary_release_rejects_fake_commit_and_unpinned_artifact(self):
+        data = self._ready_binary_candidate()
+        data["vulnerable"]["commit"] = "a" * 40
+        with self.assertRaisesRegex(RegistryError, "must not claim a source commit"):
+            validate_metadata(data, data["id"])
+
+        data["vulnerable"].pop("commit")
+        data["build"]["inputs"][0]["sha256"] = "not-a-digest"
+        with self.assertRaisesRegex(RegistryError, "HTTPS SHA-256-pinned build input"):
+            validate_metadata(data, data["id"])
+
     def test_ready_rejects_a_half_published_environment(self):
         """One variant with a digest and one without is reproducible by neither path."""
         data = self._ready_candidate()
