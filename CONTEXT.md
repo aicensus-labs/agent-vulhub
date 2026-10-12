@@ -2,6 +2,22 @@
 
 本仓库以稳定、可重复的漏洞机制复现为目标。机制复现与真实模型端到端复现是不同的验证概念。
 
+## Agent-PoC 测试集准入
+
+当前测试集评估外部 Agent 根据漏洞版源码生成 PoC 的能力。选样必须依次满足以下条件，不能把全部收录环境或全部源码环境直接当作测试集：
+
+1. **材料范围**：`provenance.kind = "source"`（未声明时按协议默认为源码型），漏洞版和修复版及构建输入均已固定。二进制或闭源发布物不纳入当前源码型测试集。
+2. **机制验证**：`verification.mechanism.status = "passed"`，并有属于该环境、与当前输入一致的有效证据。维护者 reference PoC 必须完成三轮四场景验收：漏洞版攻击产生目标效果、修复版阻断同一攻击、两版正常任务均通过。未运行、失败、证据缺失或过期的环境不得进入测试集；不能只看 metadata 中的 `passed` 字符串。
+3. **候选评分验收**：满足前两项的环境属于机制已验证的源码候选样本。只有环境的 `verification.agent_poc.adapter_status = "accepted"`，且记录审阅日期、证据和说明后，才可进入可运行的正式测试集。验收须证明评分器能识别候选触发的真实产品效果，并拒绝未触发漏洞、只自写成功文件或自报 verdict 的候选；同一候选须接受漏洞版与修复版对照，正常任务对照也必须有效。
+
+Level 1 的 `task_description` 必须有独立审阅记录，记录需绑定描述文件 SHA-256、审阅日期、审阅者和审阅材料 SHA-256；`agent-task`、`agent-control` 与 `agent-evaluate` 都会复核这些值。`agent-task` 能生成目录只代表任务打包功能可用，不代表样本已经满足准入条件。`agent-control` 是 Adapter 准入前的维护者正负控制入口，要求当前机制证据和 Level 1 描述审阅，但不要求 Adapter 已 accepted；每个控制至少三轮，负向候选只允许漏洞版攻击未触发，修复版攻击和两版 benign 必须通过。`agent-control-archive` 会校验并归档报告、case 结果和 verifier 证据。人工审阅后，metadata 必须绑定 Level 1 `task_sha256`、正负控制报告和审阅记录；审阅记录同时固定两份控制报告及其归档 manifest 的 SHA-256。`runner check` 会重新核对归档文件清单、case 结果、verifier context/verdict、控制矩阵和全部指纹；正式 `agent-evaluate` 还要求任务包为 Level 1 且哈希与已接受 Adapter 完全一致，不能只看 metadata 中的状态字符串。
+
+`python3 -m runner agent-manifest --output results/agent-poc-dataset/manifest.json` 只会收录 `runner check` 接受的样本，并记录任务哈希、当前环境与 runner 指纹及准入证据；样本数为 0 时，生成的清单也为空，不能据此声称已有可评分样本。
+
+测试集准入、`draft`/`ready` 生命周期和 Agent 成绩分别记录。`draft` 可以包含已通过机制验证的候选样本；机制通过或 Adapter 验收通过均不代表 Agent 已成功生成 PoC。统计时分别报告收录数、机制已验证的源码候选数、Adapter 已验收的正式样本数和实际 Agent 测评结果。
+
+这些准入规则供建库与维护 Agent 使用。提供给参测 Agent 的 Level 0/1 任务包仍须隐藏修复材料、reference PoC、验证器、内部证据和预期效果，详见 [Agent-PoC 执行协议](docs/environment-contract.md#agent-poc-任务与候选执行协议)。
+
 ## Language
 
 **机制复现（mechanism）**：
@@ -13,8 +29,20 @@ _Avoid_：真实模型端到端复现、仅凭退出码认定复现成功
 _Avoid_：固定模型输出的机制复现
 
 **Agent-PoC 任务（agent_poc task）**：
-提供给外部 Agent 的受控任务包，默认包含漏洞版完整源码、agent-facing 漏洞描述和候选提交约定，不包含修复版、reference PoC、验证器或预期结论。它是候选生成输入，不等同于机制复现结果。
+提供给外部 Agent 的受控任务包：Level 0 提供漏洞版源码和候选提交约定，Level 1 额外提供经审阅的 agent-facing 漏洞描述；两者都不包含修复版、reference PoC、验证器或预期结论。它是候选生成输入，不等同于机制复现结果。
 _Avoid_：把 patched 源码、verifier 或预期 canary 混入 Level 1 任务包
+
+**Level 0 发现任务**：
+只给漏洞版源码、通用目标范围和候选提交约定，测 Agent 从源码中发现并构造漏洞 PoC 的能力。
+_Avoid_：开放式发现任务、零提示复现
+
+**Level 1 描述辅助复现任务**：
+给漏洞版源码和经审阅的 Agent-facing 漏洞描述，测 Agent 根据已知漏洞线索构造 PoC 的能力；它不代表自主发现。
+_Avoid_：盲测、无提示发现
+
+**Agent-facing 漏洞描述**：
+专为某一 Agent 任务难度编写的线索文本，可说明影响、近似位置、漏洞类型和根因线索，但不包含最终候选输入或评分器的成功标记。
+_Avoid_：直接复用维护者完整漏洞说明、reference PoC 步骤
 
 **候选 PoC（candidate PoC）**：
 Agent 提交给统一 Candidate runner 的脚本、输入文件或请求生成器。候选退出码只表示执行状态，漏洞结论必须由真实产品效果和独立验证器给出。

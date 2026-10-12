@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 
 from .protocol import (contained, digest, fingerprint, read_json, validate_report,
-                       validate_verdict, write_json, write_metadata)
+                       revision_identity, validate_verdict, write_json, write_metadata)
 
 
 def ready_check(root, directory, metadata):
@@ -38,8 +38,9 @@ def ready_check(root, directory, metadata):
         if digest(contained(summary.parent, name)) != sha:
             raise ValueError(f"Retained evidence changed: {name}")
     for case in report["cases"]:
-        if case["source_commit"] != metadata[case["variant"]]["commit"]:
-            raise ValueError("Case source revision differs from reviewed metadata")
+        revision_kind, revision = revision_identity(metadata, case["variant"])
+        if case.get("revision_kind") != revision_kind or case.get("target_revision") != revision:
+            raise ValueError("Case target revision differs from reviewed metadata")
         path = contained(summary.parent, case["case_id"])
         actual = read_json(path / "result.json")
         if actual != case:
@@ -49,33 +50,88 @@ def ready_check(root, directory, metadata):
             raise ValueError("Retained verdict disagrees with passing report")
 
 
-def refresh(root, directory, metadata):
-    if metadata.get("lifecycle") != "ready":
-        return False
-    try:
-        ready_check(root, directory, metadata)
-        return False
-    except (ValueError, OSError, KeyError, TypeError) as error:
-        history = directory / "evidence" / "history"
-        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-        write_json(history / f"{stamp}.json", {"action": "invalidate", "reason": str(error),
-                   "previous_review": metadata.get("review"), "previous_verification": metadata.get("verification")})
+def _mechanism_evidence_current(root, directory, metadata):
+    mechanism = metadata.get("verification", {}).get("mechanism", {})
+    if mechanism.get("status") != "passed":
+        return
+    evidence = mechanism.get("evidence") or []
+    if not evidence:
+        raise ValueError("passed mechanism needs evidence")
+    expected = fingerprint(root, directory, metadata)
+    for relative in evidence:
+        path = contained(directory, relative)
+        if not path.is_file():
+            path = contained(root, relative)
+        report = read_json(path)
+        if report.get("environment_id") != metadata.get("id"):
+            raise ValueError(f"Mechanism evidence belongs to another environment: {relative}")
+        if report.get("fingerprint") != expected:
+            raise ValueError(f"Mechanism evidence {relative} is stale for the current inputs")
+
+
+def _invalidate(directory, metadata, reason, layers, downgrade_lifecycle=True):
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    write_json(directory / "evidence" / "history" / f"{stamp}.json", {
+        "action": "invalidate", "reason": str(reason),
+        "previous_review": metadata.get("review"),
+        "previous_verification": metadata.get("verification"),
+    })
+    if downgrade_lifecycle:
         metadata["lifecycle"] = "draft"
-        for value in metadata.get("verification", {}).values():
-            value.update(status="not_run", verified_at="", evidence=[], notes="Previous evidence retained after invalidation")
+    verification = metadata.get("verification", {})
+    for layer in layers:
+        value = verification.get(layer)
+        if not isinstance(value, dict):
+            continue
+        if layer == "agent_poc":
+            value.update(adapter_status="not_run", verified_at="", evidence=[],
+                         notes="Previous evidence retained after invalidation")
+        elif value.get("status") in {"passed", "failed"}:
+            value.update(status="not_run", verified_at="", evidence=[],
+                         notes="Previous evidence retained after invalidation")
+    if downgrade_lifecycle:
         metadata.pop("review", None)
-        write_metadata(directory / "metadata.toml", metadata)
-        return True
+    write_metadata(directory / "metadata.toml", metadata)
+    return True
 
 
-def promote(root, directory, metadata, report_path, reviewers):
-    minimum = 2 if metadata.get("runtime", {}).get("exceptions") else 1
-    if len(set(reviewers)) < minimum or any(not x.strip() for x in reviewers):
-        raise ValueError(f"Need {minimum} distinct reviewers")
+def refresh(root, directory, metadata):
+    if metadata.get("lifecycle") == "ready":
+        try:
+            ready_check(root, directory, metadata)
+        except (ValueError, OSError, KeyError, TypeError) as error:
+            return _invalidate(directory, metadata, error, metadata.get("verification", {}).keys())
+        adapter = metadata.get("verification", {}).get("agent_poc", {})
+        if adapter.get("adapter_status") == "accepted":
+            try:
+                from .agent_poc import validate_adapter_admission
+                validate_adapter_admission(root, directory, metadata)
+            except (ValueError, OSError, KeyError, TypeError) as error:
+                return _invalidate(directory, metadata, error, ("agent_poc",),
+                                   downgrade_lifecycle=False)
+        return False
+
+    try:
+        _mechanism_evidence_current(root, directory, metadata)
+    except (ValueError, OSError, KeyError, TypeError) as error:
+        return _invalidate(directory, metadata, error,
+                           ("mechanism", "end_to_end", "agent_poc"))
+
+    adapter = metadata.get("verification", {}).get("agent_poc", {})
+    if adapter.get("adapter_status") == "accepted":
+        try:
+            from .agent_poc import validate_adapter_admission
+            validate_adapter_admission(root, directory, metadata)
+        except (ValueError, OSError, KeyError, TypeError) as error:
+            return _invalidate(directory, metadata, error, ("agent_poc",))
+    return False
+
+
+def archive_report(root, directory, metadata, report_path):
     report_path = Path(report_path).resolve()
     raw_report = read_json(report_path)
     if raw_report.get("layer") != "mechanism":
-        raise ValueError("Only mechanism reports can be promoted")
+        raise ValueError("Only mechanism reports can be archived")
     report = validate_report(raw_report, fingerprint(root, directory, metadata))
     if report.get("environment_id") != metadata["id"]:
         raise ValueError("Report belongs to another environment")
@@ -84,8 +140,9 @@ def promote(root, directory, metadata, report_path, reviewers):
         raise ValueError("Invalid run ID")
     # Check every retained result before copying or changing metadata.
     for case in report["cases"]:
-        if case["source_commit"] != metadata[case["variant"]]["commit"]:
-            raise ValueError("Case source revision differs from metadata")
+        revision_kind, revision = revision_identity(metadata, case["variant"])
+        if case.get("revision_kind") != revision_kind or case.get("target_revision") != revision:
+            raise ValueError("Case target revision differs from metadata")
         folder = contained(report_path.parent, case["case_id"])
         if read_json(folder / "result.json") != case:
             raise ValueError("Report case differs from on-disk result")
@@ -116,6 +173,30 @@ def promote(root, directory, metadata, report_path, reviewers):
         if path.is_file():
             manifest[path.relative_to(archive).as_posix()] = digest(path)
     write_json(archive / "manifest.json", manifest)
+    return archive
+
+
+def archive_draft(root, directory, metadata, report_path):
+    """Retain a verified mechanism report while leaving lifecycle at draft."""
+    if metadata.get("lifecycle") != "draft":
+        raise ValueError("Evidence can only be archived without review while lifecycle is draft")
+    archive = archive_report(root, directory, metadata, report_path)
+    report = read_json(archive / "report.json")
+    metadata["verification"]["mechanism"].update(
+        status="passed",
+        verified_at=report["finished_at"],
+        evidence=[(archive / "report.json").relative_to(directory).as_posix()],
+    )
+    write_metadata(directory / "metadata.toml", metadata)
+    return archive
+
+
+def promote(root, directory, metadata, report_path, reviewers):
+    minimum = 2 if metadata.get("runtime", {}).get("exceptions") else 1
+    if len(set(reviewers)) < minimum or any(not x.strip() for x in reviewers):
+        raise ValueError(f"Need {minimum} distinct reviewers")
+    archive = archive_report(root, directory, metadata, report_path)
+    report = read_json(archive / "report.json")
     metadata["lifecycle"] = "ready"
     metadata["verification"]["mechanism"].update(status="passed", verified_at=report["finished_at"],
         evidence=[(archive / "report.json").relative_to(directory).as_posix()])

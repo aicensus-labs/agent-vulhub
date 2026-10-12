@@ -137,6 +137,20 @@ class FactoryTests(unittest.TestCase):
         self.assertIn("reproduce.py", text)
         self.assertIn("verify.py", text)
 
+    def test_binary_briefs_require_release_hashes_instead_of_source_commits(self):
+        metadata = self.directory / "metadata.toml"
+        metadata.write_text(metadata.read_text(encoding="utf-8") +
+                            '\n[provenance]\nkind = "binary"\npublisher = "Synthetic Vendor"\n',
+                            encoding="utf-8")
+        analyze = factory.brief(self.root, self.environment, "analyze")
+        self.assertIn("官方发布来源 URL", analyze)
+        self.assertIn("artifact` 文件名与 SHA-256", analyze)
+        self.assertNotIn("完整 40 位 commit", analyze)
+
+        build = factory.brief(self.root, self.environment, "build")
+        self.assertIn("目标发布物", build)
+        self.assertIn("ARTIFACT_SHA256", build)
+
     def test_brief_rejects_unknown_stage_and_environment(self):
         with self.assertRaises(factory.FactoryError):
             factory.brief(self.root, self.environment, "deploy")

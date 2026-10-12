@@ -7,13 +7,15 @@ import json
 import os
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 import time
 import uuid
 
 from .compose import validate_compose
 from .protocol import (CASES, IMAGE, IMAGE_ID, SCHEMA, check_fixtures, digest, fingerprint,
-                       input_binding as protocol_input_binding, read_json, runner_fingerprint,
+                       input_binding as protocol_input_binding, read_json, revision_identity,
+                       runner_fingerprint,
                        validate_verdict, write_json)
 
 
@@ -117,8 +119,11 @@ def image_check(commands, image, directory, metadata, variant, binding):
                        "immutable image is present and inspectable") from error
     data = json.loads(content)[0]
     labels = data.get("Config", {}).get("Labels") or {}
-    if labels.get("org.opencontainers.image.revision") != metadata[variant]["commit"]:
-        raise RunError("image_inspect", f"{variant}: source revision label mismatch", 2, "not_run")
+    revision_kind, revision = revision_identity(metadata, variant)
+    label = ("org.opencontainers.image.revision" if revision_kind == "source_commit"
+             else "org.agent-vulhub.target-revision")
+    if labels.get(label) != revision:
+        raise RunError("image_inspect", f"{variant}: target revision label mismatch", 2, "not_run")
     if labels.get("org.agent-vulhub.inputs") != binding:
         raise RunError("image_inspect", f"{variant}: build inputs fingerprint mismatch", 2, "not_run")
     if data.get("Os") != "linux" or data.get("Architecture") != "amd64":
@@ -302,14 +307,14 @@ def _results_volume_name(config, project, variant):
     return definition.get("name", f"{project}_{source}")
 
 
-def _candidate_container_command(image, target, project, config, variant):
+def _candidate_container_command(image, target, project):
     name = project + "-candidate"
-    volume = _results_volume_name(config, project, variant)
     return name, ["docker", "run", "-d", "--name", name,
                   "--network", "container:" + target,
-                  "--mount", f"type=volume,source={volume},target=/lab/results",
+                  "--mount", "type=tmpfs,destination=/lab/results,tmpfs-size=16777216,tmpfs-mode=1777",
                   "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true",
-                  "--pids-limit", "64", "--user", "0:0", "--entrypoint", "tail", image,
+                  "--pids-limit", "64", "--memory", "1g", "--cpus", "1",
+                  "--user", "0:0", "--entrypoint", "tail", image,
                   "-f", "/dev/null"]
 
 
@@ -333,35 +338,55 @@ def _remove_container(child, name, phase):
                            "cleanup_failed", "candidate and verifier containers are removed")
 
 
-def _collect_candidate_facts(child, container, output, context):
-    """Replace candidate-authored facts with a runner-owned evidence inventory."""
+def _collect_candidate_facts(child, candidate_container, target_container, output, context):
+    """Move bounded candidate artifacts to a separate verifier namespace."""
     collected = output / "candidate-evidence"
     collected.mkdir()
-    child.run(["docker", "cp", container + ":/lab/results/.", str(collected)], "candidate_collect")
+    child.run(["docker", "cp", candidate_container + ":/lab/results/.", str(collected)], "candidate_collect")
+    artifacts = output / "candidate-artifacts"
+    artifacts.mkdir()
     evidence = []
+    total_bytes = 0
+    entry_count = 0
     for path in sorted(collected.rglob("*")):
         relative = path.relative_to(collected)
+        entry_count += 1
+        if entry_count > 4096 or len(relative.parts) > 32:
+            raise ValueError("Candidate output exceeds the entry count or nesting limit")
         if path.is_symlink():
             raise ValueError(f"Candidate produced an invalid evidence path: {relative}")
         if path.is_dir():
             continue
         if not path.is_file():
             raise ValueError(f"Candidate produced an invalid evidence path: {relative}")
-        if relative.name in {"facts.json", "verdict.json", "context.json", "agent-context.json"}:
+        if len(relative.parts) == 1 and relative.name in {
+                "facts.json", "verdict.json", "context.json", "agent-context.json"}:
             continue
-        if path.stat().st_size > 8 * 1024 * 1024:
-            raise ValueError(f"Candidate evidence exceeds 8 MiB: {relative}")
-        evidence.append({"path": relative.as_posix(), "sha256": digest(path)})
+        size = path.stat().st_size
+        total_bytes += size
+        if total_bytes > 8 * 1024 * 1024:
+            raise ValueError("Candidate output exceeds 8 MiB")
+        target = artifacts / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, target)
+        evidence.append({"path": (Path("candidate-output") / relative).as_posix(),
+                         "sha256": digest(target)})
     facts = {**context, "execution_status": "completed", "evidence": evidence}
     write_json(collected / "facts.json", facts)
-    child.run(["docker", "cp", str(collected / "facts.json"), container + ":/lab/results/facts.json"],
+    child.run(["docker", "exec", target_container, "rm", "-rf", "/lab/results/candidate-output"],
+              "candidate_setup")
+    child.run(["docker", "exec", target_container, "mkdir", "-p", "/lab/results/candidate-output"],
+              "candidate_setup")
+    child.run(["docker", "cp", str(artifacts) + "/.",
+               target_container + ":/lab/results/candidate-output"], "candidate_setup")
+    child.run(["docker", "cp", str(collected / "facts.json"), target_container + ":/lab/results/facts.json"],
               "candidate_setup")
 
 
 def _prepare_candidate_container(child, container):
     """Hide evaluator files and make the product tree read-only for the candidate."""
     child.run(["docker", "exec", container, "sh", "-c",
-               "rm -rf /inputs; find /lab -maxdepth 1 -type f -delete; "
+               "rm -rf /inputs /lab/fixtures; find /lab -maxdepth 1 -type f -delete; "
                "chmod -R a-w /lab; chmod -R a+rwX /lab/results"], "candidate_setup")
 
 
@@ -373,17 +398,22 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
     output.mkdir()
     project = "avh-" + uuid.uuid4().hex[:20]
     context = {"schema_version": SCHEMA, "run_id": report["run_id"], "case_id": case_id,
-               "variant": variant, "scenario": scenario}
+               "variant": variant, "scenario": scenario, "layer": layer}
     agent_context = {"schema_version": context["schema_version"], "run_id": context["run_id"],
                      "case_id": f"agent-{number:02d}-{uuid.uuid4().hex[:12]}",
                      "scenario": context["scenario"]}
+    revision_kind, revision = revision_identity(metadata, variant)
     result = {**context, "environment_id": metadata["id"], "round": number, "project": project,
-              "layer": layer, "source_commit": metadata[variant]["commit"],
+              "layer": layer, "revision_kind": revision_kind, "target_revision": revision,
               "image": images[variant], "started_at": utc(), "outcome": "not_run", "cleaned": False,
               "platform": report["platform"], "toolchain": {k: report[k] for k in
               ("runner_fingerprint", "docker_version", "compose_version")}, "exit_code": 0}
+    if revision_kind == "source_commit":
+        result["source_commit"] = revision
+    else:
+        result["artifact_sha256"] = revision.removeprefix("sha256:")
     write_json(output / "context.json", context)
-    if candidate is not None:
+    if candidate is not None and candidate.format == "command":
         write_json(output / "agent-context.json", agent_context)
     child = Commands(output, args.timeout)
     env = compose_env(images)
@@ -431,16 +461,23 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
         if state.get("Config", {}).get("Labels", {}).get("com.docker.compose.project") != project:
             raise RunError("compose_up", "Container project identity mismatch")
         interpreter = harness(metadata)
-        if candidate is None:
+        if candidate is None or candidate.format in {
+                "mcp_tool_inputs", "mcp_path_inputs", "mcp_tool_plan_inputs", "http_request_inputs"}:
             child.run(["docker", "cp", str(output / "context.json"), container + ":/lab/results/context.json"], "setup")
+            if candidate is not None:
+                selected_file = dict(candidate.files)["attack" if scenario == "attack" else "benign"]
+                input_path = output / "candidate-input.json"
+                shutil.copyfile(candidate.directory / selected_file, input_path)
+                child.run(["docker", "cp", str(input_path), container + ":/lab/results/candidate-input.json"],
+                          "candidate_setup")
             command = [interpreter, "/lab/reproduce.py", "--context", "/lab/results/context.json",
                        "--output", "/lab/results"]
             phase = "reproduce"
             timeout = None
             output_limit = 8 * 1024 * 1024
-        else:
+        elif candidate.format == "command":
             candidate_container, candidate_command = _candidate_container_command(
-                images[variant], container, project, config, variant)
+                images[variant], container, project)
             child.run(candidate_command, "candidate_setup", env=env)
             _prepare_candidate_container(child, candidate_container)
             child.run(["docker", "cp", str(candidate.directory) + "/.", candidate_container + ":/candidate"],
@@ -452,21 +489,24 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
             timeout = candidate.timeout_seconds
             output_limit = candidate.max_output_bytes
         exec_args = ["docker", "exec"]
-        if candidate is not None:
+        if candidate is not None and candidate.format == "command":
             exec_args.extend(["-e", "AVH_AGENT_CONTEXT=/lab/results/agent-context.json",
                               "--user", "65532:65532"])
-        exec_args.extend([candidate_container if candidate is not None else container, *command])
+        candidate_target = candidate_container if candidate is not None and candidate.format == "command" else container
+        exec_args.extend([candidate_target, *command])
         status, _ = child.run(exec_args, phase,
                               accepted=(0, 1, 2), timeout=timeout, output_limit=output_limit)
         if status:
             raise RunError(phase, f"PoC exited {status}; no verification claim", 1 if status == 1 else 2,
                            "execution_failed" if status == 1 else "not_run")
-        if candidate is not None:
+        if candidate is not None and candidate.format == "command":
+            _collect_candidate_facts(child, candidate_container, container, output, context)
             _remove_container(child, candidate_container, "candidate_cleanup")
             candidate_container = None
-            _collect_candidate_facts(child, container, output, context)
-            child.run(["docker", "cp", str(output / "context.json"), container + ":/lab/results/context.json"],
-                      "verifier_setup")
+        if candidate is not None:
+            if candidate.format == "command":
+                child.run(["docker", "cp", str(output / "context.json"), container + ":/lab/results/context.json"],
+                          "verifier_setup")
             verifier_container, verifier_command = _verifier_container_command(
                 images[variant], project, config, variant, interpreter)
             status, _ = child.run(verifier_command, "verify", accepted=(0, 1, 2))
@@ -546,18 +586,24 @@ def run_case(commands, directory, metadata, images, report, number, variant, sce
 
 
 def reproduce(root, directory, metadata, args, candidate=None, layer="mechanism", task=None,
-              agent_metadata=None):
+              agent_metadata=None, control_role=None):
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ-") + uuid.uuid4().hex[:12]
-    output = root / "results" / metadata["id"] / run_id
+    output_root = root / "results" / metadata["id"]
+    if layer == "agent_poc":
+        output_root /= "agent-poc"
+    output = output_root / run_id
     output.mkdir(parents=True)
     commands = Commands(output, args.timeout)
     report = {"schema_version": SCHEMA, "run_id": run_id, "environment_id": metadata["id"],
               "layer": layer, "rounds": args.rounds, "started_at": utc(), "cases": [],
               "outcome": "not_run", "exit_code": 2}
+    if control_role is not None:
+        report["adapter_control_role"] = control_role
     if candidate is not None:
         report["candidate"] = {
             "artifact_sha256": candidate.artifact_sha256,
             "manifest_sha256": candidate.manifest_sha256,
+            "format": candidate.format,
             "command": list(candidate.command),
             "timeout_seconds": candidate.timeout_seconds,
             "max_output_bytes": candidate.max_output_bytes,
@@ -568,10 +614,27 @@ def reproduce(root, directory, metadata, args, candidate=None, layer="mechanism"
         report["agent"] = agent_metadata
     try:
         if candidate is not None:
-            adapter = metadata.get("verification", {}).get("agent_poc", {})
-            if adapter.get("adapter_status") != "accepted":
-                raise RunError("agent_adapter", "Environment has no accepted Agent-PoC Adapter", 2, "not_run",
-                               "metadata verification.agent_poc.adapter_status = accepted")
+            from .agent_poc import (AgentPocError, validate_adapter_admission,
+                                    validate_adapter_control_prerequisites)
+            try:
+                if control_role is not None:
+                    if control_role not in {"positive", "negative"} or args.rounds < 3:
+                        raise AgentPocError("Adapter controls require a positive/negative role and at least three rounds")
+                    validate_adapter_control_prerequisites(root, directory, metadata)
+                else:
+                    adapter = metadata.get("verification", {}).get("agent_poc", {})
+                    if adapter.get("adapter_status") != "accepted":
+                        raise AgentPocError("Environment has no accepted Agent-PoC Adapter")
+                    if (not isinstance(task, dict) or type(task.get("difficulty")) is not int or
+                            task.get("difficulty") != 1 or
+                            task.get("task_sha256") != adapter.get("task_sha256")):
+                        raise AgentPocError(
+                            "Evaluation requires the accepted Level 1 task package and exact task_sha256")
+                    validate_adapter_admission(root, directory, metadata)
+            except AgentPocError as error:
+                expected = ("current mechanism and Level 1 review evidence" if control_role is not None
+                            else "current mechanism and accepted Adapter review evidence")
+                raise RunError("agent_adapter", str(error), 2, "not_run", expected) from error
         check_fixtures(directory)
         report["fingerprint"] = fingerprint(root, directory, metadata)
         binding = input_binding(root, directory, metadata)
@@ -591,8 +654,10 @@ def reproduce(root, directory, metadata, args, candidate=None, layer="mechanism"
         for variant, image in images.items():
             if not isinstance(image, str) or not (IMAGE.fullmatch(image) or IMAGE_ID.fullmatch(image)):
                 raise RunError("preflight", f"Missing immutable {variant} image", 2, "not_run")
-            if not metadata[variant].get("commit"):
-                raise RunError("preflight", f"Missing {variant} revision", 2, "not_run")
+            try:
+                revision_identity(metadata, variant)
+            except ValueError as error:
+                raise RunError("preflight", str(error), 2, "not_run") from error
         preview = inspect_config(commands, directory, images, "avh-preflight", metadata, args.allow_exceptions)
         if not args.offline:
             for image in set(s["image"] for s in preview["services"].values()):
@@ -630,6 +695,15 @@ def reproduce(root, directory, metadata, args, candidate=None, layer="mechanism"
         report["finished_at"] = utc()
         write_json(output / "report.json", report)
     print(f"{report['outcome']}: {output / 'report.json'}")
+    if control_role is not None:
+        from .agent_poc import _validate_case_matrix
+        expected_outcome = "passed" if control_role == "positive" else "failed"
+        expected_exit_code = 0 if control_role == "positive" else 1
+        if (report["outcome"] == expected_outcome and report["exit_code"] == expected_exit_code and
+                _validate_case_matrix(report, layer="agent_poc", mode=control_role,
+                                      rounds=report["rounds"])):
+            return 0
+        return 1 if report["outcome"] in {"passed", "failed"} else report["exit_code"]
     return report["exit_code"]
 
 
@@ -638,11 +712,33 @@ def agent_evaluate(root, directory, metadata, args):
     from .agent_poc import load_agent_metadata, validate_candidate, validate_task
 
     task_directory = Path(args.task_dir)
-    candidate = validate_candidate(Path(args.candidate))
+    adapter = metadata.get("verification", {}).get("agent_poc", {})
+    expected_format = adapter.get("candidate_format", "command")
+    candidate = validate_candidate(Path(args.candidate), expected_format=expected_format)
     try:
         task = validate_task(root, directory, task_directory, metadata["id"], metadata)
         agent_metadata = load_agent_metadata(Path(args.agent_meta) if args.agent_meta else None)
         return reproduce(root, directory, metadata, args, candidate=candidate, layer="agent_poc", task=task,
                          agent_metadata=agent_metadata)
+    finally:
+        candidate.cleanup()
+
+
+def agent_control(root, directory, metadata, args):
+    """Run a maintainer-only Adapter control before scoring admission."""
+    from .agent_poc import load_agent_metadata, validate_candidate, validate_task
+
+    if args.rounds < 3:
+        raise ValueError("Adapter controls require at least three rounds")
+    adapter = metadata.get("verification", {}).get("agent_poc", {})
+    expected_format = adapter.get("candidate_format", "command")
+    candidate = validate_candidate(Path(args.candidate), expected_format=expected_format)
+    try:
+        task = validate_task(root, directory, Path(args.task_dir), metadata["id"], metadata)
+        if task["difficulty"] != 1:
+            raise ValueError("Adapter controls require a Level 1 task package")
+        agent_metadata = load_agent_metadata(Path(args.agent_meta) if args.agent_meta else None)
+        return reproduce(root, directory, metadata, args, candidate=candidate, layer="agent_poc", task=task,
+                         agent_metadata=agent_metadata, control_role=args.role)
     finally:
         candidate.cleanup()

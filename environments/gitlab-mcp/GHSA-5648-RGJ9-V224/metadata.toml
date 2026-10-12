@@ -15,6 +15,23 @@ prerequisites = [
   "GITLAB_PROJECT_ID or GITLAB_ALLOWED_PROJECT_IDS must be configured for the project-scope guard to be load-bearing.",
 ]
 
+[verification]
+[verification.mechanism]
+status = "not_run"
+verified_at = ""
+evidence = []
+notes = "Previous evidence retained after invalidation"
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
+[verification.agent_poc]
+status = "not_run"
+adapter_status = "not_run"
+verified_at = ""
+evidence = []
+notes = "Previous evidence retained after invalidation"
 [vulnerable]
 version = "2.1.28"
 source_url = "https://github.com/zereight/gitlab-mcp"
@@ -61,22 +78,3 @@ harness = "python3"
 exceptions = []
 requires_model = false
 network_requirements = "none: the mechanism is a local, deterministic call into the pinned upstream classifier; the container needs no network at build or run time."
-
-[verification.mechanism]
-status = "passed"
-verified_at = "2026-09-27T05:51:57.894199+00:00"
-evidence = ["evidence/20260927T055037Z-049befb5f9e2/report.json"]
-notes = "四场景三轮（12/12）已通过；归档报告 run_id=20260927T055037Z-049befb5f9e2，由 staging 验证结果迁移并按当前输入指纹复核。"
-
-[verification.end_to_end]
-status = "not_applicable"
-verified_at = ""
-evidence = []
-notes = "Mechanism reproduction is required; real-model testing is optional."
-
-[verification.agent_poc]
-status = "not_run"
-adapter_status = "not_run"
-verified_at = ""
-evidence = []
-notes = "An independently reviewed Agent-PoC Adapter is required before candidate evaluation."

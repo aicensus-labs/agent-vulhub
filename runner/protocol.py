@@ -28,6 +28,32 @@ def digest(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def provenance_kind(metadata):
+    provenance = metadata.get("provenance", {})
+    if not isinstance(provenance, dict):
+        raise ValueError("provenance must be a table")
+    kind = provenance.get("kind", "source")
+    if kind not in {"source", "binary"}:
+        raise ValueError("provenance.kind must be source or binary")
+    return kind
+
+
+def revision_identity(metadata, variant):
+    """Return the immutable identity of the code under test for one variant."""
+    if provenance_kind(metadata) == "source":
+        return "source_commit", metadata[variant].get("commit", "")
+    artifact = metadata[variant].get("artifact", "")
+    build = metadata.get("build", {})
+    inputs = build.get("inputs", []) if isinstance(build, dict) else []
+    inputs = inputs if isinstance(inputs, list) else []
+    matches = [item for item in inputs
+               if isinstance(item, dict) and item.get("name") == artifact]
+    artifact_hash = matches[0].get("sha256") if len(matches) == 1 else None
+    if not artifact or not isinstance(artifact_hash, str) or not HASH.fullmatch(artifact_hash):
+        raise ValueError(f"{variant}: binary artifact must identify one SHA-256-pinned build input")
+    return "artifact_sha256", "sha256:" + artifact_hash
+
+
 def contained(base, relative):
     path = Path(relative)
     if path.is_absolute() or ".." in path.parts or not path.parts:
@@ -290,8 +316,19 @@ def validate_report(report, expected_fingerprint):
                 raise ValueError("Case environment_id does not match report")
             if case.get("outcome") != "passed" or case.get("exit_code") != 0 or not case.get("cleaned"):
                 raise ValueError("A case failed or left resources behind")
-            if not re.fullmatch(r"[0-9a-f]{40}", case.get("source_commit", "")):
-                raise ValueError("Case source revision must be pinned")
+            revision_kind = case.get("revision_kind")
+            if revision_kind == "source_commit":
+                revision = case.get("source_commit", "")
+                if (not re.fullmatch(r"[0-9a-f]{40}", revision)
+                        or case.get("target_revision") != revision):
+                    raise ValueError("Case source revision must be pinned")
+            elif revision_kind == "artifact_sha256":
+                artifact_hash = case.get("artifact_sha256", "")
+                if (not HASH.fullmatch(artifact_hash)
+                        or case.get("target_revision") != "sha256:" + artifact_hash):
+                    raise ValueError("Case binary artifact must be pinned by SHA-256")
+            else:
+                raise ValueError("Case revision identity is missing or unsupported")
             project = case.get("project")
             if not project or project in projects:
                 raise ValueError("Cases must have independent Compose projects")

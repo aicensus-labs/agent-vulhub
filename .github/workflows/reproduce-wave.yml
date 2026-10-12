@@ -1,0 +1,78 @@
+name: Rebuild Mechanism Evidence Wave
+
+on:
+  workflow_dispatch:
+    inputs:
+      offset:
+        description: Starting row in the pinned rebuild wave
+        type: number
+        required: true
+        default: 0
+      limit:
+        description: Maximum environments in this dispatch (1-100)
+        type: number
+        required: true
+        default: 50
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mechanism-rebuild-${{ inputs.offset }}
+  cancel-in-progress: false
+
+jobs:
+  select:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.wave.outputs.matrix }}
+      has_jobs: ${{ steps.wave.outputs.has_jobs }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Validate wave slice and input fingerprints
+        id: wave
+        env:
+          AVH_WAVE_OFFSET: ${{ inputs.offset }}
+          AVH_WAVE_LIMIT: ${{ inputs.limit }}
+        run: |
+          matrix="$(python3 -m scripts.rebuild_wave --offset "$AVH_WAVE_OFFSET" --limit "$AVH_WAVE_LIMIT")"
+          printf 'matrix=%s\n' "$matrix" >> "$GITHUB_OUTPUT"
+          if [ "$matrix" = '{"include":[]}' ]; then
+            printf 'has_jobs=false\n' >> "$GITHUB_OUTPUT"
+          else
+            printf 'has_jobs=true\n' >> "$GITHUB_OUTPUT"
+          fi
+
+  reproduce:
+    needs: select
+    if: >-
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
+      needs.select.outputs.has_jobs == 'true'
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.sha }}
+      - name: Run three-round mechanism matrix
+        env:
+          AVH_ENVIRONMENT: ${{ matrix.environment_id }}
+          AVH_FROM_SOURCE: "true"
+        run: python3 -m runner.ci
+      - name: Retain report, case evidence, and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mechanism-${{ github.run_id }}-${{ matrix.artifact_slug }}
+          path: results/${{ matrix.environment_id }}/
+          retention-days: 90
+          if-no-files-found: warn

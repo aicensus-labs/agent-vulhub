@@ -9,7 +9,7 @@ instead of an agent's self-assessment. Adapted to this repository's contract:
 stage        CVE-Factory         agent-vulhub artifacts and gate
 ===========  ==================  ==========================================
 analyze      Analyzer            ``research/<env>/public.md`` from the
-                                 advisory, fix commit and upstream source
+                                 advisory, fix commit or pinned release artifacts
 generate     Generator           ``diagram.toml`` + ``reproduce.py`` +
                                  fixtures (logical, no Docker)
 build        Builder             ``Dockerfile`` + pinned ``build.inputs``;
@@ -78,7 +78,7 @@ STAGES: tuple[Stage, ...] = (
         title="信息收集",
         role="Analyzer",
         goal=(
-            "阅读 advisory、修复提交和上游源码，把可核对的事实蒸馏成研究笔记；"
+            "阅读 advisory、修复提交或发布物差异和上游材料，把可核对的事实蒸馏成研究笔记；"
             "信息不足时以 error 结束，不要猜。"
         ),
         outputs=("research/public.md", "research/analyze-res.toml"),
@@ -254,6 +254,11 @@ def brief(root: Path, environment_id: str, stage_id: str) -> str:
     research = research_directory(root, environment_id)
     candidate = _read_candidate(root, environment_id)
     _, identifier = split_environment(environment_id)
+    from .cli import read_toml
+    metadata_path = directory / "metadata.toml"
+    metadata = read_toml(metadata_path) if metadata_path.is_file() else {}
+    provenance = metadata.get("provenance", {})
+    provenance_kind = provenance.get("kind", "source") if isinstance(provenance, dict) else "source"
 
     lines = [
         f"# Stage `{stage.id}` — {stage.title}（{stage.role}）",
@@ -292,13 +297,16 @@ def brief(root: Path, environment_id: str, stage_id: str) -> str:
     for item in stage.reads:
         lines.append(f"- 允许阅读：`{item}`")
     if stage.blind:
+        blind_basis = ("research/public.md 与厂商发布物、发布说明或包清单判断。"
+                       if provenance_kind == "binary" else
+                       "research/public.md 与上游源码/文档判断。")
         lines += [
             "",
             "### 信息隔离（盲建）",
             "",
             "为了不让你照着断言去凑环境，**禁止阅读**下列文件："
             + "、".join(f"`{item}`" for item in stage.blind)
-            + "。如果需要知道依赖，只依据 `research/public.md` 与上游源码/文档判断。",
+            + "。如果需要知道依赖，只依据 " + blind_basis,
         ]
 
     lines += [
@@ -349,9 +357,18 @@ def brief(root: Path, environment_id: str, stage_id: str) -> str:
             "",
             *[f"- `{section}`" for section in ANALYSIS_SECTIONS],
             "",
-            "写清 vulnerable/patched 的版本、**完整 40 位 commit**、源码 URL，以及修复提交改了哪一处检查。"
-            "如果找不到修复提交或无法离线构建，直接写 `status = \"error\"`。",
         ]
+        if provenance_kind == "binary":
+            lines.append(
+                "写清 vulnerable/patched 的版本、官方发布来源 URL、`artifact` 文件名与 SHA-256；"
+                "比较真实发布包的行为差异并指出修复边界。不要填写虚构源码 commit。"
+                "若拿不到固定的漏洞版/修复版发布物或无法控制运行依赖，直接写 `status = \"error\"`。"
+            )
+        else:
+            lines.append(
+                "写清 vulnerable/patched 的版本、**完整 40 位 commit**、源码 URL，以及修复提交改了哪一处检查。"
+                "如果找不到修复提交或无法离线构建，直接写 `status = \"error\"`。"
+            )
     if stage.id == "generate":
         lines += [
             "",
@@ -382,8 +399,12 @@ def brief(root: Path, environment_id: str, stage_id: str) -> str:
             "",
             "`metadata.toml` 的 `build.inputs` 每项形如 "
             "`{ name = \"...\", url = \"https://...\", sha256 = \"<64 hex>\" }`，"
-            "必须包含源码归档与所有离线安装所需依赖；`build.base_image` 必须固定 digest。",
-            "Dockerfile 必须 `ARG BASE_IMAGE` / `FROM ${BASE_IMAGE}`，并在 `--network none` 下可构建。",
+            f"必须包含{'目标发布物' if provenance_kind == 'binary' else '源码归档'}与所有离线安装所需依赖；"
+            "`build.base_image` 必须固定 digest。",
+            ("二进制配方按 `artifact` 安装发布物，接收 `ARTIFACT_FILE`、`ARTIFACT_SHA256`、`TARGET_REVISION`；"
+             if provenance_kind == "binary" else
+             "源码配方接收 `SOURCE_COMMIT`、`SOURCE_ARCHIVE`；")
+            + "Dockerfile 必须 `ARG BASE_IMAGE` / `FROM ${BASE_IMAGE}`，并在 `--network none` 下可构建。",
         ]
     if stage.id in {"validate", "solve"}:
         lines += [

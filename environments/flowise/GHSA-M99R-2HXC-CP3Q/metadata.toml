@@ -30,6 +30,23 @@ prerequisites = [
     "The attacker-controlled JavaScript is already present at a known absolute path on the server (the advisory's upload plus export-import path recovery step)",
 ]
 
+[verification]
+[verification.mechanism]
+status = "not_run"
+verified_at = ""
+evidence = []
+notes = "Previous evidence retained after invalidation"
+[verification.end_to_end]
+status = "not_applicable"
+verified_at = ""
+evidence = []
+notes = "Mechanism reproduction is required; real-model testing is optional."
+[verification.agent_poc]
+status = "not_run"
+adapter_status = "not_run"
+verified_at = ""
+evidence = []
+notes = "Previous evidence retained after invalidation"
 [vulnerable]
 version = "3.1.1"
 source_url = "https://github.com/FlowiseAI/Flowise/tree/flowise%403.1.1"
@@ -175,22 +192,3 @@ harness = "python3"
 exceptions = []
 requires_model = false
 network_requirements = "no network: the mechanism reproduction is fully offline and needs no registry, no docker daemon and no model API"
-
-[verification.mechanism]
-status = "passed"
-verified_at = "2026-09-27T03:24:03.854538+00:00"
-evidence = ["evidence/20260927T032248Z-5c9953a43b42/report.json"]
-notes = "四场景三轮（12/12）已通过；归档报告 run_id=20260927T032248Z-5c9953a43b42，由 staging 验证结果迁移并按当前输入指纹复核。"
-
-[verification.end_to_end]
-status = "not_applicable"
-verified_at = ""
-evidence = []
-notes = "Mechanism reproduction is required; real-model testing is optional."
-
-[verification.agent_poc]
-status = "not_run"
-adapter_status = "not_run"
-verified_at = ""
-evidence = []
-notes = "An independently reviewed Agent-PoC Adapter is required before candidate evaluation."
