@@ -31,8 +31,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          persist-credentials: true
           ref: ${{ github.sha }}
+      - name: Fetch LFS inputs for selected wave slice
+        env:
+          AVH_WAVE_OFFSET: ${{ inputs.offset }}
+          AVH_WAVE_LIMIT: ${{ inputs.limit }}
+        run: |
+          paths="$(jq -r --argjson offset "$AVH_WAVE_OFFSET" --argjson limit "$AVH_WAVE_LIMIT" \
+            '[.environments[$offset:($offset + $limit)][] | "environments/" + .environment_id + "/**"] | join(",")' \
+            .github/agent-poc-rebuild-wave-20261011.json)"
+          git lfs pull --include="$paths" --exclude=""
+          git config --local --unset-all http.https://github.com/.extraheader
       - name: Validate wave slice and input fingerprints
         id: wave
         env:
@@ -61,8 +71,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          persist-credentials: false
+          persist-credentials: true
           ref: ${{ github.sha }}
+      - name: Fetch LFS inputs for this environment
+        env:
+          AVH_ENVIRONMENT: ${{ matrix.environment_id }}
+        run: |
+          git lfs pull --include="environments/${AVH_ENVIRONMENT}/**" --exclude=""
+          git config --local --unset-all http.https://github.com/.extraheader
       - name: Run three-round mechanism matrix
         env:
           AVH_ENVIRONMENT: ${{ matrix.environment_id }}

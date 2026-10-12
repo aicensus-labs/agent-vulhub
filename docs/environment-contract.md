@@ -216,6 +216,6 @@ finally 清理仅限本次 Compose project 的容器、网络、volume。--keep-
 
 ## CI 部署前提
 
-PR CI 只静态校验和工具测试；Docker smoke 必须显式运行。复验 workflow 只从默认分支手动派发，机制任务使用 GitHub-hosted `ubuntu-latest` runner；每个 job 在新建的临时 Linux VM 上执行，job 结束后由 GitHub 回收。workflow 不使用仓库 secrets，权限仅为读取内容，并将并发限制为三个 job。无需配置自建 runner 或 GitHub environment 审批规则。
+PR CI 只静态校验和工具测试；Docker smoke 必须显式运行。复验 workflow 只从默认分支手动派发，机制任务使用 GitHub-hosted `ubuntu-latest` runner；每个 job 在新建的临时 Linux VM 上执行，job 结束后由 GitHub 回收。workflow 不使用仓库 secrets，权限仅为读取内容，并将并发限制为三个 job。需要的 Git LFS 输入按波次分片或单个环境选择性下载；只读 checkout token 在下载后、执行 runner 前移除。无需配置自建 runner 或 GitHub environment 审批规则。
 
 GHCR 登录、仓库访问控制和分支保护由维护者配置，代码不会自动创建这些外部资源。实验只使用假数据和受控效果。
