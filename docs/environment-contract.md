@@ -216,6 +216,6 @@ finally 清理仅限本次 Compose project 的容器、网络、volume。--keep-
 
 ## CI 部署前提
 
-PR CI 只静态校验和工具测试；Docker smoke 必须显式运行。隔离 workflow 只检出默认分支，可手动/每周运行，使用 vulhub-ephemeral 标签的一次性 Linux VM。管理员须配置受保护的 vulhub-lab environment，并为每次作业新建和销毁 VM，不能把标签绑定到持久开发机；未配置则作业排队。
+PR CI 只静态校验和工具测试；Docker smoke 必须显式运行。复验 workflow 只从默认分支手动派发，机制任务使用 GitHub-hosted `ubuntu-latest` runner；每个 job 在新建的临时 Linux VM 上执行，job 结束后由 GitHub 回收。workflow 不使用仓库 secrets，权限仅为读取内容，并将并发限制为三个 job。无需配置自建 runner 或 GitHub environment 审批规则。
 
-GHCR 登录、仓库访问控制、分支保护和 VM 供应由维护者配置，代码不会自动创建这些外部资源。实验只使用假数据和受控效果。
+GHCR 登录、仓库访问控制和分支保护由维护者配置，代码不会自动创建这些外部资源。实验只使用假数据和受控效果。
