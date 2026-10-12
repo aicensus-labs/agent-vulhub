@@ -91,4 +91,5 @@ jobs:
           name: mechanism-${{ github.run_id }}-${{ matrix.artifact_slug }}
           path: results/${{ matrix.environment_id }}/
           retention-days: 90
+          include-hidden-files: true
           if-no-files-found: warn
